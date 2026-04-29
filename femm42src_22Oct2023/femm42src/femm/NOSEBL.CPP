@@ -129,6 +129,18 @@ CMaterialProp::CMaterialProp()
 		bAnisoConductivity=FALSE;
 }
 
+void CMaterialProp::ComputeAnisoConductivity(double Wcore_mm)
+{
+	// Wang 2015 PhD eqs 4-3/4-4:
+	// sigma_t = F * sigma_m          [MS/m]  (in-plane, drives gap-loss eddy)
+	// sigma_n = (d/W)^2 * sigma_m/F  [S/m]   (normal, drives tanh skin-depth)
+	if (Cduct<=0. || LamFill<=0. || Lam_d<=0. || Wcore_mm<=0.) return;
+	double F=LamFill, sigma_m=Cduct, ratio=Lam_d/Wcore_mm;
+	Cduct_t = F * sigma_m;                          // [MS/m]
+	Cduct_n = ratio*ratio * sigma_m * 1.e06 / F;   // [S/m]
+	bAnisoConductivity = TRUE;
+}
+
 CMaterialProp::~CMaterialProp()
 {
 	if(BHpoints>0) free(BHdata);

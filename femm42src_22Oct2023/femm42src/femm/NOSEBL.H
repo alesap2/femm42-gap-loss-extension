@@ -123,6 +123,8 @@ class CMaterialProp
 		double Cduct_t;          // tangential conductivity [MS/m] = F * Cduct
 		double Cduct_n;          // normal conductivity [S/m]
 		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
+		// Compute Cduct_t and Cduct_n from lamination parameters (Wang 2015 eqs 4-3/4-4)
+		void ComputeAnisoConductivity(double Wcore_mm);
 
 	private:
 };

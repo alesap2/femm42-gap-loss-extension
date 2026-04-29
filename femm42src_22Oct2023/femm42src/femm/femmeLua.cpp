@@ -60,6 +60,7 @@ void CFemmeDoc::initalise_lua()
 	lua_register(lua,"mi_zoomin",lua_zoomin);
 	lua_register(lua,"mi_zoom",lua_zoom);
 	lua_register(lua,"mi_addmaterial",lua_addmatprop);
+	lua_register(lua,"mi_setmataniso",lua_setmataniso);
 	lua_register(lua,"mi_addpointprop",lua_addpointprop);
 	lua_register(lua,"mi_addcircprop",lua_addcircuitprop);
 	lua_register(lua,"mi_addboundprop",lua_addboundprop);
@@ -1546,6 +1547,42 @@ int CFemmeDoc::lua_addmatprop(lua_State *L)
 
 	((CFemmeDoc *)pFemmeDoc)->blockproplist.Add(m);
 	
+	return 0;
+}
+
+int CFemmeDoc::lua_setmataniso(lua_State *L)
+{
+	// mi_setmataniso(name, Cduct_t, Cduct_n)
+	//   name     - material name string
+	//   Cduct_t  - in-plane conductivity [MS/m]  (0 = auto-compute)
+	//   Cduct_n  - normal conductivity [S/m]     (0 = auto-compute)
+	// When both are 0, calls ComputeAnisoConductivity(Lam_d*100) to estimate
+	// sigma_n from lamination geometry (Wang 2015 eqs 4-3/4-4).
+	CatchNullDocument();
+	CFemmeDoc * thisDoc = (CFemmeDoc *)pFemmeDoc;
+	int n = lua_gettop(L);
+	if (n < 1) return 0;
+
+	CString BlockName;
+	BlockName.Format("%s", lua_tostring(L,1));
+
+	int k;
+	for(k=0; k<thisDoc->blockproplist.GetSize(); k++)
+		if (BlockName == thisDoc->blockproplist[k].BlockName) break;
+	if (k == thisDoc->blockproplist.GetSize()) return 0; // not found
+
+	double sigma_t = (n>1) ? lua_todouble(L,2) : 0.;
+	double sigma_n = (n>2) ? lua_todouble(L,3) : 0.;
+
+	if (sigma_t==0. && sigma_n==0.) {
+		// Auto-compute: use Wcore = Lam_d * 100 (rough estimate)
+		double Wcore_mm = thisDoc->blockproplist[k].Lam_d * 100.;
+		thisDoc->blockproplist[k].ComputeAnisoConductivity(Wcore_mm);
+	} else {
+		thisDoc->blockproplist[k].Cduct_t = sigma_t;
+		thisDoc->blockproplist[k].Cduct_n = sigma_n;
+		if (sigma_t > 0.) thisDoc->blockproplist[k].bAnisoConductivity = TRUE;
+	}
 	return 0;
 }
 

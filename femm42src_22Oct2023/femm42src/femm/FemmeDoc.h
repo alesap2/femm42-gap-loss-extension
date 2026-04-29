@@ -207,6 +207,7 @@ public:
 	static int lua_mirror(lua_State *L);
 	static int lua_scale(lua_State *L);
 	static int lua_addmatprop(lua_State *L);
+	static int lua_setmataniso(lua_State *L);
 	static int lua_addpointprop(lua_State *L);
 	static int lua_addboundprop(lua_State *L);
 	static int lua_addcircuitprop(lua_State *L);
