@@ -124,6 +124,9 @@ CMaterialProp::CMaterialProp()
 		NStrands=0;			// number of strands per wire
 
 		BHpoints=0;
+		Cduct_t=0.;
+		Cduct_n=0.;
+		bAnisoConductivity=FALSE;
 }
 
 CMaterialProp::~CMaterialProp()

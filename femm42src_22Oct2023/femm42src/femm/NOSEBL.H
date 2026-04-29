@@ -119,6 +119,10 @@ class CMaterialProp
 		double Theta_hy;		// and y-direction, for anisotropic linear problems.
 		int    NStrands;		// number of strands per wire
 		double WireD;			// strand diameter, mm
+		// Anisotropic conductivity for homogenized laminated cores (Wang 2015)
+		double Cduct_t;          // tangential conductivity [MS/m] = F * Cduct
+		double Cduct_n;          // normal conductivity [S/m]
+		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
 
 	private:
 };
