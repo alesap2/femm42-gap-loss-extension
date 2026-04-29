@@ -744,6 +744,9 @@ BOOL CFemmeDocCore::OnOpenDocument()
 			MProp.Jr=0.;
 			MProp.Ji=0.;				// applied current density, MA/m^2
 			MProp.Cduct=0.;		    // conductivity of the material, MS/m
+			MProp.Cduct_t=0.;		// tangential conductivity [MS/m]
+			MProp.Cduct_n=0.;		// normal conductivity [S/m]
+			MProp.bAnisoConductivity=FALSE;
 			MProp.Lam_d=0.;			// lamination thickness, mm
 			MProp.Theta_hn=0.;			// hysteresis angle, degrees
 			MProp.Theta_hx=0.;			// hysteresis angle, degrees
@@ -800,7 +803,21 @@ BOOL CFemmeDocCore::OnOpenDocument()
 		   sscanf(v,"%lf",&MProp.Cduct);
 		   q[0]=NULL;
 		}	
-		
+
+		// Anisotropic conductivity tags (new — backward compatible)
+		if( _strnicmp(q,"<sigma_t>",9)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Cduct_t);
+		   if(MProp.Cduct_t>0.) MProp.bAnisoConductivity=TRUE;
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<sigma_n>",9)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Cduct_n);
+		   q[0]=NULL;
+		}
+
 		if( _strnicmp(q,"<phi_h>",7)==0){
 		   v=StripKey(s);
 		   sscanf(v,"%lf",&MProp.Theta_hn);

@@ -24,6 +24,30 @@ CMaterialProp::CMaterialProp()
 	slope=NULL;
 	Bdata=NULL;
 	Hdata=NULL;
+	Cduct_t=0.;
+	Cduct_n=0.;
+	bAnisoConductivity=FALSE;
+}
+
+void CMaterialProp::ComputeAnisoConductivity(double Wcore_mm)
+{
+	// Implements homogenisation formulae from Wang 2015 (PhD UManchester), §4.2
+	// eq. 4-3: sigma_t = F * sigma_m
+	// eq. 4-4: sigma_n = (t_l / W_core)^2 * sigma_m / F
+	// where F=LamFill, t_l=Lam_d [mm], W_core=Wcore_mm [mm], sigma_m=Cduct [MS/m]
+	if (Cduct <= 0. || LamFill <= 0. || Lam_d <= 0. || Wcore_mm <= 0.) return;
+
+	double F = LamFill;
+	double sigma_m = Cduct;              // [MS/m]
+	double ratio   = Lam_d / Wcore_mm;  // dimensionless (both in mm)
+
+	// sigma_t in MS/m
+	Cduct_t = F * sigma_m;
+
+	// sigma_n in S/m:  ratio^2 * sigma_m[MS/m] * 1e6 / F  → S/m
+	Cduct_n = ratio * ratio * sigma_m * 1.e06 / F;
+
+	bAnisoConductivity = TRUE;
 }
 
 void CMaterialProp::GetSlopes()
