@@ -147,6 +147,9 @@ CMaterialProp::CMaterialProp()
 		LamType=0;			// type of lamination;
 		MuMax=0.;			// maximum permeability (used for incremental permeability problems
 		Frequency=0;		// problem frequency in Hz (needed for incremental permeability problems
+		Cduct_t=0.;
+		Cduct_n=0.;
+		bAnisoConductivity=FALSE;
 }
 
 CMaterialProp::~CMaterialProp()

@@ -611,6 +611,9 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.BHpoints=0;
 			MProp.MuMax=0;
 			MProp.Frequency=Frequency;
+			MProp.Cduct_t=0.;
+			MProp.Cduct_n=0.;
+			MProp.bAnisoConductivity=FALSE;
 			q[0]=NULL;
 		}
 
@@ -714,6 +717,19 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		if( _strnicmp(q,"<WireD>",7)==0){
 		   v=StripKey(s);
 		   sscanf(v,"%lf",&MProp.WireD);
+		   q[0]=NULL;
+		}
+		
+		if( _strnicmp(q,"<sigma_t>",9)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Cduct_t);
+		   if(MProp.Cduct_t>0.) MProp.bAnisoConductivity=TRUE;
+		   q[0]=NULL;
+		}
+		
+		if( _strnicmp(q,"<sigma_n>",9)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Cduct_n);
 		   q[0]=NULL;
 		}
 		
@@ -1347,8 +1363,12 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 									  exp(-I*blockproplist[k].Theta_hy*PI/180.);
 			
 			if(blockproplist[k].Lam_d!=0){
+				// For anisotropic case use Cduct_n [S/m] -> MS/m for through-lam skin depth
+				double CductTanh = blockproplist[k].bAnisoConductivity
+					? blockproplist[k].Cduct_n * 1.e-06
+					: blockproplist[k].Cduct;
 				halflag=exp(-I*blockproplist[k].Theta_hx*PI/360.);
-				ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+				ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_x));
 				K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 				if (blockproplist[k].Cduct!=0)
 				{
@@ -1361,7 +1381,7 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				}
 				
 				halflag=exp(-I*blockproplist[k].Theta_hy*PI/360.);
-				ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
+				ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_y));
 				K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 				if (blockproplist[k].Cduct!=0)
 				{
@@ -2093,10 +2113,17 @@ BOOL CFemmviewDoc::GetPointValues(double x, double y, int k, CPointVals &u)
 			u.c=1./Re(1./(blocklist[meshelem[k].lbl].o));
 		else u.c=0;
 		
-		if (blockproplist[meshelem[k].blk].Lam_d!=0) u.c=0;
+		// Anisotropic laminate: use in-plane Cduct_t; otherwise zero out eddy term
+		if (blockproplist[meshelem[k].blk].Lam_d!=0) {
+			if (blockproplist[meshelem[k].blk].bAnisoConductivity)
+				u.c = blockproplist[meshelem[k].blk].Cduct_t;
+			else
+				u.c=0;
+		}
 
-		// only add in eddy currents if the region is solid 
-		if (blocklist[meshelem[k].lbl].FillFactor<0)
+		// only add in eddy currents if the region is solid (or anisotropic lam)
+		if (blocklist[meshelem[k].lbl].FillFactor<0 ||
+			blockproplist[meshelem[k].blk].bAnisoConductivity)
 			u.Je=-I*Frequency*2.*PI*u.c*u.A;
 
 		if(ProblemType!=0){
@@ -2939,7 +2966,12 @@ CComplex CFemmviewDoc::GetJA(int k,CComplex *J,CComplex *A)
 	Javg=blockproplist[blk].Jr+I*blockproplist[blk].Ji;
 
 	c=blockproplist[blk].Cduct;
-	if ((blockproplist[blk].Lam_d!=0) && (blockproplist[blk].LamType==0)) c=0;
+	if ((blockproplist[blk].Lam_d!=0) && (blockproplist[blk].LamType==0)) {
+		if (blockproplist[blk].bAnisoConductivity)
+			c = blockproplist[blk].Cduct_t;  // in-plane conductivity for gap-loss eddy
+		else
+			c = 0;
+	}
 	if (blocklist[lbl].FillFactor>0) c=0; 
 	
 
@@ -3247,8 +3279,11 @@ CComplex CFemmviewDoc::BlockIntegral(int inttype)
 			case 4: // Resistive Losses
 				if (abs(blocklist[meshelem[i].lbl].o)==0) sig=0;
 				else sig=1.e06/Re(1./blocklist[meshelem[i].lbl].o);
+				// Legacy: zero out eddy for in-plane laminates (tanh-mu handles it).
+				// Anisotropic: allow sig from Cduct_t (already folded into .o by solver).
 				if((blockproplist[meshelem[i].blk].Lam_d!=0) &&
-					(blockproplist[meshelem[i].blk].LamType==0)) sig=0;
+					(blockproplist[meshelem[i].blk].LamType==0) &&
+					!blockproplist[meshelem[i].blk].bAnisoConductivity) sig=0;
 				if(sig!=0){
 					
 					if (ProblemType==0){
@@ -3389,6 +3424,28 @@ CComplex CFemmviewDoc::BlockIntegral(int inttype)
 					z+=(a*y*Depth);
 				}
 				break;
+
+			case 31: // Gap Loss (in-plane eddy, anisotropic laminate, Wang 2015)
+				// Applies only to LamType==0, Lam_d>0, bAnisoConductivity==TRUE.
+				// Uses Cduct_t [MS/m] as the in-plane conductivity.
+				if (blockproplist[meshelem[i].blk].bAnisoConductivity &&
+					(blockproplist[meshelem[i].blk].LamType==0) &&
+					(blockproplist[meshelem[i].blk].Lam_d>0))
+				{
+					sig = blockproplist[meshelem[i].blk].Cduct_t * 1.e06; // MS/m -> S/m
+					if (sig!=0) {
+						if (ProblemType==0) {
+							for(k=0;k<3;k++) V[k]=Jn[k].Conj()/sig;
+							y=PlnInt(a,Jn,V)*Depth;
+						}
+						if (ProblemType==1)
+							y=2.*PI*R*a*J*conj(J)/sig;
+						if (Frequency!=0) y/=2.;
+						z+=y;
+					}
+				}
+				break;
+
 			default:
 				break;
 		}	
