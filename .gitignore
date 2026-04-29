@@ -1,0 +1,47 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Visual Studio build outputs
+Debug/
+Release/
+x64/
+Win32/
+*.obj
+*.pch
+*.iobj
+*.ipdb
+*.ilk
+*.exp
+*.lib
+*.pdb
+*.aps
+*.ncb
+*.sdf
+*.suo
+*.user
+*.VC.db
+*.VC.opendb
+ipch/
+.vs/
+
+# MSBuild
+*.log
+
+# Generated files
+*.sbr
+*.bsc
+*.plg
+
+# Compiled binaries (executables are distributed, not built here)
+# We keep .exe in release/ as they are reference binaries
+# femm/Debug/*.exe
+# femm/Release/*.exe
+
+# CMake (if ever used)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
