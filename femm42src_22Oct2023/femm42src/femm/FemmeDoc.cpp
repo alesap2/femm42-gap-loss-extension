@@ -1952,6 +1952,9 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.WireD=0;
 			MProp.BHpoints=0;
 			MProp.BHdata=NULL;
+			MProp.Cduct_t=0.;
+			MProp.Cduct_n=0.;
+			MProp.bAnisoConductivity=FALSE;
 			q[0]=NULL;
 		}
 
@@ -2059,6 +2062,19 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		if( _strnicmp(q,"<WireD>",7)==0){
 		   v=StripKey(s);
 		   sscanf(v,"%lf",&MProp.WireD);
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<sigma_t>",9)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Cduct_t);
+		   if(MProp.Cduct_t>0.) MProp.bAnisoConductivity=TRUE;
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<sigma_n>",9)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Cduct_n);
 		   q[0]=NULL;
 		}
 
@@ -2456,6 +2472,11 @@ BOOL CFemmeDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		fprintf(fp,"    <LamFill> = %.17g\n",blockproplist[i].LamFill);
 		fprintf(fp,"    <NStrands> = %i\n",blockproplist[i].NStrands);
 		fprintf(fp,"    <WireD> = %.17g\n",blockproplist[i].WireD);
+		// Anisotropic conductivity (gap loss extension — Wang 2015)
+		if(blockproplist[i].bAnisoConductivity){
+			fprintf(fp,"    <sigma_t> = %.17g\n",blockproplist[i].Cduct_t);
+			fprintf(fp,"    <sigma_n> = %.17g\n",blockproplist[i].Cduct_n);
+		}
 		fprintf(fp,"    <BHPoints> = %i\n",blockproplist[i].BHpoints);
 		for(j=0;j<blockproplist[i].BHpoints;j++)
 			fprintf(fp,"      %.17g	%.17g\n",blockproplist[i].BHdata[j].re,

@@ -81,6 +81,18 @@ class CMaterialProp
 		double Theta_m;			// orientation of magnetization, degrees
 		double Jr,Ji;			// applied current density, MA/m^2
 		double Cduct;		    // conductivity of the material, MS/m
+
+		// Anisotropic conductivity for homogenized laminated cores
+		// (Wang 2015 PhD, §4.2; Wang 2017 IEEE Trans. Power Electron.)
+		// sigma_t: tangential conductivity along laminations [MS/m] = F * Cduct
+		// sigma_n: normal conductivity through laminations [S/m]  = (Lam_d/Lam_fill_width)^2 * Cduct/F
+		// When bAnisoConductivity==TRUE and LamType==0 and Lam_d>0,
+		// the FEM uses Cduct_t for in-plane eddy (gap loss model)
+		// and Cduct_n (converted to MS/m) for the tanh skin-depth formula.
+		double Cduct_t;		    // tangential conductivity [MS/m]
+		double Cduct_n;		    // normal conductivity [S/m] (stored in S/m, ~order 1)
+		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
+
 		double Lam_d;			// lamination thickness, mm
 		double Theta_hn;			// hysteresis angle, degrees
 		double Theta_hx;			// hysteresis angle, degrees
@@ -103,6 +115,10 @@ class CMaterialProp
 		CComplex LaminatedBH(double omega, int i);
 		void IncrementalPermeability(double B, double w, CComplex &mu1, CComplex &mu2);
 		void IncrementalPermeability(double B, double &mu1, double &mu2);
+		// Compute Cduct_t and Cduct_n from Cduct, LamFill, Lam_d using Wang 2015 formulae.
+		// Wcore_mm: strip width of the core in mm (used in sigma_n formula).
+		// Sets bAnisoConductivity=TRUE on success.
+		void ComputeAnisoConductivity(double Wcore_mm);
 
 	private:
 };

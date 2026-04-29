@@ -175,16 +175,23 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
 			
-			if(blockproplist[k].Lam_d!=0){
+		if(blockproplist[k].Lam_d!=0){
 				if (blockproplist[k].Cduct != 0){
+					// For anisotropic case use Cduct_n [S/m] converted to MS/m for the
+					// through-lamination skin-depth formula (Wang 2015, eq. 4-5/4-6).
+					// For legacy scalar case use Cduct directly.
+					double CductTanh = blockproplist[k].bAnisoConductivity
+						? blockproplist[k].Cduct_n * 1.e-06  // S/m -> MS/m
+						: blockproplist[k].Cduct;
+
 					halflag=exp(-I*blockproplist[k].Theta_hx*DEG/2.);
-					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+					ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_x));
 					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill +
 							(1.- blockproplist[k].LamFill);
 
 					halflag=exp(-I*blockproplist[k].Theta_hy*DEG/2.);
-					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
+					ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_y));
 					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 					Mu[k][1]=((Mu[k][1]*tanh(K))/K)*blockproplist[k].LamFill + 
 							(1. - blockproplist[k].LamFill);
@@ -453,11 +460,19 @@ do{
 		// contribution from eddy currents;	
 		K=-I*a*w*blockproplist[meshele[i].blk].Cduct*c/12.;
 
-		// in-plane laminated blocks appear to have no conductivity;
-		// eddy currents are accounted for in these elements by their
-		// frequency-dependent permeability.
+		// in-plane laminated blocks (LamType==0, Lam_d>0):
+		// - Legacy mode (bAnisoConductivity==FALSE): eddy accounted for via tanh
+		//   permeability -> set K=0 (no explicit eddy term in matrix).
+		// - Anisotropic mode (bAnisoConductivity==TRUE): use Cduct_t [MS/m] as
+		//   the in-plane conductivity for gap-loss eddy currents (Wang 2015).
 		if((blockproplist[El->blk].LamType==0) &&
-			(blockproplist[El->blk].Lam_d>0)) K=0;
+			(blockproplist[El->blk].Lam_d>0))
+		{
+			if(blockproplist[El->blk].bAnisoConductivity)
+				K=-I*a*w*blockproplist[El->blk].Cduct_t*c/12.;
+			else
+				K=0;
+		}
 		
 		// if this element is part of a wound coil, 
 		// it should have a zero "bulk" conductivity...

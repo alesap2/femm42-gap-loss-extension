@@ -158,6 +158,11 @@ class CMaterialProp
 		double Jr,Ji;			// applied current density, MA/m^2
 		double Cduct;		    // conductivity of the material, MS/m
 		double Lam_d;			// lamination thickness, mm
+		// Anisotropic conductivity for homogenized laminated cores
+		// (Wang 2015 PhD, §4.2; Wang 2017 IEEE Trans. Power Electron.)
+		double Cduct_t;          // tangential conductivity [MS/m] = F * Cduct
+		double Cduct_n;          // normal conductivity [S/m]
+		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
 		double Theta_hn;			// hysteresis angle, degrees
 		double Theta_hx;			// hysteresis angle, degrees
 		double Theta_hy;			// hysteresis angle, degrees
