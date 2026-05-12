@@ -325,12 +325,14 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			// Convert problem coordinates to metres (mesh is stored in cm; LengthConv = 0.01 m/cm).
 			double Wperp_m = Wperp_units * LengthConv;
 			labellist[l].Wperp = Wperp_m;
-			// Iron μ with hysteresis lag in the perpendicular slot.
-			// LamType==2 → perpendicular slot is Mu[k][1] (B_x), based on mu_y/Theta_hy
-			// LamType==1 → perpendicular slot is Mu[k][0] (B_y), based on mu_x/Theta_hx
-			CComplex mufe = (mp.LamType==2)
-				? mp.mu_y*exp(-I*mp.Theta_hy*DEG)
-				: mp.mu_x*exp(-I*mp.Theta_hx*DEG);
+			// Iron μ in the perpendicular slot with hysteresis lag.
+			// For BH-curve materials mu_x/mu_y==1 (linear field unused); derive
+			// initial permeability from the first non-zero BH segment instead.
+			double mu_r_lin = (mp.LamType==2) ? mp.mu_y : mp.mu_x;
+			if(mp.BHpoints>=2 && mp.Bdata[1]>0. && abs(mp.Hdata[1])>0.)
+				mu_r_lin = mp.Bdata[1] / (muo * abs(mp.Hdata[1]));
+			double hyst_deg = (mp.LamType==2) ? mp.Theta_hy : mp.Theta_hx;
+			CComplex mufe = mu_r_lin * exp(-I*hyst_deg*DEG);
 			CComplex g2 = -I * w * mufe * muo * mp.Cduct_t * 1.e6;	// σ_t MS/m → S/m
 			CComplex za = sqrt(g2) * (Wperp_m * 0.5);				// a = Wperp/2 in metres
 			labellist[l].MuPerp = mp.LamFill * mufe * PerpLenzShape(za)

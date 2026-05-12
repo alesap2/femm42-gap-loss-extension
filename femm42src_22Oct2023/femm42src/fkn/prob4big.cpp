@@ -323,9 +323,14 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 			if(Wperp_units<=0.) continue;
 			double Wperp_m = Wperp_units * LengthConv;
 			labellist[l].Wperp = Wperp_m;
-			CComplex mufe = (mp.LamType==2)
-				? mp.mu_y*exp(-I*mp.Theta_hy*PI/180.)
-				: mp.mu_x*exp(-I*mp.Theta_hx*PI/180.);
+			// Iron μ in the perpendicular slot.
+			// For BH-curve materials mu_x/mu_y is stored as 1 (unused); derive the
+			// initial permeability from the first non-zero BH segment instead.
+			double mu_r_lin = (mp.LamType==2) ? mp.mu_y : mp.mu_x;
+			if(mp.BHpoints>=2 && mp.Bdata[1]>0. && abs(mp.Hdata[1])>0.)
+				mu_r_lin = mp.Bdata[1] / (muo * abs(mp.Hdata[1]));
+			double hyst_deg = (mp.LamType==2) ? mp.Theta_hy : mp.Theta_hx;
+			CComplex mufe = mu_r_lin * exp(-I*hyst_deg*PI/180.);
 			CComplex g2 = -I * w * mufe * muo * mp.Cduct_t * 1.e6;
 			CComplex za = sqrt(g2) * (Wperp_m * 0.5);
 			labellist[l].MuPerp = mp.LamFill * mufe * PerpLenzShape(za)
