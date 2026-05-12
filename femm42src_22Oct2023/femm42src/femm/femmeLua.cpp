@@ -1604,10 +1604,13 @@ int CFemmeDoc::lua_setmataniso(lua_State *L)
 
 int CFemmeDoc::lua_setmatperplenz(lua_State *L)
 {
-	// mi_setmatperplenz(name, Wcore_mm [, model_id])
-	//   Enables the perpendicular Lenz μ⊥(ω) Bessel model for a laminated material.
-	//   Wcore_mm : effective strip width (= 2×a) in mm.  0 = disable (reset to series reluctance).
+	// mi_setmatperplenz(name [, enable [, model_id]])
+	//   Toggles the perpendicular Lenz μ⊥(ω) Bessel model for a laminated material.
+	//   enable   : 0 = off, non-zero = on (default 1 when arg omitted).
 	//   model_id : optional, 0 = circular Bessel (default; only supported value).
+	//
+	//   The disc radius a = Wperp/2 is derived per-LABEL from the geometry
+	//   by the solver at solve time — no width parameter is stored in the material.
 	//
 	//   Safety: defensive reset — every field is written before return,
 	//   so repeated calls within the same process never leak state.
@@ -1624,17 +1627,15 @@ int CFemmeDoc::lua_setmatperplenz(lua_State *L)
 		if (BlockName == thisDoc->blockproplist[k].BlockName) break;
 	if (k == thisDoc->blockproplist.GetSize()) return 0;  // not found
 
-	double Wcore_mm   = (n>1) ? lua_todouble(L,2) : 0.;
-	int    model_id   = (n>2) ? (int)lua_todouble(L,3) : 0;
+	int enable   = (n>1) ? (int)lua_todouble(L,2) : 1;
+	int model_id = (n>2) ? (int)lua_todouble(L,3) : 0;
 
-	if (Wcore_mm > 0.) {
-		thisDoc->blockproplist[k].Wcore_mm     = Wcore_mm;
-		thisDoc->blockproplist[k].bPerpLenz    = TRUE;
+	if (enable != 0) {
+		thisDoc->blockproplist[k].bPerpLenz     = TRUE;
 		thisDoc->blockproplist[k].PerpLenzModel = model_id;
 	} else {
 		// Disable: reset to series-reluctance mode
-		thisDoc->blockproplist[k].Wcore_mm     = 0.;
-		thisDoc->blockproplist[k].bPerpLenz    = FALSE;
+		thisDoc->blockproplist[k].bPerpLenz     = FALSE;
 		thisDoc->blockproplist[k].PerpLenzModel = 0;
 	}
 	return 0;

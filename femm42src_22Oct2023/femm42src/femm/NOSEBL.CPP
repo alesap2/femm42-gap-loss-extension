@@ -127,7 +127,6 @@ CMaterialProp::CMaterialProp()
 		Cduct_t=0.;
 		Cduct_n=0.;
 		bAnisoConductivity=FALSE;
-		Wcore_mm=0.;
 		bPerpLenz=FALSE;
 		PerpLenzModel=0;
 }

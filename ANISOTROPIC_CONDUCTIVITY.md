@@ -753,27 +753,38 @@ flux, but for the perpendicular direction.
 
 ### 4.4 Implementation details
 
-**New material fields** (in `fkn/mesh.h` and `femm/Problem.h`):
+**New material fields** (in `fkn/mesh.h`, `femm/Problem.h`, `femm/NOSEBL.H`):
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `Wcore_mm` | `double` | `0.` | Strip full-width [mm]. `0` = disabled. |
-| `bPerpLenz` | `BOOL` | `FALSE` | Enable Bessel model. |
-| `PerpLenzModel` | `int` | `0` | 0 = circular Bessel. |
+| `bPerpLenz` | `BOOL` | `FALSE` | Enable Bessel model for this material. |
+| `PerpLenzModel` | `int` | `0` | 0 = circular Bessel; 1 reserved. |
+
+> **No `Wcore_mm` is stored in the material.** The disc radius is derived
+> per **block-label** from the mesh geometry by the solver — the same
+> material in two different geometries gives two different effective μ⊥.
+
+**New geometric fields** (in `fkn/mesh.h`, class `CBlockLabel`):
+
+| Field | Type | Filled by | Meaning |
+| --- | --- | --- | --- |
+| `Wperp` | `double` | solver | bounding-box extent perpendicular to lamination stacking direction, in **metres** |
+| `MuPerp` | `CComplex` | solver | precomputed Bessel μ⊥(ω) for this label (cached) |
 
 **`.fem` file tags** (optional, backward-compatible):
 
 ```
-<Wcore>      = 10.0
-<PerpLenz>   = 1
-<PerpLenzModel> = 0
+<PerpLenz>      = 1     # 1 = enable, 0 = disable
+<PerpLenzModel> = 0     # reserved
 ```
 
 **Lua API** (`femm/femmeLua.cpp`):
 
 ```lua
-mi_setmatperplenz(name, Wcore_mm)          -- enable
-mi_setmatperplenz(name, 0)                 -- disable (reset to series)
+mi_setmatperplenz(name)            -- enable on material `name`
+mi_setmatperplenz(name, 1)         -- enable (explicit)
+mi_setmatperplenz(name, 0)         -- disable
+mi_setmatperplenz(name, 1, 0)      -- enable, model 0 (circular Bessel)
 ```
 
 **Numerical helpers** (`fkn/bessel_perplenz.h`):
@@ -782,21 +793,36 @@ Power-series $J_0(z)$ and $J_1(z)$ for complex $z$, 60 terms.
 Precise to $10^{-12}$ relative for $|z| \le 20$.
 Caller caps at $|z| \ge 20$: `PerpLenzShape` returns 0 (full screening).
 
-**Injection point** (`fkn/prob2big.cpp` and `prob4big.cpp`):
+**Injection points** (`fkn/prob2big.cpp` and `prob4big.cpp`):
 
-In the per-material-block `Mu[k]` precomputation loop:
-- `LamType==2` (perpendicular = B_x = `mu2` slot): Bessel replaces series reluctance on `Mu[k][1]`.
-- `LamType==1` (perpendicular = B_y = `mu1` slot): Bessel replaces series reluctance on `Mu[k][0]`.
-- `LamType==0`, `Lam_d==0`, or `bPerpLenz==FALSE`: **unchanged** — full backward compatibility.
+1. **Geometric pre-pass** (after the per-material `Mu[k]` loop):
+   one sweep over `meshele[]` computes the bounding box of every block
+   label; for labels whose material has `bPerpLenz==TRUE`, `Lam_d>0`,
+   `Cduct_t>0`, and `LamType∈{1,2}`, the perpendicular extent gives
+   `a = Wperp/2` and the closed-form Bessel μ⊥(ω) is cached in
+   `labellist[l].MuPerp`. Mesh units are converted to metres via
+   `LengthConv` (cm → m).
+   - `LamType==1` (stacked in Y): `Wperp = x_max − x_min`
+   - `LamType==2` (stacked in X): `Wperp = y_max − y_min`
+
+2. **Per-element override** (right after `meshele[i].mu1 = Mu[k][0]`):
+   for elements whose material has `bPerpLenz` enabled, the perpendicular
+   slot (`mu1` for `LamType==1`, `mu2` for `LamType==2`) is **replaced**
+   by the per-label `labellist[l].MuPerp`. The parallel slot keeps the
+   per-material `Mu[k]` value (with `tanh(K)/K` skin effect).
+
+Disabled paths (`LamType==0`, `Lam_d==0`, or `bPerpLenz==FALSE`)
+are completely **unchanged** — full backward compatibility.
 
 ### 4.5 Activation conditions
 
 The Bessel branch runs **only when ALL of the following are true**:
 
 1. `blockproplist[k].bPerpLenz == TRUE`
-2. `blockproplist[k].Wcore_mm > 0`
-3. `blockproplist[k].Cduct_t  > 0`  (in-plane conductivity)
-4. `LamType == 1` or `LamType == 2` and `Lam_d > 0`
+2. `blockproplist[k].Cduct_t  > 0` (in-plane conductivity)
+3. `LamType == 1` or `LamType == 2`
+4. `Lam_d > 0`
+5. `labellist[l].Wperp > 0` (i.e. the label has finite bounding box)
 
 When any condition is false, the code falls back to the original
 series-reluctance formula. No existing `.fem` file is affected.
@@ -822,7 +848,7 @@ See `femmTestFiles/probe_perp_lenz.lua`, `plot_perp_lenz.py`, and
 | VP-2: B perpendicular, bPerpLenz active | `|B_perp|` drops >5 % at 50 kHz |
 | VP-3: rev3.fem + bPerpLenz | Total loss ≈ Wang Eq. 11 ±5 % (100 Hz–500 kHz) |
 | VP-4: `Lam_d==0` solid block | Bit-exact identical to master |
-| VP-5: `bPerpLenz==FALSE`, `Wcore_mm>0` | Bit-exact identical to master |
+| VP-5: `bPerpLenz==FALSE` on any geometry | Bit-exact identical to master |
 
 ---
 

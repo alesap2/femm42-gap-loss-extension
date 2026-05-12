@@ -11,8 +11,9 @@
 -- Outputs: probe_perp_lenz_data.csv, probe_perp_lenz_results.txt
 --
 -- NOTE: This script requires TestBin/femm.exe with the bPerpLenz extension compiled.
---       The Wcore and sigma_t must be set via mi_setmataniso + mi_setmatperplenz
---       Lua calls before solving.  For now the script reads a pre-configured .fem.
+--       sigma_t is set via mi_setmataniso. bPerpLenz is toggled with
+--       mi_setmatperplenz(name, 1) — the disc radius is derived
+--       automatically by the solver from the per-label bounding box.
 
 src  = "D:\\FEMM Source\\femmTestFiles\\pourleroi_cc_magnetostatic_rev3.fem"
 logp = "D:\\FEMM Source\\femmTestFiles\\probe_perp_lenz_results.txt"

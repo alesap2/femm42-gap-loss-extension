@@ -123,8 +123,7 @@ class CMaterialProp
 		double Cduct_t;          // tangential conductivity [MS/m] = F * Cduct
 		double Cduct_n;          // normal conductivity [S/m]
 		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
-		// Perpendicular Lenz feedback — Bessel disc model
-		double Wcore_mm;         // strip width for perp. Lenz model [mm]; 0 = disabled
+		// Perpendicular Lenz feedback — Bessel disc model (geometric Wperp; no material-side width)
 		BOOL   bPerpLenz;        // TRUE = use Bessel μ⊥(ω) model
 		int    PerpLenzModel;    // 0 = circular Bessel; 1 = reserved
 		// Compute Cduct_t and Cduct_n from lamination parameters (Wang 2015 eqs 4-3/4-4)

@@ -202,23 +202,17 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 		}
 		else if (blockproplist[k].LamType==2){
 			// Laminations stacked in X (lam plane = YZ).
-			// B_x PERPENDICULAR to lam: uses mu2 = Mu[k][1] in assembly (via 1/Re(mu2) * Mx).
-			// B_y PARALLEL to lam: uses mu1 = Mu[k][0] in assembly (via 1/Re(mu1) * My).
+			// B_x PERPENDICULAR to lam: uses mu2 = Mu[k][1] in assembly (via 1/mu2 * Mx).
+			// B_y PARALLEL     to lam: uses mu1 = Mu[k][0] in assembly (via 1/mu1 * My).
+			// NOTE: if bPerpLenz is enabled for this material, Mu[k][1] is OVERRIDDEN
+			// per-element later (see assembly loop) using labellist[lbl].MuPerp, which
+			// is derived from the per-label geometric Wperp. The static value below
+			// is the series-reluctance fallback (no Lenz feedback).
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
 			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR component (mu2, B_x direction) — Bessel or series reluctance
-				if (blockproplist[k].bPerpLenz &&
-				    blockproplist[k].Wcore_mm > 0. &&
-				    blockproplist[k].Cduct_t  > 0.){
-					// Bessel disc μ⊥(ω): shape = 2J₁(γa)/(γa·J₀(γa))
-					CComplex mufe = Mu[k][1];			// relative iron μ with hyst. lag
-					CComplex g2   = -I * w * mufe * muo * blockproplist[k].Cduct_t * 1.e6;
-					CComplex za   = sqrt(g2) * (blockproplist[k].Wcore_mm * 0.5e-3);
-					Mu[k][1] = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
-					         + (1. - blockproplist[k].LamFill);
-				} else {
-					// Legacy: series reluctance
+				// PERPENDICULAR component (mu2, B_x): static series reluctance default.
+				{
 					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
 					                + (1. - blockproplist[k].LamFill) / 1.0;
 					Mu[k][1] = 1.0 / inv_mu;
@@ -238,23 +232,14 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 		}
 		else if (blockproplist[k].LamType==1){
 			// Laminations stacked in Y (lam plane = XZ).
-			// B_y PERPENDICULAR to lam: uses mu1 = Mu[k][0] in assembly (via 1/Re(mu1) * My).
-			// B_x PARALLEL to lam: uses mu2 = Mu[k][1] in assembly (via 1/Re(mu2) * Mx).
+			// B_y PERPENDICULAR to lam: uses mu1 = Mu[k][0] in assembly.
+			// B_x PARALLEL     to lam: uses mu2 = Mu[k][1] in assembly.
+			// NOTE: bPerpLenz override happens per-element via labellist[lbl].MuPerp.
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
 			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR component (mu1, B_y direction) — Bessel or series reluctance
-				if (blockproplist[k].bPerpLenz &&
-				    blockproplist[k].Wcore_mm > 0. &&
-				    blockproplist[k].Cduct_t  > 0.){
-					// Bessel disc μ⊥(ω)
-					CComplex mufe = Mu[k][0];			// relative iron μ with hyst. lag
-					CComplex g2   = -I * w * mufe * muo * blockproplist[k].Cduct_t * 1.e6;
-					CComplex za   = sqrt(g2) * (blockproplist[k].Wcore_mm * 0.5e-3);
-					Mu[k][0] = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
-					         + (1. - blockproplist[k].LamFill);
-				} else {
-					// Legacy: series reluctance
+				// PERPENDICULAR component (mu1, B_y): static series reluctance default.
+				{
 					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][0]
 					                + (1. - blockproplist[k].LamFill) / 1.0;
 					Mu[k][0] = 1.0 / inv_mu;
@@ -277,6 +262,81 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			Mu[k][1]=1;
 		}
 
+	}
+
+	// =====================================================================
+	// Perpendicular Lenz feedback (Bessel disc model) — geometric pre-pass.
+	// For every block label whose material has bPerpLenz==TRUE and uses
+	// laminations (LamType==1 or 2) with in-plane conductivity Cduct_t>0,
+	// derive the disc radius a = Wperp/2 from the bounding box of the
+	// elements assigned to that label, then pre-compute μ⊥(ω) via the
+	// closed-form Bessel formula. The result is stashed in labellist[l].MuPerp
+	// and applied per-element later (overriding Mu[k] for the perpendicular slot).
+	// LamType==1 → lams stacked in Y, perpendicular extent = X bounding box
+	// LamType==2 → lams stacked in X, perpendicular extent = Y bounding box
+	// =====================================================================
+	{
+		// Reset per-label storage.
+		for(int l=0; l<NumBlockLabels; l++){
+			labellist[l].Wperp = 0.;
+			labellist[l].MuPerp = 0.;
+		}
+		// Bounding box per label (only labels referenced by mesh).
+		double *xmn = new double[NumBlockLabels];
+		double *xmx = new double[NumBlockLabels];
+		double *ymn = new double[NumBlockLabels];
+		double *ymx = new double[NumBlockLabels];
+		BOOL   *seen = new BOOL[NumBlockLabels];
+		for(int l=0; l<NumBlockLabels; l++){
+			xmn[l]= 1.e30; xmx[l]=-1.e30;
+			ymn[l]= 1.e30; ymx[l]=-1.e30;
+			seen[l]=FALSE;
+		}
+		for(int i=0; i<NumEls; i++){
+			int lbl = meshele[i].lbl;
+			if(lbl<0 || lbl>=NumBlockLabels) continue;
+			seen[lbl]=TRUE;
+			for(int kk=0; kk<3; kk++){
+				int nn = meshele[i].p[kk];
+				double xn=meshnode[nn].x, yn=meshnode[nn].y;
+				if(xn<xmn[lbl]) xmn[lbl]=xn;
+				if(xn>xmx[lbl]) xmx[lbl]=xn;
+				if(yn<ymn[lbl]) ymn[lbl]=yn;
+				if(yn>ymx[lbl]) ymx[lbl]=yn;
+			}
+		}
+		// Per-label Wperp and Bessel μ⊥.
+		for(int l=0; l<NumBlockLabels; l++){
+			if(!seen[l]) continue;
+			int k = labellist[l].BlockType;
+			if(k<0 || k>=NumBlockProps) continue;
+			CMaterialProp &mp = blockproplist[k];
+			if(!mp.bPerpLenz)               continue;
+			if(mp.Lam_d<=0.)                continue;
+			if(mp.Cduct_t<=0.)              continue;
+			if(mp.LamType!=1 && mp.LamType!=2) continue;
+			// Geometric perpendicular extent (mesh units = problem units; FEMM
+			// length scale 'LengthUnits' converts to metres later; here we use
+			// the same scale as Lam_d which is in millimetres → assume problem
+			// coordinates are already scaled to mm at this stage).
+			double Wperp_units = (mp.LamType==2) ? (ymx[l]-ymn[l])
+			                                     : (xmx[l]-xmn[l]);
+			if(Wperp_units<=0.) continue;
+			// Convert problem coordinates to metres (mesh is stored in cm; LengthConv = 0.01 m/cm).
+			double Wperp_m = Wperp_units * LengthConv;
+			labellist[l].Wperp = Wperp_m;
+			// Iron μ with hysteresis lag in the perpendicular slot.
+			// LamType==2 → perpendicular slot is Mu[k][1] (B_x), based on mu_y/Theta_hy
+			// LamType==1 → perpendicular slot is Mu[k][0] (B_y), based on mu_x/Theta_hx
+			CComplex mufe = (mp.LamType==2)
+				? mp.mu_y*exp(-I*mp.Theta_hy*DEG)
+				: mp.mu_x*exp(-I*mp.Theta_hx*DEG);
+			CComplex g2 = -I * w * mufe * muo * mp.Cduct_t * 1.e6;	// σ_t MS/m → S/m
+			CComplex za = sqrt(g2) * (Wperp_m * 0.5);				// a = Wperp/2 in metres
+			labellist[l].MuPerp = mp.LamFill * mufe * PerpLenzShape(za)
+			                    + (1. - mp.LamFill);
+		}
+		delete[] xmn; delete[] xmx; delete[] ymn; delete[] ymx; delete[] seen;
 	}
 
 do{
@@ -628,6 +688,18 @@ do{
 			meshele[i].mu1=Mu[k][0];
 			meshele[i].mu2=Mu[k][1];
 			meshele[i].v12=0;
+			// Per-element Perpendicular Lenz override: replace the perpendicular
+			// slot with the per-label Bessel μ⊥(ω) derived from geometry.
+			if(blockproplist[k].bPerpLenz && blockproplist[k].Lam_d>0. &&
+			   blockproplist[k].Cduct_t>0.){
+				int l = meshele[i].lbl;
+				if(l>=0 && l<NumBlockLabels && labellist[l].Wperp>0.){
+					if(blockproplist[k].LamType==2)
+						meshele[i].mu2 = labellist[l].MuPerp;
+					else if(blockproplist[k].LamType==1)
+						meshele[i].mu1 = labellist[l].MuPerp;
+				}
+			}
 			if (blockproplist[k].BHpoints>0)
 			{
 				if (bIncremental==FALSE)

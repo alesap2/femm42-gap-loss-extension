@@ -55,6 +55,14 @@ class CBlockLabel
 		CComplex ProximityMu; 
 		BOOL bIsWound;
 
+		// Perpendicular Lenz feedback — geometric data filled by solver.
+		// Wperp = extent of this label's bounding box PERPENDICULAR to the
+		// lamination stacking direction (X for LamType==2, Y for LamType==1).
+		// MuPerp = pre-computed complex μ⊥(ω) for the perpendicular slot,
+		// using the Bessel disc model with disc radius a = Wperp/2.
+		double   Wperp;
+		CComplex MuPerp;
+
 	private:
 
 };
@@ -97,7 +105,8 @@ class CMaterialProp
 		// Replaces the series-reluctance μ⊥ with a complex Bessel formula:
 		//   μ⊥(ω) = (1-F)·μ₀ + F·μ_fe · 2J₁(γa)/(γa·J₀(γa)),  γ²=-jωμσ_t
 		// Active for LamType==1 and LamType==2 when bPerpLenz==TRUE.
-		double Wcore_mm;       // effective strip half-width a=Wcore/2 [mm]; 0 disables
+		// The disc radius a = Wperp/2 is derived per-LABEL from the geometry
+		// at solve time (CBlockLabel::Wperp), NOT stored in the material.
 		BOOL   bPerpLenz;      // TRUE = use Bessel μ⊥(ω) for perpendicular flux
 		int    PerpLenzModel;  // 0 = circular Bessel; 1 = reserved
 

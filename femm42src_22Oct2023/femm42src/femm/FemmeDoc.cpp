@@ -1955,7 +1955,6 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.Cduct_t=0.;
 			MProp.Cduct_n=0.;
 			MProp.bAnisoConductivity=FALSE;
-			MProp.Wcore_mm    = 0.;
 			MProp.bPerpLenz   = FALSE;
 			MProp.PerpLenzModel = 0;
 			q[0]=NULL;
@@ -2081,14 +2080,9 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		   q[0]=NULL;
 		}
 
-		// Perpendicular Lenz feedback tags (new — backward compatible)
-		if( _strnicmp(q,"<Wcore>",7)==0){
-		   v=StripKey(s);
-		   sscanf(v,"%lf",&MProp.Wcore_mm);
-		   if(MProp.Wcore_mm>0.) MProp.bPerpLenz=TRUE;
-		   q[0]=NULL;
-		}
-
+		// Perpendicular Lenz feedback tags (new — backward compatible).
+		// Disc radius is derived from per-label geometry by the solver;
+		// no Wcore stored in the material.
 		if( _strnicmp(q,"<PerpLenz>",10)==0){
 		   v=StripKey(s);
 		   int pl=0; sscanf(v,"%i",&pl);
@@ -2501,9 +2495,9 @@ BOOL CFemmeDoc::OnSaveDocument(LPCTSTR lpszPathName)
 			fprintf(fp,"    <sigma_t> = %.17g\n",blockproplist[i].Cduct_t);
 			fprintf(fp,"    <sigma_n> = %.17g\n",blockproplist[i].Cduct_n);
 		}
-		// Perpendicular Lenz feedback (written only when enabled)
-		if(blockproplist[i].bPerpLenz && blockproplist[i].Wcore_mm>0.){
-			fprintf(fp,"    <Wcore> = %.17g\n",blockproplist[i].Wcore_mm);
+		// Perpendicular Lenz feedback (written only when enabled). Disc radius
+		// is derived from geometry by the solver; no Wcore stored here.
+		if(blockproplist[i].bPerpLenz){
 			fprintf(fp,"    <PerpLenz> = 1\n");
 			fprintf(fp,"    <PerpLenzModel> = %i\n",blockproplist[i].PerpLenzModel);
 		}
