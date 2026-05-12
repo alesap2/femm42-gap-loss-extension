@@ -1,0 +1,26 @@
+=== test_aniso.lua  Mon May 11 19:36:07 2026 ===
+
+1. Opened: D:\FEMM Source\femmTestFiles\pourleroi_cc_magnetostatic_rev2.fem
+
+2. Setting anisotropic conductivity on 'Amorphous'...
+   d_lam=0.023 mm, LamFill=0.80, Sigma_bulk=0.769 MS/m
+   mi_setmataniso('Amorphous', 0, 0)  [auto-compute] --> OK
+   mi_setmataniso('Amorphous', 0.6152, 500.0)  [explicit] --> OK
+
+3. Meshing...
+   Mesh created.
+4. Analyzing (f=1000 Hz, AC)...
+   Solution loaded.
+
+5. Standard block integrals on 'Amorphous' core:
+   Point (0,30mm): |B|=0.0048-I*0.0112 T   |H|=3819.07-I*8952.07 A/m   Pe=0.0000e+00 W/m3
+   Area            = 1.376810e-01 m2
+   Eddy loss (std) = 0.000000e+00 W   [mo_blockintegral(4)]
+   Stored energy   = 1.455469e-03 J   [mo_blockintegral(2)]
+
+6. Gap Loss (anisotropic, Wang 2015):
+   Gap Loss        = 0.000000e+00 W   [mo_blockintegral(31)]
+   --> W_gap = 0  (flag not set, or no AC flux in selected region)
+
+=== TEST COMPLETE ===
+Results: D:\FEMM Source\femmTestFiles\test_aniso_results.txt

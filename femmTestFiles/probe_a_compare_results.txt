@@ -1,0 +1,78 @@
+=== Probe A_z along x={0.1,7,13.9}, y in [14, 61.6] mm ===
+Source: D:\FEMM Source\femmTestFiles\pourleroi_cc_magnetostatic_rev3.fem
+Samples: 401 points, dy = 0.119 mm
+Probe lines: x = 0.1, 7, 13.9 mm
+Test: A_z(full anisotropic sigma) vs A_z(sigma=0 everywhere).
+If results are nearly identical, the model has NO Lenz back-reaction:
+losses are computed post-hoc from the macroscopic B that exists in a
+pure magnetostatic-AC solve.
+
+---- Frequency = 1000 Hz ----
+  f=1000 Hz, x=0.100 mm :
+    max|A_full|                = 3.426472e-04 Wb/m
+    max|B_full|                = 4.038865e-01 T
+    max|A_full - A_sigma=0|    = 3.024423e-05 (8.827 % of max|A|)
+    rms|A_full - A_sigma=0|    = 2.100101e-05
+    max||B_full|-|B_sigma=0||  = 2.789872e-01 (69.076 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 1.939423e-01
+  f=1000 Hz, x=7.000 mm :
+    max|A_full|                = 8.210448e-04 Wb/m
+    max|B_full|                = 1.019057e-01 T
+    max|A_full - A_sigma=0|    = 2.007444e-04 (24.450 % of max|A|)
+    rms|A_full - A_sigma=0|    = 5.897252e-05
+    max||B_full|-|B_sigma=0||  = 5.665440e-02 (55.595 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 4.199367e-02
+  f=1000 Hz, x=13.900 mm :
+    max|A_full|                = 1.698144e-03 Wb/m
+    max|B_full|                = 4.238809e-01 T
+    max|A_full - A_sigma=0|    = 4.632359e-05 (2.728 % of max|A|)
+    rms|A_full - A_sigma=0|    = 3.426984e-05
+    max||B_full|-|B_sigma=0||  = 2.745533e-01 (64.771 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 1.878273e-01
+
+---- Frequency = 10000 Hz ----
+  f=10000 Hz, x=0.100 mm :
+    max|A_full|                = 3.144390e-04 Wb/m
+    max|B_full|                = 3.844264e-01 T
+    max|A_full - A_sigma=0|    = 2.838122e-05 (9.026 % of max|A|)
+    rms|A_full - A_sigma=0|    = 1.923598e-05
+    max||B_full|-|B_sigma=0||  = 2.595991e-01 (67.529 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 1.790230e-01
+  f=10000 Hz, x=7.000 mm :
+    max|A_full|                = 7.928782e-04 Wb/m
+    max|B_full|                = 1.004207e-01 T
+    max|A_full - A_sigma=0|    = 2.033011e-04 (25.641 % of max|A|)
+    rms|A_full - A_sigma=0|    = 6.133763e-05
+    max||B_full|-|B_sigma=0||  = 4.919709e-02 (48.991 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 3.708006e-02
+  f=10000 Hz, x=13.900 mm :
+    max|A_full|                = 1.605030e-03 Wb/m
+    max|B_full|                = 3.985061e-01 T
+    max|A_full - A_sigma=0|    = 4.300176e-05 (2.679 % of max|A|)
+    rms|A_full - A_sigma=0|    = 2.974382e-05
+    max||B_full|-|B_sigma=0||  = 2.670258e-01 (67.007 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 1.637125e-01
+
+---- Frequency = 100000 Hz ----
+  f=100000 Hz, x=0.100 mm :
+    max|A_full|                = 3.045879e-04 Wb/m
+    max|B_full|                = 3.744679e-01 T
+    max|A_full - A_sigma=0|    = 2.753751e-05 (9.041 % of max|A|)
+    rms|A_full - A_sigma=0|    = 1.862961e-05
+    max||B_full|-|B_sigma=0||  = 2.528804e-01 (67.531 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 1.736537e-01
+  f=100000 Hz, x=7.000 mm :
+    max|A_full|                = 7.828998e-04 Wb/m
+    max|B_full|                = 1.001211e-01 T
+    max|A_full - A_sigma=0|    = 2.031268e-04 (25.945 % of max|A|)
+    rms|A_full - A_sigma=0|    = 6.188029e-05
+    max||B_full|-|B_sigma=0||  = 4.695653e-02 (46.900 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 3.552053e-02
+  f=100000 Hz, x=13.900 mm :
+    max|A_full|                = 1.575599e-03 Wb/m
+    max|B_full|                = 3.859748e-01 T
+    max|A_full - A_sigma=0|    = 4.159251e-05 (2.640 % of max|A|)
+    rms|A_full - A_sigma=0|    = 2.855742e-05
+    max||B_full|-|B_sigma=0||  = 2.582457e-01 (66.907 % of max|B|)
+    rms||B_full|-|B_sigma=0||  = 1.562373e-01
+

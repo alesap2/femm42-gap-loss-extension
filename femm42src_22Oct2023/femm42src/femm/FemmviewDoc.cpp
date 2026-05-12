@@ -2966,11 +2966,12 @@ CComplex CFemmviewDoc::GetJA(int k,CComplex *J,CComplex *A)
 	Javg=blockproplist[blk].Jr+I*blockproplist[blk].Ji;
 
 	c=blockproplist[blk].Cduct;
-	if ((blockproplist[blk].Lam_d!=0) && (blockproplist[blk].LamType==0)) {
-		if (blockproplist[blk].bAnisoConductivity)
-			c = blockproplist[blk].Cduct_t;  // in-plane conductivity for gap-loss eddy
-		else
-			c = 0;
+	if ((blockproplist[blk].Lam_d > 0) &&
+	    (blockproplist[blk].LamType==0 || blockproplist[blk].LamType==1 || blockproplist[blk].LamType==2)) {
+		// Laminated: K=0 in solver → conductive J term is zero in the FEM solution.
+		// Eddy losses are accounted for via complex mu (integral 3) for parallel flux
+		// and via the thin-lam formula (integral 31) for perpendicular flux.
+		c = 0;
 	}
 	if (blocklist[lbl].FillFactor>0) c=0; 
 	
@@ -3425,23 +3426,40 @@ CComplex CFemmviewDoc::BlockIntegral(int inttype)
 				}
 				break;
 
-			case 31: // Gap Loss (in-plane eddy, anisotropic laminate, Wang 2015)
-				// Applies only to LamType==0, Lam_d>0, bAnisoConductivity==TRUE.
-				// Uses Cduct_t [MS/m] as the in-plane conductivity.
-				if (blockproplist[meshelem[i].blk].bAnisoConductivity &&
-					(blockproplist[meshelem[i].blk].LamType==0) &&
-					(blockproplist[meshelem[i].blk].Lam_d>0))
+			case 31: // Eddy loss via thin-lamination analytical formula.
+				// Valid when t_lam << skin depth within a single lamination
+				// (typically true for 10-30 µm lams at 1-100 kHz).
+				//
+				// P_vol = sigma_t * omega^2 * B_perp_peak^2 * t_lam^2 / 24 * fill
+				// (factor 24 = 12 from the formula * 2 from peak->RMS conversion).
+				//
+				// B_perp = flux PERPENDICULAR to lamination plane:
+				//   LamType==0 (lams in XY, stacked Z): no perp flux in 2D plane → 0.
+				//   LamType==1 (lams in XZ, stacked Y): B_y is perpendicular.
+				//   LamType==2 (lams in YZ, stacked X): B_x is perpendicular.
+				//
+				// sigma_t (in-lamination plane) = bulk Cduct by default,
+				// or Cduct_t [MS/m] if mi_setmataniso has been used to override it.
+				if ((blockproplist[meshelem[i].blk].Lam_d > 0) && (Frequency != 0))
 				{
-					sig = blockproplist[meshelem[i].blk].Cduct_t * 1.e06; // MS/m -> S/m
-					if (sig!=0) {
-						if (ProblemType==0) {
-							for(k=0;k<3;k++) V[k]=Jn[k].Conj()/sig;
-							y=PlnInt(a,Jn,V)*Depth;
-						}
-						if (ProblemType==1)
-							y=2.*PI*R*a*J*conj(J)/sig;
-						if (Frequency!=0) y/=2.;
-						z+=y;
+					int lt = blockproplist[meshelem[i].blk].LamType;
+					if (lt==1 || lt==2)
+					{
+						double sig_t = blockproplist[meshelem[i].blk].bAnisoConductivity
+							? blockproplist[meshelem[i].blk].Cduct_t * 1.e06   // MS/m → S/m
+							: blockproplist[meshelem[i].blk].Cduct  * 1.e06;   // bulk default
+						double d_lam = blockproplist[meshelem[i].blk].Lam_d * 0.001;     // mm → m
+						double fill  = blockproplist[meshelem[i].blk].LamFill;
+						double omega = Frequency * 2.0 * PI;
+						double B2x   = Re(meshelem[i].B1 * conj(meshelem[i].B1));
+						double B2y   = Re(meshelem[i].B2 * conj(meshelem[i].B2));
+						double B2_perp = (lt==2) ? B2x : B2y;
+						double P_factor = sig_t * omega * omega * d_lam * d_lam / 24.0 * fill;
+						if (ProblemType==0)
+							y = P_factor * B2_perp * a * Depth;
+						else
+							y = P_factor * B2_perp * 2.0 * PI * R * a;
+						z += y;
 					}
 				}
 				break;

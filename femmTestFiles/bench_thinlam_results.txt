@@ -1,0 +1,27 @@
+================================================================
+Thin-lam benchmark - mo_blockintegral(31) vs native AC solve
+================================================================
+B0=1.000 T  f=100 Hz  sigma=1.000 MS/m
+slab: W=20 mm  t=2 mm  depth=1 mm  V=4.000e-08 m^3
+skin depth (mu_r=1): 0.0503 m  -> t/delta=3.974e-02 (must be << 1)
+CLOSED FORM:  P_an = sigma*w^2*B^2*t^2/24 * V = 2.631895e-03 W
+
+---- PASS A: bulk conductor (FEMM-native AC eddy solve) ----
+step: analyze A
+step: loadsolution A
+  P(4) resistive  = 2.631894e-03 W
+  P(3) hyst+lam-mu= 5.887832e-21 W
+  Volume(10)      = 4.000000e-08 m^3 (closed form V = 4.000000e-08)
+---- PASS B: LamType=2 + mo_blockintegral(31) ----
+step: analyze B
+step: loadsolution B
+  P(31) thin-lam  = 2.631894e-03 W
+  P(3)  hyst+lam  = nan W
+  P(4)  resistive = 0.000000e+00 W
+=== COMPARISON ===
+  P_an  = 2.631895e-03 W
+  P_ref = 2.631894e-03 W
+  P_31  = 2.631894e-03 W
+  P_ref / P_an  = 1.0000
+  P_31  / P_an  = 1.0000
+  P_31  / P_ref = 1.0000

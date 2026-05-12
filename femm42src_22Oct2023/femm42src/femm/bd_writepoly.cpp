@@ -4,6 +4,31 @@
 #include "stdafx.h"
 #include "femm.h"
 #include "beladrawDoc.h"
+
+// ---- Simple file logger (writes to BinDir\femm_debug.log) ----
+static void FemmLog(const char* BinDir, const char* fmt, ...)
+{
+	char msg[1024];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(msg, sizeof(msg)-1, fmt, ap);
+	va_end(ap);
+
+	OutputDebugStringA(msg);   // visible in DebugView (Sysinternals)
+	OutputDebugStringA("\n");
+
+	char path[MAX_PATH];
+	snprintf(path, sizeof(path), "%sfemm_debug.log", BinDir);
+	FILE* f = fopen(path, "at");
+	if (f) {
+		SYSTEMTIME st; GetLocalTime(&st);
+		fprintf(f, "[%02d:%02d:%02d.%03d] %s\n",
+			st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, msg);
+		fclose(f);
+	}
+}
+// --------------------------------------------------------------
+
 #include "bd_probdlg.h"
 #include "bd_PtProp.h"
 #include "bd_OpBlkDlg.h"
@@ -375,6 +400,8 @@ BOOL CbeladrawDoc::OnWritePoly()
 	sprintf(CommandLine,"\"%striangle.exe\" -p -P -j -q%f -e -A -a -z -Q -I %s",
 		(const char *) BinDir,__min(MinAngle+MINANGLE_BUMP,MINANGLE_MAX), (const char *) rootname);
 
+	FemmLog(BinDir, "OnWritePoly: spawning: %s", CommandLine);
+
 	STARTUPINFO StartupInfo = {0};
 	PROCESS_INFORMATION ProcessInfo;
 	StartupInfo.cb = sizeof(STARTUPINFO);
@@ -383,6 +410,7 @@ BOOL CbeladrawDoc::OnWritePoly()
 	if (CreateProcess(NULL,CommandLine, NULL, NULL, FALSE,
 		0, NULL, NULL, &StartupInfo, &ProcessInfo)){
 	
+		FemmLog(BinDir, "OnWritePoly: CreateProcess OK, waiting...");
 		if(bLinehook==FALSE) WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
 		else
 		{
@@ -399,7 +427,11 @@ BOOL CbeladrawDoc::OnWritePoly()
 	}
 	else
 	{
-		MsgBox("Couldn't spawn triangle.exe");
+		DWORD dwErr = GetLastError();
+		char szErr[512];
+		sprintf(szErr, "Couldn't spawn triangle.exe\nWin32 error: %lu\nCommandLine: %s", dwErr, CommandLine);
+		FemmLog(BinDir, "OnWritePoly: CreateProcess FAILED error=%lu cmd=%s", dwErr, CommandLine);
+		MsgBox(szErr);
 		return FALSE;
 	}
 	
@@ -410,6 +442,7 @@ BOOL CbeladrawDoc::OnWritePoly()
 	);
 	CloseHandle(ProcessInfo.hProcess);
 	CloseHandle(ProcessInfo.hThread);
+	FemmLog(BinDir, "OnWritePoly: triangle exited with code %lu", ExitCode);
 	if (ExitCode!=0)
 	{
 		MsgBox("Call to triangle was unsuccessful. Check for small angles.");
@@ -673,6 +706,8 @@ BOOL CbeladrawDoc::FunnyOnWritePoly()
 	sprintf(CommandLine,"\"%striangle.exe\" -p -P -j -q%f -e -A -a -z -Q -I %s",
 		(const char *) BinDir,__min(MinAngle+MINANGLE_BUMP,MINANGLE_MAX), (const char *) rootname);
 
+	FemmLog(BinDir, "FunnyOnWritePoly pass1: spawning: %s", CommandLine);
+
 	STARTUPINFO StartupInfo = {0};
 	PROCESS_INFORMATION ProcessInfo;
 	StartupInfo.cb = sizeof(STARTUPINFO);
@@ -696,7 +731,11 @@ BOOL CbeladrawDoc::FunnyOnWritePoly()
 	}
 	else
 	{
-		MsgBox("Couldn't spawn triangle.exe");
+		DWORD dwErr = GetLastError();
+		char szErr[512];
+		sprintf(szErr, "Couldn't spawn triangle.exe\nWin32 error: %lu\nCommandLine: %s", dwErr, CommandLine);
+		FemmLog(BinDir, "FunnyOnWritePoly pass1: CreateProcess FAILED error=%lu cmd=%s", dwErr, CommandLine);
+		MsgBox(szErr);
 		Undo();  UnselectAll();
 		return FALSE;
 	}
@@ -708,6 +747,7 @@ BOOL CbeladrawDoc::FunnyOnWritePoly()
 	);
 	CloseHandle(ProcessInfo.hProcess);
 	CloseHandle(ProcessInfo.hThread);
+	FemmLog(BinDir, "FunnyOnWritePoly pass1: triangle exited code=%lu", ExitCode);
 	if (ExitCode!=0)
 	{
 		MsgBox("Call to triangle was unsuccessful. Check for small angles.");
@@ -1508,6 +1548,8 @@ BOOL CbeladrawDoc::FunnyOnWritePoly()
 	sprintf(CommandLine,"\"%striangle.exe\" -p -P -j -q%f -e -A -a -z -Q -I -Y %s",
 		(const char *) BinDir,__min(MinAngle+MINANGLE_BUMP,MINANGLE_MAX), (const char *) rootname);
 
+	FemmLog(BinDir, "FunnyOnWritePoly pass2: spawning: %s", CommandLine);
+
 	StartupInfo.cb = sizeof(STARTUPINFO);
 	StartupInfo.dwFlags = STARTF_USESHOWWINDOW | STARTF_FORCEOFFFEEDBACK;
 	StartupInfo.wShowWindow =  SW_SHOWMINNOACTIVE;
@@ -1529,7 +1571,11 @@ BOOL CbeladrawDoc::FunnyOnWritePoly()
 	}
 	else
 	{
-		MsgBox("Couldn't spawn triangle.exe");
+		DWORD dwErr = GetLastError();
+		char szErr[512];
+		sprintf(szErr, "Couldn't spawn triangle.exe\nWin32 error: %lu\nCommandLine: %s", dwErr, CommandLine);
+		FemmLog(BinDir, "FunnyOnWritePoly pass2: CreateProcess FAILED error=%lu cmd=%s", dwErr, CommandLine);
+		MsgBox(szErr);
 		Undo();  UnselectAll();
 		return FALSE;
 	}
@@ -1540,6 +1586,7 @@ BOOL CbeladrawDoc::FunnyOnWritePoly()
 	);
 	CloseHandle(ProcessInfo.hProcess);
 	CloseHandle(ProcessInfo.hThread);
+	FemmLog(BinDir, "FunnyOnWritePoly pass2: triangle exited code=%lu", ExitCode);
 	if (ExitCode!=0)
 	{
 		MsgBox("Call to triangle was unsuccessful. Check for small angles.");

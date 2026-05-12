@@ -1553,11 +1553,12 @@ int CFemmeDoc::lua_addmatprop(lua_State *L)
 int CFemmeDoc::lua_setmataniso(lua_State *L)
 {
 	// mi_setmataniso(name, Cduct_t, Cduct_n)
-	//   name     - material name string
-	//   Cduct_t  - in-plane conductivity [MS/m]  (0 = auto-compute)
-	//   Cduct_n  - normal conductivity [S/m]     (0 = auto-compute)
-	// When both are 0, calls ComputeAnisoConductivity(Lam_d*100) to estimate
-	// sigma_n from lamination geometry (Wang 2015 eqs 4-3/4-4).
+	//   Enables anisotropic electrical conductivity for a laminated material.
+	//   The conductivity tensor has two independent components:
+	//     Cduct_t  - tangential (in-plane) conductivity [MS/m]
+	//     Cduct_n  - normal (through-thickness) conductivity [S/m]
+	//   When both are 0, ComputeAnisoConductivity estimates them from
+	//   the lamination geometry (Lam_d) assuming thin-lam skin depth.
 	CatchNullDocument();
 	CFemmeDoc * thisDoc = (CFemmeDoc *)pFemmeDoc;
 	int n = lua_gettop(L);
@@ -1574,14 +1575,28 @@ int CFemmeDoc::lua_setmataniso(lua_State *L)
 	double sigma_t = (n>1) ? lua_todouble(L,2) : 0.;
 	double sigma_n = (n>2) ? lua_todouble(L,3) : 0.;
 
+	// Optional 4th argument: Wcore_mm (cross-section width of the lamination stack [mm]).
+	// Used only when sigma_t==0 and sigma_n==0 (auto-compute mode).
+	// Physical meaning: the eddy-current loop size in the direction perpendicular
+	// to the lamination plane — typically the width of the core column.
+	double Wcore_mm = (n>3) ? lua_todouble(L,4) : 0.;
+
 	if (sigma_t==0. && sigma_n==0.) {
-		// Auto-compute: use Wcore = Lam_d * 100 (rough estimate)
-		double Wcore_mm = thisDoc->blockproplist[k].Lam_d * 100.;
+		// Auto-compute from homogenisation formulae:
+		//   sigma_t = LamFill * sigma_m
+		//   sigma_n = (Lam_d / Wcore)^2 * sigma_m / LamFill
+		// If Wcore not supplied, fall back to Lam_d * 100 (rough order-of-magnitude).
+		if (Wcore_mm <= 0.) Wcore_mm = thisDoc->blockproplist[k].Lam_d * 100.;
 		thisDoc->blockproplist[k].ComputeAnisoConductivity(Wcore_mm);
-	} else {
+	} else if (sigma_t > 0.) {
 		thisDoc->blockproplist[k].Cduct_t = sigma_t;
 		thisDoc->blockproplist[k].Cduct_n = sigma_n;
-		if (sigma_t > 0.) thisDoc->blockproplist[k].bAnisoConductivity = TRUE;
+		thisDoc->blockproplist[k].bAnisoConductivity = TRUE;
+	} else {
+		// sigma_t == 0 and sigma_n != 0 → user disables aniso explicitly
+		thisDoc->blockproplist[k].Cduct_t = 0.;
+		thisDoc->blockproplist[k].Cduct_n = sigma_n;
+		thisDoc->blockproplist[k].bAnisoConductivity = FALSE;
 	}
 	return 0;
 }

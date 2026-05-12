@@ -1,0 +1,110 @@
+=== validate_aniso.lua Mon May 11 23:23:17 2026 ===
+Validating ANISOTROPIC CONDUCTIVITY (Wang 2017 model)
+Base material: sigma=0.7692 MS/m, t_lam=0.023mm, F=0.8, LamType=2
+
+--- TEST 1: P_gap vs sigma_t (linear scaling expected) ---
+  T1: sigma_t x0.5                 f=  1000Hz sig_t=3.077e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=5.7300e-07
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T1: sigma_t x1.0 (base)          f=  1000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=1.1460e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T1: sigma_t x2.0                 f=  1000Hz sig_t=1.231e+00MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=2.2920e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T1: sigma_t x4.0                 f=  1000Hz sig_t=2.462e+00MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=4.5840e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+
+  Ratio (x2.0)/(x1.0) = 2.000   expected ~2.0
+  Ratio (x4.0)/(x1.0) = 4.000   expected ~4.0
+  Ratio (x0.5)/(x1.0) = 0.500   expected ~0.5
+
+--- TEST 2: P_gap vs frequency (alpha ~ 2.0 thin-lam, ->1.72 high f) ---
+  T2: f=100Hz                      f=   100Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=7.6201e-06  P_gap_r(4)=0.0000e+00  P_thin31=1.3453e-08
+    P_core_h(3)=1.2404e-05 P_core_r(4)=0.0000e+00 P_cu(4)=1.4138e+00 P_RI2/2=1.4138e+00
+    R=2.8277e-04 Ohm   L=4.9810e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T2: f=300Hz                      f=   300Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.7011e-05  P_gap_r(4)=0.0000e+00  P_thin31=1.1767e-07
+    P_core_h(3)=1.0922e-04 P_core_r(4)=0.0000e+00 P_cu(4)=2.4828e+00 P_RI2/2=2.4829e+00
+    R=4.9657e-04 Ohm   L=4.9388e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T2: f=1000Hz                     f=  1000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=1.1460e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T2: f=3000Hz                     f=  3000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=5.5481e-03  P_gap_r(4)=0.0000e+00  P_thin31=9.2753e-06
+    P_core_h(3)=9.1074e-03 P_core_r(4)=0.0000e+00 P_cu(4)=1.3927e+01 P_RI2/2=1.3937e+01
+    R=2.7873e-03 Ohm   L=4.6158e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T2: f=10000Hz                    f= 10000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=5.9166e-02  P_gap_r(4)=0.0000e+00  P_thin31=9.7838e-05
+    P_core_h(3)=9.7253e-02 P_core_r(4)=0.0000e+00 P_cu(4)=2.7230e+01 P_RI2/2=2.7327e+01
+    R=5.4655e-03 Ohm   L=4.5442e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T2: f=30000Hz                    f= 30000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=5.1886e-01  P_gap_r(4)=0.0000e+00  P_thin31=8.5590e-04
+    P_core_h(3)=8.5300e-01 P_core_r(4)=0.0000e+00 P_cu(4)=5.1509e+01 P_RI2/2=5.2361e+01
+    R=1.0472e-02 Ohm   L=4.5028e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T2: f=100000Hz                   f=100000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=5.5211e+00  P_gap_r(4)=0.0000e+00  P_thin31=9.3271e-03
+    P_core_h(3)=9.0486e+00 P_core_r(4)=0.0000e+00 P_cu(4)=9.2825e+01 P_RI2/2=1.0175e+02
+    R=2.0351e-02 Ohm   L=4.4735e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+
+  Fitted exponents (log-log slope P_gap vs f):
+       100Hz ->    300Hz:  alpha = 1.974
+       300Hz ->   1000Hz:  alpha = 1.891
+      1000Hz ->   3000Hz:  alpha = 1.903
+      3000Hz ->  10000Hz:  alpha = 1.957
+     10000Hz ->  30000Hz:  alpha = 1.974
+     30000Hz -> 100000Hz:  alpha = 1.984
+
+--- TEST 3: P_gap vs sigma_n (small effect for thin lams expected) ---
+  T3: sigma_n=0.01 S/m             f=  1000Hz sig_t=6.154e-01MS/m sig_n=1.000e-02S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=1.1460e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T3: sigma_n=1 S/m                f=  1000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=1.1460e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T3: sigma_n=100 S/m              f=  1000Hz sig_t=6.154e-01MS/m sig_n=1.000e+02S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=1.1460e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  T3: sigma_n=10000                f=  1000Hz sig_t=6.154e-01MS/m sig_n=1.000e+04S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=1.1460e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+
+  Ratio sn=1/sn=0.01 = 1.000
+  Ratio sn=100/sn=1  = 1.000
+  Ratio sn=1e4/sn=1  = 1.000
+
+--- TEST 4: anisotropy flag OFF (sigma_t=0,sigma_n>0) vs ON ---
+  aniso OFF: P_gap_h=6.6985e-04  P_thin31=1.4325e-06
+  T4: aniso ON (sigma_t=0.6154)    f=  1000Hz sig_t=6.154e-01MS/m sig_n=1.000e+00S/m
+    P_gap_h(3)=6.6985e-04  P_gap_r(4)=0.0000e+00  P_thin31=1.1460e-06
+    P_core_h(3)=1.0967e-03 P_core_r(4)=0.0000e+00 P_cu(4)=7.4874e+00 P_RI2/2=7.4885e+00
+    R=1.4977e-03 Ohm   L=4.7546e+00 uH   |I|=1.000e+02   Vol_gap=3.9788e-05
+  P_gap OFF / ON = 1.250  (P_thin31 ratio; expected = 1/LamFill = 1.250)
+
+--- TEST 5: P_thin31 vs Lam_d (expect quadratic scaling t^2) ---
+    t_lam=0.0050 mm   P_thin31=5.4159e-08   P_gap_h(3)=3.1657e-05   L=4.755 uH
+    t_lam=0.0100 mm   P_thin31=2.1664e-07   P_gap_h(3)=1.2663e-04   L=4.755 uH
+    t_lam=0.0230 mm   P_thin31=1.1460e-06   P_gap_h(3)=6.6985e-04   L=4.755 uH
+    t_lam=0.0500 mm   P_thin31=5.4158e-06   P_gap_h(3)=3.1654e-03   L=4.755 uH
+    t_lam=0.1000 mm   P_thin31=2.1663e-05   P_gap_h(3)=1.2648e-02   L=4.755 uH
+    t_lam=0.2000 mm   P_thin31=8.6639e-05   P_gap_h(3)=4.9853e-02   L=4.754 uH
+
+  Fitted exponents (log-log slope P vs t_lam):
+    0.0050 -> 0.0100 mm:  beta = 2.000
+    0.0100 -> 0.0230 mm:  beta = 2.000
+    0.0230 -> 0.0500 mm:  beta = 2.000
+    0.0500 -> 0.1000 mm:  beta = 2.000
+    0.1000 -> 0.2000 mm:  beta = 2.000
+
+=== END ===

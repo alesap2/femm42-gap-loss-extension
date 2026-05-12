@@ -106,16 +106,8 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 	CComplex *CircInt1,*CircInt2,*CircInt3;
 
 
-	// Can't handle LamType==1 or LamType==2 in AC problems.
-	// Detect if this is being attempted.
-	for(i=0;i<NumEls;i++)
-	{
-		if( (blockproplist[meshele[i].blk].LamType==1) ||
-			(blockproplist[meshele[i].blk].LamType==2) ){
-			MsgBox("On-edge lamination not supported in AC analyses");
-			return FALSE;
-		}
-	}
+	// LamType==1 (parallel to X) and LamType==2 (parallel to Y) are now
+	// supported for AC problems using the tanh skin-depth model.
 	
 	// Go through and evaluate permeability for regions subject to prox effects
 	for(i=0;i<NumBlockLabels;i++) GetFillFactor(i);
@@ -221,6 +213,48 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 							(1. - blockproplist[k].LamFill);
 				}
 
+			}
+		}
+		else if (blockproplist[k].LamType==2){
+			// Lams stacked in X (lam plane = YZ).
+			//   B_y PARALLEL: tanh skin effect on mu_y.
+			//   B_x PERPENDICULAR: series reluctance on mu_x (gap-like effective mu).
+			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*PI/180.);
+			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*PI/180.);
+			if(blockproplist[k].Lam_d!=0){
+				CComplex inv_mu = blockproplist[k].LamFill / Mu[k][0]
+				                + (1. - blockproplist[k].LamFill) / 1.0;
+				Mu[k][0] = 1.0 / inv_mu;
+				if(blockproplist[k].Cduct!=0){
+					halflag=exp(-I*blockproplist[k].Theta_hy*PI/360.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					Mu[k][1]=((Mu[k][1]*tanh(K))/K)*blockproplist[k].LamFill
+						+(1.-blockproplist[k].LamFill);
+				} else {
+					Mu[k][1]=Mu[k][1]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+				}
+			}
+		}
+		else if (blockproplist[k].LamType==1){
+			// Lams stacked in Y (lam plane = XZ).
+			//   B_x PARALLEL: tanh skin effect on mu_x.
+			//   B_y PERPENDICULAR: series reluctance on mu_y.
+			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*PI/180.);
+			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*PI/180.);
+			if(blockproplist[k].Lam_d!=0){
+				CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
+				                + (1. - blockproplist[k].LamFill) / 1.0;
+				Mu[k][1] = 1.0 / inv_mu;
+				if(blockproplist[k].Cduct!=0){
+					halflag=exp(-I*blockproplist[k].Theta_hx*PI/360.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill
+						+(1.-blockproplist[k].LamFill);
+				} else {
+					Mu[k][0]=Mu[k][0]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+				}
 			}
 		}
 		else{
@@ -389,11 +423,12 @@ do{
 		// over the entire element;
 		K = -I*R*a*w*blockproplist[meshele[i].blk].Cduct*c/6.;
 
-		// radially laminated blocks appear to have no conductivity;
-		// eddy currents are accounted for in these elements by their
-		// frequency-dependent permeability.
-		if((blockproplist[El->blk].LamType==0) &&
-			(blockproplist[El->blk].Lam_d>0)) K=0;
+		// K=0 for all laminated block types (LamType=0/1/2): same reasoning as prob2big.
+		if(blockproplist[El->blk].Lam_d>0)
+		{
+			int lt = blockproplist[El->blk].LamType;
+			if(lt==0 || lt==1 || lt==2) K=0;
+		}
 		
 		// if this element is part of a wound coil, 
 		// it should have a zero "bulk" conductivity...

@@ -78,16 +78,10 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 
 
 
-	// Can't handle LamType==1 or LamType==2 in AC problems.
-	// Detect if this is being attempted.
-	for(i=0;i<NumEls;i++)
-	{
-		if( (blockproplist[meshele[i].blk].LamType==1) ||
-			(blockproplist[meshele[i].blk].LamType==2) ){
-			MsgBox("On-edge lamination not supported in AC analyses");
-			return FALSE;
-		}
-	}
+	// LamType==1 (lams parallel to X) and LamType==2 (lams parallel to Y) are
+	// now supported in AC problems. The effective permeability is computed using
+	// the tanh skin-depth correction on the component transverse to the laminations,
+	// and a simple fill-factor average on the parallel component.
 
 	// Go through and evaluate permeability for regions subject to prox effects
 	for(i=0;i<NumBlockLabels;i++) GetFillFactor(i);
@@ -177,9 +171,10 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			
 		if(blockproplist[k].Lam_d!=0){
 				if (blockproplist[k].Cduct != 0){
-					// For anisotropic case use Cduct_n [S/m] converted to MS/m for the
-					// through-lamination skin-depth formula (Wang 2015, eq. 4-5/4-6).
-					// For legacy scalar case use Cduct directly.
+					// For anisotropic conductivity: use Cduct_n (normal/through-thickness
+					// component) to compute the transverse skin depth, because it is the
+					// through-thickness current path that determines flux penetration.
+					// For legacy scalar conductivity: use Cduct directly.
 					double CductTanh = blockproplist[k].bAnisoConductivity
 						? blockproplist[k].Cduct_n * 1.e-06  // S/m -> MS/m
 						: blockproplist[k].Cduct;
@@ -201,6 +196,60 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 							(1.- blockproplist[k].LamFill);
 					Mu[k][1]=Mu[k][1]*blockproplist[k].LamFill + 
 							(1. - blockproplist[k].LamFill);
+				}
+			}
+		}
+		else if (blockproplist[k].LamType==2){
+			// Laminations stacked in X (lamination plane = YZ):
+			//   B_y is PARALLEL to lams → standard tanh skin-effect on mu_y
+			//                              (effective mu_y = LamFill·mu_steel + (1-LamFill)
+			//                               at thin-lam limit; tanh captures the eddy in Im[mu]).
+			//   B_x is PERPENDICULAR to lams → series reluctance on mu_x
+			//                              (mu_x_eff = 1 / (LamFill/mu_steel + (1-LamFill)/mu_air))
+			//                              ≈ mu_air/(1-LamFill) for high-mu steel.
+			//                              No standard skin effect because lam is thinner than skin depth.
+			//                              Perpendicular-flux eddy losses recovered post-solve via integral(31).
+			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
+			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
+			if(blockproplist[k].Lam_d!=0){
+				// PERPENDICULAR component: series reluctance (no tanh)
+				CComplex inv_mu = blockproplist[k].LamFill / Mu[k][0]
+				                + (1. - blockproplist[k].LamFill) / 1.0;
+				Mu[k][0] = 1.0 / inv_mu;
+
+				// PARALLEL component: standard tanh skin effect (uses bulk Cduct)
+				if(blockproplist[k].Cduct!=0){
+					halflag=exp(-I*blockproplist[k].Theta_hy*DEG/2.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					Mu[k][1]=((Mu[k][1]*tanh(K))/K)*blockproplist[k].LamFill
+						+(1.-blockproplist[k].LamFill);
+				} else {
+					Mu[k][1]=Mu[k][1]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+				}
+			}
+		}
+		else if (blockproplist[k].LamType==1){
+			// Laminations stacked in Y (lamination plane = XZ):
+			//   B_x is PARALLEL to lams → tanh skin-effect on mu_x
+			//   B_y is PERPENDICULAR to lams → series reluctance on mu_y
+			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
+			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
+			if(blockproplist[k].Lam_d!=0){
+				// PERPENDICULAR component: series reluctance (no tanh)
+				CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
+				                + (1. - blockproplist[k].LamFill) / 1.0;
+				Mu[k][1] = 1.0 / inv_mu;
+
+				// PARALLEL component: standard tanh skin effect
+				if(blockproplist[k].Cduct!=0){
+					halflag=exp(-I*blockproplist[k].Theta_hx*DEG/2.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill
+						+(1.-blockproplist[k].LamFill);
+				} else {
+					Mu[k][0]=Mu[k][0]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
 				}
 			}
 		}
@@ -460,18 +509,16 @@ do{
 		// contribution from eddy currents;	
 		K=-I*a*w*blockproplist[meshele[i].blk].Cduct*c/12.;
 
-		// in-plane laminated blocks (LamType==0, Lam_d>0):
-		// - Legacy mode (bAnisoConductivity==FALSE): eddy accounted for via tanh
-		//   permeability -> set K=0 (no explicit eddy term in matrix).
-		// - Anisotropic mode (bAnisoConductivity==TRUE): use Cduct_t [MS/m] as
-		//   the in-plane conductivity for gap-loss eddy currents (Wang 2015).
-		if((blockproplist[El->blk].LamType==0) &&
-			(blockproplist[El->blk].Lam_d>0))
+		// Eddy current contribution: K=0 for ALL laminated block types (LamType=0/1/2).
+		// The tanh complex-permeability correction in the mu computation already captures
+		// flux shielding within each lamination. Assigning any bulk sigma to the FEM
+		// mass matrix would create a spurious macro skin effect on the entire block.
+		// Eddy losses are recovered post-solve via blockintegral(31), which applies the
+		// thin-lamination analytical formula directly to B from the field solution.
+		if(blockproplist[El->blk].Lam_d>0)
 		{
-			if(blockproplist[El->blk].bAnisoConductivity)
-				K=-I*a*w*blockproplist[El->blk].Cduct_t*c/12.;
-			else
-				K=0;
+			int lt = blockproplist[El->blk].LamType;
+			if(lt==0 || lt==1 || lt==2) K=0;
 		}
 		
 		// if this element is part of a wound coil, 

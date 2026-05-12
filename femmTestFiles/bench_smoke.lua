@@ -1,0 +1,1 @@
+writeto("D:\\FEMM Source\\femmTestFiles\\smoke.txt"); write("hello\n"); writeto(); newdocument(0); write("after newdoc\n"); writeto("D:\\FEMM Source\\femmTestFiles\\smoke.txt"); write("after newdoc2\n"); writeto(); exit()
