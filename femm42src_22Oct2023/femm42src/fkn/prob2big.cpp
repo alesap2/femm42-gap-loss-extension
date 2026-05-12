@@ -7,6 +7,7 @@
 #include "mesh.h"
 #include "spars.h"
 #include "FemmeDocCore.h"
+#include "bessel_perplenz.h"
 
 // #define NEWTON
 
@@ -200,48 +201,30 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			}
 		}
 		else if (blockproplist[k].LamType==2){
-			// Laminations stacked in X (lamination plane = YZ):
-			//   B_y is PARALLEL to lams → standard tanh skin-effect on mu_y
-			//                              (effective mu_y = LamFill·mu_steel + (1-LamFill)
-			//                               at thin-lam limit; tanh captures the eddy in Im[mu]).
-			//   B_x is PERPENDICULAR to lams → series reluctance on mu_x
-			//                              (mu_x_eff = 1 / (LamFill/mu_steel + (1-LamFill)/mu_air))
-			//                              ≈ mu_air/(1-LamFill) for high-mu steel.
-			//                              No standard skin effect because lam is thinner than skin depth.
-			//                              Perpendicular-flux eddy losses recovered post-solve via integral(31).
+			// Laminations stacked in X (lam plane = YZ).
+			// B_x PERPENDICULAR to lam: uses mu2 = Mu[k][1] in assembly (via 1/Re(mu2) * Mx).
+			// B_y PARALLEL to lam: uses mu1 = Mu[k][0] in assembly (via 1/Re(mu1) * My).
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
 			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR component: series reluctance (no tanh)
-				CComplex inv_mu = blockproplist[k].LamFill / Mu[k][0]
-				                + (1. - blockproplist[k].LamFill) / 1.0;
-				Mu[k][0] = 1.0 / inv_mu;
-
-				// PARALLEL component: standard tanh skin effect (uses bulk Cduct)
-				if(blockproplist[k].Cduct!=0){
-					halflag=exp(-I*blockproplist[k].Theta_hy*DEG/2.);
-					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
-					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-					Mu[k][1]=((Mu[k][1]*tanh(K))/K)*blockproplist[k].LamFill
-						+(1.-blockproplist[k].LamFill);
+				// PERPENDICULAR component (mu2, B_x direction) — Bessel or series reluctance
+				if (blockproplist[k].bPerpLenz &&
+				    blockproplist[k].Wcore_mm > 0. &&
+				    blockproplist[k].Cduct_t  > 0.){
+					// Bessel disc μ⊥(ω): shape = 2J₁(γa)/(γa·J₀(γa))
+					CComplex mufe = Mu[k][1];			// relative iron μ with hyst. lag
+					CComplex g2   = -I * w * mufe * muo * blockproplist[k].Cduct_t * 1.e6;
+					CComplex za   = sqrt(g2) * (blockproplist[k].Wcore_mm * 0.5e-3);
+					Mu[k][1] = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
+					         + (1. - blockproplist[k].LamFill);
 				} else {
-					Mu[k][1]=Mu[k][1]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+					// Legacy: series reluctance
+					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
+					                + (1. - blockproplist[k].LamFill) / 1.0;
+					Mu[k][1] = 1.0 / inv_mu;
 				}
-			}
-		}
-		else if (blockproplist[k].LamType==1){
-			// Laminations stacked in Y (lamination plane = XZ):
-			//   B_x is PARALLEL to lams → tanh skin-effect on mu_x
-			//   B_y is PERPENDICULAR to lams → series reluctance on mu_y
-			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
-			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
-			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR component: series reluctance (no tanh)
-				CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
-				                + (1. - blockproplist[k].LamFill) / 1.0;
-				Mu[k][1] = 1.0 / inv_mu;
 
-				// PARALLEL component: standard tanh skin effect
+				// PARALLEL component (mu1, B_y direction): standard tanh skin effect
 				if(blockproplist[k].Cduct!=0){
 					halflag=exp(-I*blockproplist[k].Theta_hx*DEG/2.);
 					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
@@ -250,6 +233,42 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 						+(1.-blockproplist[k].LamFill);
 				} else {
 					Mu[k][0]=Mu[k][0]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+				}
+			}
+		}
+		else if (blockproplist[k].LamType==1){
+			// Laminations stacked in Y (lam plane = XZ).
+			// B_y PERPENDICULAR to lam: uses mu1 = Mu[k][0] in assembly (via 1/Re(mu1) * My).
+			// B_x PARALLEL to lam: uses mu2 = Mu[k][1] in assembly (via 1/Re(mu2) * Mx).
+			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
+			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
+			if(blockproplist[k].Lam_d!=0){
+				// PERPENDICULAR component (mu1, B_y direction) — Bessel or series reluctance
+				if (blockproplist[k].bPerpLenz &&
+				    blockproplist[k].Wcore_mm > 0. &&
+				    blockproplist[k].Cduct_t  > 0.){
+					// Bessel disc μ⊥(ω)
+					CComplex mufe = Mu[k][0];			// relative iron μ with hyst. lag
+					CComplex g2   = -I * w * mufe * muo * blockproplist[k].Cduct_t * 1.e6;
+					CComplex za   = sqrt(g2) * (blockproplist[k].Wcore_mm * 0.5e-3);
+					Mu[k][0] = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
+					         + (1. - blockproplist[k].LamFill);
+				} else {
+					// Legacy: series reluctance
+					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][0]
+					                + (1. - blockproplist[k].LamFill) / 1.0;
+					Mu[k][0] = 1.0 / inv_mu;
+				}
+
+				// PARALLEL component (mu2, B_x direction): standard tanh skin effect
+				if(blockproplist[k].Cduct!=0){
+					halflag=exp(-I*blockproplist[k].Theta_hy*DEG/2.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					Mu[k][1]=((Mu[k][1]*tanh(K))/K)*blockproplist[k].LamFill
+						+(1.-blockproplist[k].LamFill);
+				} else {
+					Mu[k][1]=Mu[k][1]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
 				}
 			}
 		}
@@ -713,6 +732,10 @@ do{
 		}
 
 		// combine block matrices into global matrices;
+		// T-6 audit (perp-Lenz project): the harmonic solver uses full COMPLEX
+		// mu1/mu2 here (no Re() wrapper), so Im(μ⊥) from the Bessel formula
+		// contributes directly to the stiffness matrix — losses and flux
+		// redistribution are both correctly captured without any additional code.
 		for(j=0;j<3;j++)
 			for(k=0;k<3;k++){
 

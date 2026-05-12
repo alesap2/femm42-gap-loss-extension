@@ -747,6 +747,9 @@ BOOL CFemmeDocCore::OnOpenDocument()
 			MProp.Cduct_t=0.;		// tangential conductivity [MS/m]
 			MProp.Cduct_n=0.;		// normal conductivity [S/m]
 			MProp.bAnisoConductivity=FALSE;
+			MProp.Wcore_mm    = 0.;		// perp Lenz model strip width
+			MProp.bPerpLenz   = FALSE;
+			MProp.PerpLenzModel = 0;
 			MProp.Lam_d=0.;			// lamination thickness, mm
 			MProp.Theta_hn=0.;			// hysteresis angle, degrees
 			MProp.Theta_hx=0.;			// hysteresis angle, degrees
@@ -815,6 +818,27 @@ BOOL CFemmeDocCore::OnOpenDocument()
 		if( _strnicmp(q,"<sigma_n>",9)==0){
 		   v=StripKey(s);
 		   sscanf(v,"%lf",&MProp.Cduct_n);
+		   q[0]=NULL;
+		}
+
+		// Perpendicular Lenz feedback tags (new — backward compatible)
+		if( _strnicmp(q,"<Wcore>",7)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Wcore_mm);
+		   if(MProp.Wcore_mm>0.) MProp.bPerpLenz=TRUE;
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<PerpLenz>",10)==0){
+		   v=StripKey(s);
+		   int pl=0; sscanf(v,"%i",&pl);
+		   MProp.bPerpLenz=(pl!=0);
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<PerpLenzModel>",15)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%i",&MProp.PerpLenzModel);
 		   q[0]=NULL;
 		}
 

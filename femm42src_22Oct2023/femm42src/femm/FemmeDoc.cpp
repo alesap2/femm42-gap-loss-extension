@@ -1955,6 +1955,9 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.Cduct_t=0.;
 			MProp.Cduct_n=0.;
 			MProp.bAnisoConductivity=FALSE;
+			MProp.Wcore_mm    = 0.;
+			MProp.bPerpLenz   = FALSE;
+			MProp.PerpLenzModel = 0;
 			q[0]=NULL;
 		}
 
@@ -2075,6 +2078,27 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		if( _strnicmp(q,"<sigma_n>",9)==0){
 		   v=StripKey(s);
 		   sscanf(v,"%lf",&MProp.Cduct_n);
+		   q[0]=NULL;
+		}
+
+		// Perpendicular Lenz feedback tags (new — backward compatible)
+		if( _strnicmp(q,"<Wcore>",7)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%lf",&MProp.Wcore_mm);
+		   if(MProp.Wcore_mm>0.) MProp.bPerpLenz=TRUE;
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<PerpLenz>",10)==0){
+		   v=StripKey(s);
+		   int pl=0; sscanf(v,"%i",&pl);
+		   MProp.bPerpLenz=(pl!=0);
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<PerpLenzModel>",15)==0){
+		   v=StripKey(s);
+		   sscanf(v,"%i",&MProp.PerpLenzModel);
 		   q[0]=NULL;
 		}
 
@@ -2476,6 +2500,12 @@ BOOL CFemmeDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		if(blockproplist[i].bAnisoConductivity){
 			fprintf(fp,"    <sigma_t> = %.17g\n",blockproplist[i].Cduct_t);
 			fprintf(fp,"    <sigma_n> = %.17g\n",blockproplist[i].Cduct_n);
+		}
+		// Perpendicular Lenz feedback (written only when enabled)
+		if(blockproplist[i].bPerpLenz && blockproplist[i].Wcore_mm>0.){
+			fprintf(fp,"    <Wcore> = %.17g\n",blockproplist[i].Wcore_mm);
+			fprintf(fp,"    <PerpLenz> = 1\n");
+			fprintf(fp,"    <PerpLenzModel> = %i\n",blockproplist[i].PerpLenzModel);
 		}
 		fprintf(fp,"    <BHPoints> = %i\n",blockproplist[i].BHpoints);
 		for(j=0;j<blockproplist[i].BHpoints;j++)

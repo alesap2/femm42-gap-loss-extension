@@ -163,6 +163,10 @@ class CMaterialProp
 		double Cduct_t;          // tangential conductivity [MS/m] = F * Cduct
 		double Cduct_n;          // normal conductivity [S/m]
 		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
+		// Perpendicular Lenz feedback — Bessel disc model
+		double Wcore_mm;         // strip width for perp. Lenz model [mm]; 0 = disabled
+		BOOL   bPerpLenz;        // TRUE = use Bessel μ⊥(ω) model
+		int    PerpLenzModel;    // 0 = circular Bessel; 1 = reserved
 		double Theta_hn;			// hysteresis angle, degrees
 		double Theta_hx;			// hysteresis angle, degrees
 		double Theta_hy;			// hysteresis angle, degrees

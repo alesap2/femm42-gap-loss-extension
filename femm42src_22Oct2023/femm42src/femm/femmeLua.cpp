@@ -61,6 +61,7 @@ void CFemmeDoc::initalise_lua()
 	lua_register(lua,"mi_zoom",lua_zoom);
 	lua_register(lua,"mi_addmaterial",lua_addmatprop);
 	lua_register(lua,"mi_setmataniso",lua_setmataniso);
+	lua_register(lua,"mi_setmatperplenz",lua_setmatperplenz);
 	lua_register(lua,"mi_addpointprop",lua_addpointprop);
 	lua_register(lua,"mi_addcircprop",lua_addcircuitprop);
 	lua_register(lua,"mi_addboundprop",lua_addboundprop);
@@ -1597,6 +1598,44 @@ int CFemmeDoc::lua_setmataniso(lua_State *L)
 		thisDoc->blockproplist[k].Cduct_t = 0.;
 		thisDoc->blockproplist[k].Cduct_n = sigma_n;
 		thisDoc->blockproplist[k].bAnisoConductivity = FALSE;
+	}
+	return 0;
+}
+
+int CFemmeDoc::lua_setmatperplenz(lua_State *L)
+{
+	// mi_setmatperplenz(name, Wcore_mm [, model_id])
+	//   Enables the perpendicular Lenz μ⊥(ω) Bessel model for a laminated material.
+	//   Wcore_mm : effective strip width (= 2×a) in mm.  0 = disable (reset to series reluctance).
+	//   model_id : optional, 0 = circular Bessel (default; only supported value).
+	//
+	//   Safety: defensive reset — every field is written before return,
+	//   so repeated calls within the same process never leak state.
+	CatchNullDocument();
+	CFemmeDoc * thisDoc = (CFemmeDoc *)pFemmeDoc;
+	int n = lua_gettop(L);
+	if (n < 1) return 0;
+
+	CString BlockName;
+	BlockName.Format("%s", lua_tostring(L,1));
+
+	int k;
+	for(k=0; k<thisDoc->blockproplist.GetSize(); k++)
+		if (BlockName == thisDoc->blockproplist[k].BlockName) break;
+	if (k == thisDoc->blockproplist.GetSize()) return 0;  // not found
+
+	double Wcore_mm   = (n>1) ? lua_todouble(L,2) : 0.;
+	int    model_id   = (n>2) ? (int)lua_todouble(L,3) : 0;
+
+	if (Wcore_mm > 0.) {
+		thisDoc->blockproplist[k].Wcore_mm     = Wcore_mm;
+		thisDoc->blockproplist[k].bPerpLenz    = TRUE;
+		thisDoc->blockproplist[k].PerpLenzModel = model_id;
+	} else {
+		// Disable: reset to series-reluctance mode
+		thisDoc->blockproplist[k].Wcore_mm     = 0.;
+		thisDoc->blockproplist[k].bPerpLenz    = FALSE;
+		thisDoc->blockproplist[k].PerpLenzModel = 0;
 	}
 	return 0;
 }

@@ -689,7 +689,144 @@ of along it.
 
 ---
 
-## 4. Summary
+## 4. Perpendicular Lenz feedback — Bessel disc model
+
+### 4.1 Motivation
+
+The `tanh(K)/K` formula (§2.3) correctly handles the case where **B is
+parallel to the lamination plane** (flux stays inside each lam, Foucault
+loops circulate in the thickness `d_lam`). For `LamType==1` and
+`LamType==2`, the **perpendicular** component (B crosses the lam boundaries)
+was handled by the static series-reluctance formula
+
+$$\mu_\perp^{(0)} = \frac{1}{F/\mu_{\rm fe} + (1-F)}$$
+
+which is purely real and frequency-independent — no Lenz feedback. This
+means the solver could not model the flux expulsion that occurs at high
+frequency due to induced currents within each lamination disc. All
+perpendicular eddy-loss estimates came only from the post-processor.
+
+### 4.2 Physical model
+
+Each lamination is approximated as a circular disc of radius $a = W_{\rm core}/2$
+(where $W_{\rm core}$ is the strip width) with conductivity $\sigma_t$ (in-plane).
+A uniform $B_\perp$ applied on the disc faces drives eddy currents in the
+$(r,\varphi)$ plane. The 1-D radial FEM of the disc gives a closed-form
+**complex effective permeability** seen by the perpendicular flux:
+
+$$\boxed{
+\mu_\perp(\omega) = (1-F)\,\mu_0 \;+\; F\,\mu_{\rm fe}\,\mu_0\cdot
+\frac{2\,J_1(\gamma a)}{\gamma a\,J_0(\gamma a)}
+}$$
+
+with
+
+$$\gamma^2 = -j\,\omega\,\mu_{\rm fe}\,\mu_0\,\sigma_t, \qquad a = \tfrac{W_{\rm core}}{2}.$$
+
+**Limiting cases** (verification criteria):
+
+| Regime | $|\gamma a|$ | $\mu_\perp / \mu_0$ | Physical meaning |
+| --- | --- | --- | --- |
+| Low freq. | $\ll 1$ | $F\mu_{\rm fe} + (1-F)$ | no eddy, full mix |
+| High freq. | $\gg 1$ | $1-F$ | complete Lenz screening, only air |
+| $\sigma_t = 0$ | 0 | $F\mu_{\rm fe} + (1-F)$ | no eddy, exact low-f |
+
+### 4.3 Why the feedback is automatic
+
+The solver `fkn` assembles the element stiffness as
+
+```
+Me[j][k] += Mx[j][k] / El->mu2  +  My[j][k] / El->mu1  +  ...
+```
+
+using **full complex** `mu1`/`mu2` (no `Re()` wrapper — confirmed by T-6
+audit of `prob2big.cpp:~740`). Therefore:
+
+- `Re(μ⊥(ω))` decreases at high frequency → reluctivity 1/μ⊥ increases →
+  B redistributes away from the laminated region → **Lenz feedback in B**.
+- `Im(μ⊥(ω))` enters the complex stiffness directly → eddy-current losses
+  appear in the imaginary part of the solution → correct power dissipation
+  without any post-processing adjustment.
+
+This is exactly the same mechanism as the `tanh(K)/K` model for parallel
+flux, but for the perpendicular direction.
+
+### 4.4 Implementation details
+
+**New material fields** (in `fkn/mesh.h` and `femm/Problem.h`):
+
+| Field | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `Wcore_mm` | `double` | `0.` | Strip full-width [mm]. `0` = disabled. |
+| `bPerpLenz` | `BOOL` | `FALSE` | Enable Bessel model. |
+| `PerpLenzModel` | `int` | `0` | 0 = circular Bessel. |
+
+**`.fem` file tags** (optional, backward-compatible):
+
+```
+<Wcore>      = 10.0
+<PerpLenz>   = 1
+<PerpLenzModel> = 0
+```
+
+**Lua API** (`femm/femmeLua.cpp`):
+
+```lua
+mi_setmatperplenz(name, Wcore_mm)          -- enable
+mi_setmatperplenz(name, 0)                 -- disable (reset to series)
+```
+
+**Numerical helpers** (`fkn/bessel_perplenz.h`):
+
+Power-series $J_0(z)$ and $J_1(z)$ for complex $z$, 60 terms.
+Precise to $10^{-12}$ relative for $|z| \le 20$.
+Caller caps at $|z| \ge 20$: `PerpLenzShape` returns 0 (full screening).
+
+**Injection point** (`fkn/prob2big.cpp` and `prob4big.cpp`):
+
+In the per-material-block `Mu[k]` precomputation loop:
+- `LamType==2` (perpendicular = B_x = `mu2` slot): Bessel replaces series reluctance on `Mu[k][1]`.
+- `LamType==1` (perpendicular = B_y = `mu1` slot): Bessel replaces series reluctance on `Mu[k][0]`.
+- `LamType==0`, `Lam_d==0`, or `bPerpLenz==FALSE`: **unchanged** — full backward compatibility.
+
+### 4.5 Activation conditions
+
+The Bessel branch runs **only when ALL of the following are true**:
+
+1. `blockproplist[k].bPerpLenz == TRUE`
+2. `blockproplist[k].Wcore_mm > 0`
+3. `blockproplist[k].Cduct_t  > 0`  (in-plane conductivity)
+4. `LamType == 1` or `LamType == 2` and `Lam_d > 0`
+
+When any condition is false, the code falls back to the original
+series-reluctance formula. No existing `.fem` file is affected.
+
+### 4.6 Double-counting note
+
+The postprocessor `mo_blockintegral(31)` computes the Wang thin-lam
+eddy-power estimate $P = \frac{\sigma_t \omega^2 B_\perp^2 t_{\rm lam}^2}{24} F$
+from the post-solve B field. When `bPerpLenz==TRUE`, $B_\perp$ is already
+**reduced by the Lenz shielding** in the FEM solution, so `blockintegral(31)`
+gives the correct in-lam loss without double-counting. If `bPerpLenz==FALSE`,
+`blockintegral(31)` returns the unshielded estimate (may overestimate at high
+frequency).
+
+### 4.7 Validation cases (VP-1…VP-5)
+
+See `femmTestFiles/probe_perp_lenz.lua`, `plot_perp_lenz.py`, and
+`perplenz_analytical.py`. Expected outcomes:
+
+| Case | Expected result |
+| --- | --- |
+| VP-1: B parallel, bPerpLenz active | `mu1` (parallel) identical to master |
+| VP-2: B perpendicular, bPerpLenz active | `|B_perp|` drops >5 % at 50 kHz |
+| VP-3: rev3.fem + bPerpLenz | Total loss ≈ Wang Eq. 11 ±5 % (100 Hz–500 kHz) |
+| VP-4: `Lam_d==0` solid block | Bit-exact identical to master |
+| VP-5: `bPerpLenz==FALSE`, `Wcore_mm>0` | Bit-exact identical to master |
+
+---
+
+## 5. Summary
 
 | Aspect                            | Status |
 | --------------------------------- | ------ |
@@ -728,7 +865,7 @@ of along it.
 
 ---
 
-## 5. Limitations, validity envelope, and roadmap
+## 6. Limitations, validity envelope, and roadmap
 
 This section consolidates everything the model **cannot** do, where it
 diverges from physical reality, and what would be needed to remove each

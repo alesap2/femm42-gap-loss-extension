@@ -93,6 +93,14 @@ class CMaterialProp
 		double Cduct_n;		    // normal conductivity [S/m] (stored in S/m, ~order 1)
 		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
 
+		// Perpendicular Lenz feedback — Bessel disc model (Wang/Reinert)
+		// Replaces the series-reluctance μ⊥ with a complex Bessel formula:
+		//   μ⊥(ω) = (1-F)·μ₀ + F·μ_fe · 2J₁(γa)/(γa·J₀(γa)),  γ²=-jωμσ_t
+		// Active for LamType==1 and LamType==2 when bPerpLenz==TRUE.
+		double Wcore_mm;       // effective strip half-width a=Wcore/2 [mm]; 0 disables
+		BOOL   bPerpLenz;      // TRUE = use Bessel μ⊥(ω) for perpendicular flux
+		int    PerpLenzModel;  // 0 = circular Bessel; 1 = reserved
+
 		double Lam_d;			// lamination thickness, mm
 		double Theta_hn;			// hysteresis angle, degrees
 		double Theta_hx;			// hysteresis angle, degrees

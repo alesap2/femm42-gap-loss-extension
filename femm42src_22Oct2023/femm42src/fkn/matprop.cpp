@@ -12,6 +12,9 @@
 
 #define ElementsPerSkinDepth 10
 
+// Complex Bessel helpers for perpendicular Lenz μ⊥(ω) model
+#include "bessel_perplenz.h"
+
 CMaterialProp::~CMaterialProp()
 {
 	if (Bdata!=NULL) free(Bdata);
@@ -27,6 +30,9 @@ CMaterialProp::CMaterialProp()
 	Cduct_t=0.;
 	Cduct_n=0.;
 	bAnisoConductivity=FALSE;
+	Wcore_mm    = 0.;
+	bPerpLenz   = FALSE;
+	PerpLenzModel = 0;
 }
 
 void CMaterialProp::ComputeAnisoConductivity(double Wcore_mm)
