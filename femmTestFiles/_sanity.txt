@@ -1,0 +1,8 @@
+step1: lua running
+step2: file opened
+step3: saved
+step4: setmatperplenz returned
+step5: saved again
+step6: analyze done
+step7: solution loaded
+step8: |I|=1.000e+02 A  |V|=1.099e+00 V  |flx|=1.747e-04 Wb

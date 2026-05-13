@@ -758,7 +758,6 @@ flux, but for the perpendicular direction.
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `bPerpLenz` | `BOOL` | `FALSE` | Enable Bessel model for this material. |
-| `PerpLenzModel` | `int` | `0` | 0 = circular Bessel; 1 reserved. |
 
 > **No `Wcore_mm` is stored in the material.** The disc radius is derived
 > per **block-label** from the mesh geometry by the solver — the same
@@ -774,8 +773,7 @@ flux, but for the perpendicular direction.
 **`.fem` file tags** (optional, backward-compatible):
 
 ```
-<PerpLenz>      = 1     # 1 = enable, 0 = disable
-<PerpLenzModel> = 0     # reserved
+<PerpLenz> = 1     # 1 = enable, 0 = disable
 ```
 
 **Lua API** (`femm/femmeLua.cpp`):
@@ -784,7 +782,6 @@ flux, but for the perpendicular direction.
 mi_setmatperplenz(name)            -- enable on material `name`
 mi_setmatperplenz(name, 1)         -- enable (explicit)
 mi_setmatperplenz(name, 0)         -- disable
-mi_setmatperplenz(name, 1, 0)      -- enable, model 0 (circular Bessel)
 ```
 
 **Numerical helpers** (`fkn/bessel_perplenz.h`):
@@ -827,7 +824,36 @@ The Bessel branch runs **only when ALL of the following are true**:
 When any condition is false, the code falls back to the original
 series-reluctance formula. No existing `.fem` file is affected.
 
-### 4.6 Double-counting note
+### 4.6 Safeguard: unsupported AC + LamType combinations
+
+**FEMM 4.2 public** (`femm.exe` preprocessor and fkn solver prior to this
+extension) supports `LamType != 0` **only in DC mode** (`Frequency == 0`).
+In AC mode, trying to use `LamType=1` or `LamType=2` without enabling
+`bPerpLenz` causes the perpendicular permeability to collapse to an
+unphysical value of 1 (the placeholder used when material properties are
+not computed for AC).
+
+**This extension adds a safeguard** in the solver's Mu[k] loop
+([fkn/prob2big.cpp:170-173](femm42src_22Oct2023/femm42src/fkn/prob2big.cpp#L170-L173),
+[fkn/prob4big.cpp similar](femm42src_22Oct2023/femm42src/fkn/prob4big.cpp)):
+
+```cpp
+if(w > 0. && blockproplist[k].LamType != 0 && !blockproplist[k].bPerpLenz){
+    blockproplist[k].LamType = 0;  // Downgrade to isotropic
+}
+```
+
+**Effect:** Any AC problem (`w = Frequency × 2π > 0`) that specifies
+`LamType ∈ {1,2}` without setting `bPerpLenz=TRUE` is automatically
+downgraded to `LamType=0` (isotropic) at solve time. This:
+1. Prevents silent numerical corruption (μ⊥ → 1 instead of realistic values)
+2. Maintains backward compatibility (DC problems unaffected)
+3. Allows users to inadvertently disable bPerpLenz without penalty
+
+The `.fem` file is **not modified**; the downgrade occurs only in RAM
+during the solve.
+
+### 4.7 Double-counting note
 
 The postprocessor `mo_blockintegral(31)` computes the Wang thin-lam
 eddy-power estimate $P = \frac{\sigma_t \omega^2 B_\perp^2 t_{\rm lam}^2}{24} F$
@@ -837,7 +863,7 @@ gives the correct in-lam loss without double-counting. If `bPerpLenz==FALSE`,
 `blockintegral(31)` returns the unshielded estimate (may overestimate at high
 frequency).
 
-### 4.7 Validation cases (VP-1…VP-5)
+### 4.8 Validation cases (VP-1…VP-5)
 
 See `femmTestFiles/probe_perp_lenz.lua`, `plot_perp_lenz.py`, and
 `perplenz_analytical.py`. Expected outcomes:

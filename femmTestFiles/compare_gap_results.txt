@@ -1,0 +1,15 @@
+=== rev2 PerpLenz gap-loss comparison @ 100 kHz ===
+Material 'Amorphous gap' currently has LamType=1 (lam plane XZ, stacked Y)
+
+[ON] P_total       = 101.0251-I*0.0000 W
+[ON] P_gap_blocks  = -0.0000 W
+[ON] P_rest        = 101.0251-I*0.0000 W
+[ON] |I|=100.00 A  |V|=283.4191 V  |Z|=2.8342e+00 Ohm
+
+[OFF] P_total       = 99.8743+I*0.0000 W
+[OFF] P_gap_blocks  = -0.0000 W
+[OFF] P_rest        = 99.8743+I*0.0000 W
+[OFF] |I|=100.00 A  |V|=281.0886 V  |Z|=2.8109e+00 Ohm
+
+Delta P_total      = 1.1507-I*0.0000 W   (1.15-I*0.00 %)
+Delta P_gap_blocks = 0.0000 W   (-71.07 %)

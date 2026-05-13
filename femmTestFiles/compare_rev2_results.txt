@@ -1,0 +1,14 @@
+=== rev2 PerpLenz comparison ===
+[ON] max|B| in window = 3.1693e-01 T
+[ON] |I_coil|         = 1.0000e+02 A
+[ON] |V_coil|         = 3.0188e+00 V
+[ON] |Z_coil|         = 3.0188e-02 Ohm
+[ON] |flux linkage|   = 4.7984e-04 Wb-t
+
+[OFF] max|B| in window = 8.3961e-02 T
+[OFF] |I_coil|         = 1.0000e+02 A
+[OFF] |V_coil|         = 1.0990e+00 V
+[OFF] |Z_coil|         = 1.0990e-02 Ohm
+[OFF] |flux linkage|   = 1.7468e-04 Wb-t
+
+Ratio maxB ON/OFF = 3.775

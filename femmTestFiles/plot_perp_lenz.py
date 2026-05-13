@@ -15,11 +15,18 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE, "probe_perp_lenz_data.csv")
 
 # ── analytical Bessel shape factor ──────────────────────────────────────────
+# Parameters match "Amorphous gap" in pourleroi_cc_magnetostatic_rev3.fem:
+#   mu_r_init = Bdata[1]/(mu0*Hdata[1]) = 0.1317/(4pi*1e-7*2.866) ≈ 36 560
+#   sigma_t   = 0.615 MS/m (stored as sigma_t = 0.61538 in .fem)
+#   LamFill   = 0.80
+#   Wcore     ≈ Y-bbox of gap labels ≈ (56.275 - 19.325)*2 = 73.9 mm total
+#               but each gap strip is ~7.7 mm (half-height ≈ 3.9 mm each side)
+#               Use the full Y-bbox of one gap label: ~37 mm
 MU0     = 4e-7 * math.pi
-MU_FE   = 1000.
-SIGMA_T = 1.25e6   # S/m
-F_FILL  = 0.95
-WCORE   = 10e-3    # m  (10 mm)
+MU_FE   = 36560.
+SIGMA_T = 0.61538e6   # S/m
+F_FILL  = 0.80
+WCORE   = 37e-3    # m  (Y-bbox of Amorphous gap label)
 
 def bessel_j0(z):
     s, t = 1+0j, 1+0j
@@ -61,7 +68,7 @@ def load_csv(path):
                     "y":    float(row["y_mm"]),
                     "Bx":   float(row["absBx"]),
                     "By":   float(row["absBy"]),
-                    "A":    float(row["absA"]),
+                    "A":    float(row.get("absA", 0) or 0),
                 })
             except Exception:
                 pass
@@ -106,12 +113,14 @@ fig, axes = plt.subplots(2, max(1,len(freqs_in_data) or 1), figsize=(5*max(1,len
 for col, freq in enumerate(freqs_in_data or []):
     for row_idx, comp in enumerate(["Bx","By"]):
         ax = axes[row_idx][col]
-        for tag, clr in zip(["ref","perplenz"], COLORS):
+        for tag, lbl, clr in [("ref","REF (no Lenz)","#1f77b4"),
+                                ("vp5","bPerpLenz=OFF","#2ca02c"),
+                                ("vp2","bPerpLenz=ON","#d62728")]:
             rows = data.get((tag, freq), [])
             if rows:
                 ys  = [r["y"] for r in rows]
                 vs  = [r[comp] for r in rows]
-                ax.plot(ys, vs, label=tag, color=clr)
+                ax.plot(ys, vs, label=lbl, color=clr)
         ax.set_title(f"|B{comp[-1]}|  f={freq} Hz")
         ax.set_xlabel("y [mm]"); ax.set_ylabel(f"|B{comp[-1]}| [T]")
         ax.legend(fontsize=7); ax.grid(alpha=0.3)

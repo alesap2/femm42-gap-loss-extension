@@ -187,6 +187,11 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 	for(i=0;i<NumBlockProps;i++) Mu[i]=(CComplex *)calloc(2,sizeof(CComplex));
 
 	for(k=0;k<NumBlockProps;k++){
+		// Safeguard: LamType != 0 requires bPerpLenz for AC problems
+		if(w > 0. && blockproplist[k].LamType != 0 && !blockproplist[k].bPerpLenz){
+			blockproplist[k].LamType = 0;  // Downgrade to isotropic
+			blockproplist[k].bAnisoConductivity = FALSE;  // Also disable aniso tensor
+		}
 
 		if (blockproplist[k].LamType==0){
 		
@@ -318,10 +323,9 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 			if(mp.Lam_d<=0.)                continue;
 			if(mp.Cduct_t<=0.)              continue;
 			if(mp.LamType!=1 && mp.LamType!=2) continue;
-			double Wperp_units = (mp.LamType==2) ? (ymx[l]-ymn[l])
-			                                     : (xmx[l]-xmn[l]);
-			if(Wperp_units<=0.) continue;
-			double Wperp_m = Wperp_units * LengthConv;
+			// Laminated pack model: Wperp = Lam_d (laminella thickness).
+			double Wperp_m = mp.Lam_d * 1.e-3;  // mm → m
+			if(Wperp_m<=0.) continue;
 			labellist[l].Wperp = Wperp_m;
 			// Iron μ in the perpendicular slot.
 			// For BH-curve materials mu_x/mu_y is stored as 1 (unused); derive the

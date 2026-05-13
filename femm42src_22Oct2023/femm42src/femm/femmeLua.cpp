@@ -1627,16 +1627,13 @@ int CFemmeDoc::lua_setmatperplenz(lua_State *L)
 		if (BlockName == thisDoc->blockproplist[k].BlockName) break;
 	if (k == thisDoc->blockproplist.GetSize()) return 0;  // not found
 
-	int enable   = (n>1) ? (int)lua_todouble(L,2) : 1;
-	int model_id = (n>2) ? (int)lua_todouble(L,3) : 0;
+	int enable = (n>1) ? (int)lua_todouble(L,2) : 1;
 
 	if (enable != 0) {
-		thisDoc->blockproplist[k].bPerpLenz     = TRUE;
-		thisDoc->blockproplist[k].PerpLenzModel = model_id;
+		thisDoc->blockproplist[k].bPerpLenz = TRUE;
 	} else {
 		// Disable: reset to series-reluctance mode
-		thisDoc->blockproplist[k].bPerpLenz     = FALSE;
-		thisDoc->blockproplist[k].PerpLenzModel = 0;
+		thisDoc->blockproplist[k].bPerpLenz = FALSE;
 	}
 	return 0;
 }

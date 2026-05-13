@@ -1,0 +1,26 @@
+=== Sweep LamType x PerpLenz on 'Amorphous gap' (100 kHz) ===
+
+[LEGACY-public] P_tot=102.324-I*0.000 W  P_core=0.000 W  P_side=7.542 W  |flx|=4.51e-04 Wb  |Z|=2.835e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.524e-02  |By|=1.024e-01 T
+
+[LamType=0 PerpLenz=OFF (isotropic)] P_tot=102.497-I*0.000 W  P_core=4.221 W  P_side=2.110 W  |flx|=4.51e-04 Wb  |Z|=2.834e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.547e-02  |By|=1.021e-01 T
+
+[LamType=1 PerpLenz=OFF (lam plane XZ)] P_tot=101.028+I*0.000 W  P_core=2.769 W  P_side=1.385 W  |flx|=4.51e-04 Wb  |Z|=2.834e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.729e-02  |By|=1.003e-01 T
+
+[LamType=1 PerpLenz=ON  model=1 (Wperp=d_lam)] P_tot=101.025-I*0.000 W  P_core=2.750 W  P_side=1.375 W  |flx|=4.51e-04 Wb  |Z|=2.834e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.562e-02  |By|=1.013e-01 T
+
+[LamType=1 PerpLenz=ON  model=2 (Wperp=bbox)] P_tot=101.025-I*0.000 W  P_core=2.750 W  P_side=1.375 W  |flx|=4.51e-04 Wb  |Z|=2.834e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.562e-02  |By|=1.013e-01 T
+
+[LamType=2 PerpLenz=OFF (lam plane YZ)] P_tot=102.457+I*0.000 W  P_core=4.198 W  P_side=2.099 W  |flx|=4.51e-04 Wb  |Z|=2.834e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.729e-02  |By|=1.003e-01 T
+
+[LamType=2 PerpLenz=ON  model=1 (Wperp=d_lam)] P_tot=102.437-I*0.000 W  P_core=4.179 W  P_side=2.090 W  |flx|=4.51e-04 Wb  |Z|=2.834e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.590e-02  |By|=1.022e-01 T
+
+[LamType=2 PerpLenz=ON  model=2 (Wperp=bbox)] P_tot=102.437-I*0.000 W  P_core=4.179 W  P_side=2.090 W  |flx|=4.51e-04 Wb  |Z|=2.834e+00
+        B inside side gap label (4.4,17.15): |Bx|=1.590e-02  |By|=1.022e-01 T
+

@@ -1,0 +1,42 @@
+=== Deep comparison: our solver ON vs OFF vs legacy ===
+Frequency: 100 kHz   LamType=1 (lam plane XZ, B_y perpendicular)
+d_lam=0.023 mm, sigma_t=0.615 MS/m, LamFill=0.8, BH-curve (mu_init~36600)
+|gamma*a| at 100kHz = d_lam/2 * sqrt(w*mu_init*mu0*sigma_t)
+  = 11.5e-6 * sqrt(6.28e5 * 36600 * 4pi1e-7 * 0.615e6)
+  = 11.5e-6 * ~1.33e5 = ~1.53
+Bessel shape(1.53) ~ 0.75 -> mu_perp ~ 0.8*36600*0.75+0.2 ~ 21960
+Static series-reluctance (OFF): mu_perp = 1/(0.8/mu_x + 0.2/1)
+  If mu_x=1 (BH placeholder): mu_perp = 1/(0.8+0.2) = 1  *** WRONG ***
+  If mu_x=mu_init=36600:       mu_perp = 1/(0.8/36600+0.2) ~ 4.9
+
+[OUR-ON] P_total        = 101.0251-I*0.0000 W
+[OUR-ON] P_side_gaps     = 1.3753 W  (x=4.4 col)
+[OUR-ON] |flux linkage|  = 4.5106e-04 Wb-t
+[OUR-ON] |Z_coil|        = 2.8342e+00 Ohm
+[OUR-ON] B at gap center (22,37.8): |Bx|=4.3407e-04 T  |By|=3.8831e-04 T
+[OUR-ON] B at core (4.4,17.15): |Bx|=1.5625e-02 T  |By|=1.0129e-01 T
+
+[OUR-OFF] P_total        = 99.8743+I*0.0000 W
+[OUR-OFF] P_side_gaps     = 1.7532 W  (x=4.4 col)
+[OUR-OFF] |flux linkage|  = 4.4735e-04 Wb-t
+[OUR-OFF] |Z_coil|        = 2.8109e+00 Ohm
+[OUR-OFF] B at gap center (22,37.8): |Bx|=4.2035e-04 T  |By|=3.6515e-04 T
+[OUR-OFF] B at core (4.4,17.15): |Bx|=2.1414e-04 T  |By|=7.2064e-02 T
+
+[LEGACY] P_total        = 102.3241-I*0.0000 W
+[LEGACY] P_side_gaps     = 7.5424 W  (x=4.4 col)
+[LEGACY] |flux linkage|  = 4.5124e-04 Wb-t
+[LEGACY] |Z_coil|        = 2.8353e+00 Ohm
+[LEGACY] B at gap center (22,37.8): |Bx|=3.8855e-04 T  |By|=8.8128e-05 T
+[LEGACY] B at core (4.4,17.15): |Bx|=1.5245e-02 T  |By|=1.0242e-01 T
+
+=== Summary ===
+P_total:  ON=101.0251-I*0.0000 W  OFF=99.8743+I*0.0000 W  Legacy=102.3241-I*0.0000 W
+P_sides:  ON=1.3753 W  OFF=1.7532 W  Legacy=7.5424 W
+|flux|:   ON=4.511e-04   OFF=4.474e-04   Legacy=4.512e-04 Wb-t
+OFF vs Legacy: dP_tot=-2.4498+I*0.0000 W (-2.39+I*0.00 %)
+ON  vs Legacy: dP_tot=-1.2990+I*0.0000 W (-1.27+I*0.00 %)
+ON  vs OFF:    dP_tot=1.1507-I*0.0000 W (1.15-I*0.00 %)
+
+DIAGNOSIS:
+  OFF matches legacy within 5% -> static path is correct

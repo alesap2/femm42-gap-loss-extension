@@ -31,7 +31,6 @@ CMaterialProp::CMaterialProp()
 	Cduct_n=0.;
 	bAnisoConductivity=FALSE;
 	bPerpLenz   = FALSE;
-	PerpLenzModel = 0;
 }
 
 void CMaterialProp::ComputeAnisoConductivity(double Wcore_mm)

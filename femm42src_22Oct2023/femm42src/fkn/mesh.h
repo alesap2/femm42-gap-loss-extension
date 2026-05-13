@@ -108,15 +108,14 @@ class CMaterialProp
 		// The disc radius a = Wperp/2 is derived per-LABEL from the geometry
 		// at solve time (CBlockLabel::Wperp), NOT stored in the material.
 		BOOL   bPerpLenz;      // TRUE = use Bessel μ⊥(ω) for perpendicular flux
-		int    PerpLenzModel;  // 0 = circular Bessel; 1 = reserved
 
-		double Lam_d;			// lamination thickness, mm
-		double Theta_hn;			// hysteresis angle, degrees
-		double Theta_hx;			// hysteresis angle, degrees
-		double Theta_hy;			// hysteresis angle, degrees
-		int LamType;			// lamination type/orientation
-		double LamFill;			// lamination fill factor;
-		double WireD;			// strand diameter, mm
+	double Lam_d;			// lamination thickness, mm
+	double Theta_hn;			// hysteresis angle, degrees
+	double Theta_hx;			// hysteresis angle, degrees
+	double Theta_hy;			// hysteresis angle, degrees
+	int LamType;			// lamination type/orientation
+	double LamFill;			// lamination fill factor;
+	double WireD;			// strand diameter, mm
 		int NStrands;			// number of strands per wire
 		double MuMax;			// maximum permeability for AC problems
 		CMaterialProp();

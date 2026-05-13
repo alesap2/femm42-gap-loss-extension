@@ -125,7 +125,7 @@ class CMaterialProp
 		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
 		// Perpendicular Lenz feedback — Bessel disc model (geometric Wperp; no material-side width)
 		BOOL   bPerpLenz;        // TRUE = use Bessel μ⊥(ω) model
-		int    PerpLenzModel;    // 0 = circular Bessel; 1 = reserved
+
 		// Compute Cduct_t and Cduct_n from lamination parameters (Wang 2015 eqs 4-3/4-4)
 		void ComputeAnisoConductivity(double Wcore_mm);
 

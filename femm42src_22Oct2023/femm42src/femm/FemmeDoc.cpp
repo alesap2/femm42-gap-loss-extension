@@ -1956,7 +1956,6 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.Cduct_n=0.;
 			MProp.bAnisoConductivity=FALSE;
 			MProp.bPerpLenz   = FALSE;
-			MProp.PerpLenzModel = 0;
 			q[0]=NULL;
 		}
 
@@ -2087,12 +2086,6 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		   v=StripKey(s);
 		   int pl=0; sscanf(v,"%i",&pl);
 		   MProp.bPerpLenz=(pl!=0);
-		   q[0]=NULL;
-		}
-
-		if( _strnicmp(q,"<PerpLenzModel>",15)==0){
-		   v=StripKey(s);
-		   sscanf(v,"%i",&MProp.PerpLenzModel);
 		   q[0]=NULL;
 		}
 
@@ -2499,7 +2492,6 @@ BOOL CFemmeDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		// is derived from geometry by the solver; no Wcore stored here.
 		if(blockproplist[i].bPerpLenz){
 			fprintf(fp,"    <PerpLenz> = 1\n");
-			fprintf(fp,"    <PerpLenzModel> = %i\n",blockproplist[i].PerpLenzModel);
 		}
 		fprintf(fp,"    <BHPoints> = %i\n",blockproplist[i].BHpoints);
 		for(j=0;j<blockproplist[i].BHpoints;j++)

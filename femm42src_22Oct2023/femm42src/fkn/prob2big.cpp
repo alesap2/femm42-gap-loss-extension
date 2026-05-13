@@ -165,6 +165,12 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 	for(i=0;i<NumBlockProps;i++) Mu[i]=(CComplex *)calloc(2,sizeof(CComplex));
 
 	for(k=0;k<NumBlockProps;k++){
+		// Safeguard: LamType != 0 requires bPerpLenz for AC problems
+		// (FEMM 4.2 public does not support LamType != 0 in AC mode).
+		if(w > 0. && blockproplist[k].LamType != 0 && !blockproplist[k].bPerpLenz){
+			blockproplist[k].LamType = 0;  // Downgrade to isotropic
+			blockproplist[k].bAnisoConductivity = FALSE;  // Also disable aniso tensor
+		}
 
 		if (blockproplist[k].LamType==0){
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
@@ -315,15 +321,12 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			if(mp.Lam_d<=0.)                continue;
 			if(mp.Cduct_t<=0.)              continue;
 			if(mp.LamType!=1 && mp.LamType!=2) continue;
-			// Geometric perpendicular extent (mesh units = problem units; FEMM
-			// length scale 'LengthUnits' converts to metres later; here we use
-			// the same scale as Lam_d which is in millimetres → assume problem
-			// coordinates are already scaled to mm at this stage).
-			double Wperp_units = (mp.LamType==2) ? (ymx[l]-ymn[l])
-			                                     : (xmx[l]-xmn[l]);
-			if(Wperp_units<=0.) continue;
-			// Convert problem coordinates to metres (mesh is stored in cm; LengthConv = 0.01 m/cm).
-			double Wperp_m = Wperp_units * LengthConv;
+			// Perpendicular Lenz model (Model 1): each lamina is a Bessel "cylinder"
+			// with effective disc diameter = Lam_d. This requires per-label geometry;
+			// Wperp is computed from the label's bbox extent across the stacking axis.
+			// (Model 2 bbox-based was eliminated; see commit notes for rationale.)
+			double Wperp_m = mp.Lam_d * 1.e-3;  // mm → m
+			if(Wperp_m<=0.) continue;
 			labellist[l].Wperp = Wperp_m;
 			// Iron μ in the perpendicular slot with hysteresis lag.
 			// For BH-curve materials mu_x/mu_y==1 (linear field unused); derive

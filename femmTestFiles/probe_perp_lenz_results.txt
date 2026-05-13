@@ -1,0 +1,19 @@
+=== probe_perp_lenz.lua ===
+Material: Amorphous gap
+Probe x=7.0 mm, y=[14.0,60.5] mm, 201 pts
+
+---- f = 1000 Hz ----
+  REF    max|Bx|=2.8001e-02 T  max|By|=4.4352e-02 T
+  VP-5   max|Bx|=2.8001e-02 T  max|By|=4.4352e-02 T  diff_Bx=0.00000%
+  VP-2/1 max|Bx|=3.1898e-03 T  max|By|=2.9762e-03 T  dBx=88.61%  dBy=93.29%
+
+---- f = 10000 Hz ----
+  REF    max|Bx|=2.6842e-02 T  max|By|=4.3136e-02 T
+  VP-5   max|Bx|=2.6842e-02 T  max|By|=4.3136e-02 T  diff_Bx=0.00000%
+  VP-2/1 max|Bx|=2.3638e-03 T  max|By|=3.2716e-03 T  dBx=91.19%  dBy=92.42%
+
+---- f = 100000 Hz ----
+  REF    max|Bx|=2.6504e-02 T  max|By|=4.2637e-02 T
+  VP-5   max|Bx|=2.6504e-02 T  max|By|=4.2637e-02 T  diff_Bx=0.00000%
+  VP-2/1 max|Bx|=2.1271e-03 T  max|By|=3.3574e-03 T  dBx=91.97%  dBy=92.13%
+

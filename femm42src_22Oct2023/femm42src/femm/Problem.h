@@ -166,7 +166,7 @@ class CMaterialProp
 		// Perpendicular Lenz feedback — Bessel disc model (disc radius derived
 		// from per-label geometry by the solver; no material-side width parameter).
 		BOOL   bPerpLenz;        // TRUE = use Bessel μ⊥(ω) model
-		int    PerpLenzModel;    // 0 = circular Bessel; 1 = reserved
+
 		double Theta_hn;			// hysteresis angle, degrees
 		double Theta_hx;			// hysteresis angle, degrees
 		double Theta_hy;			// hysteresis angle, degrees

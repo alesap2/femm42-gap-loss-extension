@@ -1,5 +1,5 @@
 [Format]      =  4.0
-[Frequency]   =  100000
+[Frequency]   =  1000
 [Precision]   =  1e-08
 [MinAngle]    =  30
 [DoSmartMesh] =  1
@@ -117,13 +117,12 @@
     <Phi_h> = 0
     <Phi_hx> = 0
     <Phi_hy> = 0
-    <LamType> = 1
+    <LamType> = 2
     <LamFill> = 0.80000000000000004
     <NStrands> = 0
     <WireD> = 0
     <sigma_t> = 0.61538464000000004
     <sigma_n> = 2.5951727882653057
-    <PerpLenz> = 1
     <BHPoints> = 34
       0	0
       0.13170699999999999	2.8662420000000002
