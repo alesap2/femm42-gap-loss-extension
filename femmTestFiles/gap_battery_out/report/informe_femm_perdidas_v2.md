@@ -475,9 +475,11 @@ Wang escribe $P_g = k_g \cdot l_g \cdot D^{1.65} \cdot f_\text{kHz}^{1.72} \cdot
 |---|---|---|
 | Pérdidas por flujo $\perp$ | $P_g$ (empírico, 3D) | $P_x = f_{Bx} \times P_\text{side}$ (analítico, 2D) |
 | Exponente de gap | $\gamma = +1.0$ | $\gamma_{P_x}$ (a medir) |
-| Exponente de frecuencia | $\alpha = 1.72$ | $\alpha$ medido en batería 2 (§4.4) |
+| Exponente de frecuencia | $\alpha = 1.72$ | $\alpha_{P_x}$ (a medir en batería 4) |
 | Variable fija | $B_m$ constante | $B_n$ constante (calibrado) |
 | Dimensionalidad | 3D completo | 2D planar |
+
+> **Nota:** el exponente $\alpha \approx 1.96$ de la batería 2 (§4.4) corresponde a $P_\text{side}$ total vs frecuencia, dominado por el flujo paralelo $B_y$ (~98 % de la energía). No es transferible a $P_x$, que es la fracción perpendicular. El exponente de frecuencia de $P_x$ específicamente es una salida propia de la batería 4 y podría diferir de 1.96 porque el mecanismo Bessel de disco cilíndrico (responsable de las pérdidas por $B_x$) tiene su propio exponente de frecuencia, que Wang mide como 1.72.
 
 Una diferencia $\gamma_{P_x} < 1$ indicaría que el modelo 2D subestima la extensión axial del fringing (efecto 3D que FEMM no captura). Un $\gamma_{P_x}$ entre 0.7 y 1.3 se consideraría consistente con Wang dada la diferencia de dimensionalidad.
 
