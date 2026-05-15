@@ -1,24 +1,26 @@
 # Caracterización de Pérdidas en Núcleos Amorfos Laminados con Entrehierro
-## Análisis FEM Paramétrico — Batería 1 (288 casos) + Batería 2 (960 casos) — FEMM 4.2 Solver Armónico
+## Análisis FEM Paramétrico — Baterías 1+2+3 (1536 casos totales) — FEMM 4.2 Solver Armónico
 
 **Fecha:** Mayo 2026  
 **Código:** FEMM 4.2 (VS2022 x64, Release64) — `femm.exe` compilado localmente  
 **Scripts batería 1:** `run_gap_battery.py` / `gap_battery_case.lua`  
 **Scripts batería 2:** `run_gap_battery2.py` / `gap_battery2_case.lua`  
+**Scripts batería 3:** `run_gap_battery3.py` / `gap_battery3_case.lua`  
 **Scripts calibración:** `calibrate_ke.py` / `calibrate_ke_case.lua`
 
 ---
 
 ## Resumen
 
-Se realizó un barrido paramétrico de **1248 simulaciones armónicas FEM** sobre un inductor de núcleo amorfo laminado con entrehierro variable, comparando cuatro modelos de permeabilidad efectiva en FEMM 4.2. Los principales resultados son:
+Se realizó un barrido paramétrico de **1536 simulaciones armónicas FEM** sobre un inductor de núcleo amorfo laminado con entrehierro variable, comparando cuatro modelos de permeabilidad efectiva en FEMM 4.2. Los principales resultados son:
 
 - **LT0_OFF ≡ LT2_OFF** en todos los 288 casos de la batería 1: ambos modelos aplican la misma corrección tanh al postprocesador FEMM.
-- **β = 2.0000 exacto** en los 1248 casos, como consecuencia matemática directa del solver lineal.
+- **β = 2.0000 exacto** en todos los casos, como consecuencia matemática directa del solver lineal.
 - **α ≈ 1.96** (d = 23 µm, 10–200 kHz): el material opera en régimen de transición (d/(2δ) entre 0.35 y 1.55), alejándose del límite de lámina delgada.
 - **LT2_ON** (corrección Bessel para flujo perpendicular) predice 1–2 % menos pérdidas que LT0_OFF a baja frecuencia; es el modelo físicamente más completo.
 - La ecuación de diseño sin doble conteo combina `blockintegral(3)` de FEMM (eddy intra-lámina) con la separación de Bertotti sobre curvas del fabricante (histéresis).
 - Los coeficientes de Bertotti obtenidos del fabricante son: k_h = 1.357×10⁻², n = 1.806, k_e = 8.009×10⁻⁷ W·s²/kg. El valor de k_e es 4.7× superior al teórico para una lámina aislada (d = 25 µm, datasheet), atribuido al acoplamiento inter-laminar propio del núcleo amorfo enrollado; confirmado numéricamente mediante un barrido de calibración de 36 casos (1–200 kHz) sobre el modelo sin entrehierro (§7.3).
+- **Batería 3 (288 casos, d = 10–100 µm):** ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) varía entre −1.69% y +0.49%. La corrección PerpLenz reduce las pérdidas para d ≤ 25 µm a baja frecuencia, y las aumenta ligeramente para d ≥ 50 µm a alta frecuencia. Rango ingenierístico: < ±2% en todos los casos ensayados (§4.7).
 
 ---
 
@@ -31,6 +33,7 @@ FEMM 4.2 implementa ambos efectos mediante la permeabilidad compleja efectiva: l
 **Alcance del trabajo:**
 - Batería 1: 288 casos, d = 23 µm fijo, tres modos (LT0_OFF, LT2_OFF, LT2_ON), barrido en f, g, B_n.
 - Batería 2: 960 casos, d ∈ {10, 18, 23, 50, 100} µm, dos modos (LT0_OFF, LT2_ON).
+- Batería 3: 288 casos, d ∈ {10, 25, 50, 100} µm, dos modos (LT0_OFF, LT2_ON), g ∈ {2, 3, 4} mm — análisis sistemático de ΔP_⊥.
 - Comparación metodológica con Wang et al. (2017).
 - Procedimiento de diseño sin doble conteo, incluyendo separación de Bertotti sobre datos del fabricante.
 - Calibración numérica de k_e_FEMM mediante simulación sin entrehierro (36 casos, 1–200 kHz), verificando la consistencia interna del modelo FEMM respecto a la teoría analítica de lámina aislada.
@@ -358,6 +361,49 @@ $$f_{B_x} = \frac{\sum_i |B_{x,i}|^2}{\sum_i (|B_{x,i}|^2 + |B_{y,i}|^2)} \times
 El bloque "Amorphous gap" está dominado en **> 98 % por B_y** (flujo paralelo) en todo el rango de espesores ensayados. Para LT0_OFF la fracción es invariante con d, coherente con que la geometría del campo macroscópico no depende del parámetro de laminación. La ligera variación en LT2_ON refleja que la permeabilidad transversal compleja modifica la distribución local del campo cuando d se acerca a δ.
 
 > **Conclusión:** la corrección PerpLenz actúa sobre el ~2 % del flujo perpendicular, lo que la convierte en una corrección cuantitativamente pequeña (< 1.5 % de las pérdidas totales) pero físicamente correcta para la geometría real del fringing.
+
+### 4.7 Batería 3: ΔP_⊥ vs d_lam, f y Entrehierro — 288 Casos
+
+La batería 3 extiende el análisis de §4.5 con un barrido sistemático de espesores d ∈ {10, 25, 50, 100} µm, calculando directamente ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) como fracción de P(LT0_OFF).
+
+**Matriz:** 2 modos × 3 entrehierros × 4 frecuencias × 3 B_n × 4 d_lam = 288 casos. Scripts: `gap_battery3_case.lua` / `run_gap_battery3.py`. Todos los casos convergieron (error de B_n < 0.3 %).
+
+**Tabla de ΔP_⊥/P [%] a B_n = 1.0 T:**
+
+| d (µm) | g (mm) | 10 kHz | 30 kHz | 100 kHz | 200 kHz |
+|-------:|-------:|-------:|-------:|--------:|--------:|
+| 10 | 2.0 | −1.33% | −1.33% | −1.30% | −1.23% |
+| 10 | 3.0 | −1.52% | −1.52% | −1.49% | −1.41% |
+| 10 | 4.0 | −1.69% | −1.69% | −1.66% | −1.58% |
+| 25 | 2.0 | −1.32% | −1.24% | −0.65% | −0.04% |
+| 25 | 3.0 | −1.51% | −1.43% | −0.81% | −0.17% |
+| 25 | 4.0 | −1.68% | −1.59% | −0.95% | −0.28% |
+| 50 | 2.0 | −1.17% | −0.49% | +0.29% | +0.37% |
+| 50 | 3.0 | −1.36% | −0.64% | +0.18% | +0.27% |
+| 50 | 4.0 | −1.52% | −0.77% | +0.09% | +0.19% |
+| 100 | 2.0 | −0.22% | +0.32% | +0.43% | +0.49% |
+| 100 | 3.0 | −0.36% | +0.21% | +0.34% | +0.39% |
+| 100 | 4.0 | −0.48% | +0.13% | +0.26% | +0.32% |
+
+Rango total: [−1.69%, +0.49%]. La dependencia con B_n es β = 2.0000 exacto (R² = 1.000) en todos los casos, coherente con las baterías anteriores.
+
+**Observaciones clave:**
+
+1. **d = 10 µm (lámina delgada, d/(2δ) ≤ 0.45):** ΔP_⊥ es siempre negativo y prácticamente independiente de la frecuencia. El valor escala principalmente con el entrehierro: −1.3 % (g = 2 mm) a −1.7 % (g = 4 mm). En régimen de lámina delgada, la función PerpLenzShape(z_a) supera levemente a tanh(K)/K para |z| < 1.4 (§2.4), lo que se traduce en menor pérdida asociada a B_x bajo LT2_ON.
+
+2. **d = 25 µm (material de referencia, d/(2δ) = 0.38–1.69):** ΔP_⊥ evoluciona de −1.3 a −1.7 % (10 kHz) hacia ≈0 % (200 kHz). La corrección PerpLenz es operativa a f ≤ 30 kHz; a frecuencias superiores el efecto piel dentro de cada lámina domina y ambos modelos convergen.
+
+3. **d = 50 µm (transición, d/(2δ) = 0.75–3.37):** ΔP_⊥ cambia de signo entre 30 y 100 kHz. A alta frecuencia se vuelve positivo (+0.1 a +0.4 %), porque |z_a| > 1.4 sitúa la función Bessel por debajo de tanh (§2.4, tabla), y LT2_ON predice más pérdidas que LT0_OFF para B_x.
+
+4. **d = 100 µm (efecto piel, d/(2δ) = 1.50–6.74):** ΔP_⊥ es positivo en casi todo el rango (+0.1 a +0.5 %), salvo a 10 kHz (levemente negativo). El cruce de las funciones de forma ya ha tenido lugar a estas frecuencias.
+
+**Dependencia con el entrehierro:** a d y f fijos, mayor gap → mayor |ΔP_⊥|. Para ΔP < 0 (d pequeño), el valor absoluto crece con el gap al aumentar la zona de fringing y la intensidad de B_x. Para ΔP > 0 (d grande), el valor positivo decrece con el gap, ya que la fracción B_x en la línea de medida se diluye en una región de fringing más amplia.
+
+**Consistencia con baterías 1+2:** los valores a d = 25 µm de la batería 3 son coherentes con d = 23 µm de las baterías anteriores (diferencia < 0.1 pp), confirmando la reproducibilidad.
+
+**Guía de diseño:** la corrección PerpLenz modifica las pérdidas en menos de ±2 % en todos los casos estudiados. Para el material de referencia (d = 25 µm, f ≤ 30 kHz), LT2_ON predice ≈1.5 % menos pérdidas que LT0_OFF — corrección pequeña pero físicamente correcta. A f ≥ 100 kHz o d ≥ 50 µm la diferencia es inferior al 0.5 % y puede despreciarse para ingeniería.
+
+Ver [fig_battery3_overview.png](../gap_battery3_out/fig_battery3_overview.png) y [fig_battery3_scaling.png](../gap_battery3_out/fig_battery3_scaling.png).
 
 ---
 
@@ -768,6 +814,8 @@ Ningún resultado de este trabajo ha sido validado experimentalmente. Todos los 
 12. **Calibración numérica de k_e_FEMM** (36 casos, 1–200 kHz, §7.3): a baja frecuencia k_e_FEMM ≈ k_e_th_fill = 1.720×10⁻⁷ W·s²/kg (ratio FEMM/th = 1.00), confirmando que el solver implementa correctamente el modelo de lámina aislada con los parámetros σ = 0.769 MS/m, d = 25 µm, η = 0.80. La ratio k_e_fab/k_e_FEMM = 4.66× es constante en 1–100 kHz, lo que confirma que el exceso del fabricante es una propiedad del material real (acoplamiento inter-laminar), no un artefacto del modelo.
 
 13. **El flujo perpendicular representa ≈ 2 %** de la energía magnética en la zona de fringing para d = 10–100 µm. La corrección PerpLenz es cuantitativamente pequeña pero es la representación física correcta del mecanismo.
+
+14. **Batería 3 (288 casos, d = 10–100 µm):** ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) varía entre **−1.69 % y +0.49 %** en todo el espacio de parámetros (d ∈ {10, 25, 50, 100} µm, g ∈ {2, 3, 4} mm, f ∈ {10, 30, 100, 200} kHz). El signo de ΔP_⊥ cambia de negativo (d ≤ 25 µm y/o f baja) a positivo (d ≥ 50 µm y f alta), coherente con el cruce de las funciones de forma tanh y PerpLenz en |z| ≈ 1.4 (§2.4). La corrección es inferior al 2 % en valor absoluto en todos los casos: es relevante para precisión pero despreciable para estimaciones de primer orden. Para el material de referencia (d = 25 µm), la corrección es prácticamente nula a f ≥ 100 kHz.
 
 ---
 
