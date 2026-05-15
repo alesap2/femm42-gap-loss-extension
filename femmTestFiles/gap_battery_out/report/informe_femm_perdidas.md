@@ -1308,7 +1308,9 @@ Las corrientes de Foucault en los conductores (piel y proximidad) son un fenóme
 
 $$P_{\rm bobinado} = \sum_{n=1}^{N} P_{\rm bobinado}(f_n,\, \hat{I}_n)$$
 
-El procedimiento es: simular FEMM a cada frecuencia $f_n = n\cdot f_1$ con la amplitud $\hat{I}_n$ del armónico correspondiente, extraer las pérdidas en el cobre con `blockintegral(4)` o el análisis de la densidad de corriente, y sumar. **Esto es correcto y exacto para cualquier forma de onda**.
+El procedimiento es: simular FEMM a cada frecuencia $f_n = n\cdot f_1$ con la amplitud $\hat{I}_n$ del armónico correspondiente, extraer las pérdidas en el cobre con `blockintegral(4)`, y sumar. **Esto es correcto y exacto para cualquier forma de onda**.
+
+> **Nota:** `blockintegral(4)` calcula las pérdidas óhmicas (resistencia + eddy de piel y proximidad) directamente a partir de la densidad de corriente $\mathbf{J}$ obtenida por FEM, usando la conductividad eléctrica $\sigma_{\rm cond}$ definida en el material del conductor. Esta funcionalidad estaba ya presente en la versión original liberada de FEMM 4.2 — no requiere ninguna modificación del solver.
 
 #### 14.6.2 Pérdidas en el Núcleo — Qué es Lineal y Qué No
 
@@ -1367,7 +1369,7 @@ La integración natural sería: usar **FEMM para las pérdidas eddy** (con la di
 | Eddy paralelo ($B_y$, tanh) | ✅ Sí | ❌ No (separado vía Bertotti) | — |
 | Eddy fringing 2D ($B_x$, Bessel) | ✅ Sí | ❌ No | — |
 | Eddy fringing con dependencia en $D$ | ⚠️ Parcial (D fijo) | ❌ No | Wang $P_g$ si D varía |
-| Eddy en bobinado (Dowell) | ❌ No | ❌ No | Cálculo analítico separado |
+| Eddy en bobinado (piel + proximidad) | ✅ Sí — `blockintegral(4)`, FEMM original | ❌ No | — |
 | Pérdidas de exceso | ❌ No | ⚠️ Absorbido en $k_h$ | Separación Bertotti completa |
 
 ### 14.8 Pasos Pendientes para Completar el Método
