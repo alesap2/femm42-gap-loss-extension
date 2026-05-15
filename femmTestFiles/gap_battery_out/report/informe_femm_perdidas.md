@@ -825,7 +825,7 @@ Este exponente no tiene análogo en nuestra batería (D no fue variado). Refleja
 
 4. **Las dos ecuaciones son complementarias, no competidoras:** la ecuación de Wang proporciona la corrección por fringing que FEMM no captura en 2D; la ecuación de este trabajo proporciona la base de pérdidas de Foucault totales con dependencia en $d$ que Wang no estudió. La ecuación de diseño completa es:
 
-$$\boxed{P_{\rm tot} = \underbrace{K \cdot g^{-0.023} \cdot f^{1.966} \cdot B_n^2}_{\text{Foucault intra-lámina (FEMM)}} + \underbrace{k_g \cdot l_g \cdot D^{1.65} \cdot f_{\rm kHz}^{1.72} \cdot B_m^2}_{\text{Fringing extra (Wang)}} + \underbrace{V_{\rm core} \cdot k_h \cdot f \cdot B_n^{1.7}}_{\text{Histéresis (Steinmetz)}}}$$
+$$\boxed{P_{\rm tot} = \underbrace{K \cdot g^{-0.023} \cdot f^{1.966} \cdot B_n^2}_{\text{Foucault intra-lámina (FEMM)}} + \underbrace{k_g \cdot l_g \cdot D^{1.65} \cdot f_{\rm kHz}^{1.72} \cdot B_m^2}_{\text{Fringing extra (Wang)}} + \underbrace{V_{\rm core} \cdot k_h \cdot f \cdot B_n^{1.806}}_{\text{Histéresis (Steinmetz)}}}$$
 
 5. **Limitación de Wang en este contexto material:** la ecuación de Wang fue derivada y validada para Finemet. Aplicarla al amorfo de alta permeabilidad ($\mu_r$ = 30 000) requeriría recalibrar $k_g$ y, posiblemente, los exponentes, dado que el régimen de efecto piel es completamente distinto ($d/(2\delta) \approx 1.10$ vs 0.58 a 100 kHz).
 
@@ -879,11 +879,11 @@ donde el término de histéresis sigue la ecuación de Steinmetz:
 
 $$P_{\rm hyst} = k_h \cdot f^1 \cdot B_n^{\,\beta_h}$$
 
-con $k_h$ y $\beta_h$ obtenidos de hojas de datos del fabricante (p.ej. Metglas AMCC series: $k_h \approx 1.5$–$3 \times 10^{-3}$ W/(T$^{\beta_h}$·Hz·m³), $\beta_h \approx 1.6$–$1.8$).
+con $k_h$ y $\beta_h$ obtenidos de hojas de datos del fabricante (p.ej. Metglas AMCC series: $k_h \approx 1.5$–$3 \times 10^{-3}$ W/(T$^{\beta_h}$·Hz·m³), $\beta_h \approx 1.6$–$1.8$). Para el material específico de este estudio, la separación Bertotti (§14.2) arroja $k_h = 1{.}357 \times 10^{-2}$ W·s/kg y $n = 1{.}806$.
 
 La ecuación completa con corrección de histéresis quedaría:
 
-$$P_{\rm tot} \approx \underbrace{5.496 \times 10^{-2} \cdot g^{-0.023} \cdot f_{\rm kHz}^{1.966} \cdot B_n^2}_{\rm FEM\;(Foucault)} + \underbrace{V_{\rm core} \cdot k_h \cdot f_{\rm kHz}^{\,1} \cdot B_n^{1.7}}_{\rm Histéresis\;(Steinmetz)}$$
+$$P_{\rm tot} \approx \underbrace{5.496 \times 10^{-2} \cdot g^{-0.023} \cdot f_{\rm kHz}^{1.966} \cdot B_n^2}_{\rm FEM\;(Foucault)} + \underbrace{V_{\rm core} \cdot k_h \cdot f_{\rm kHz}^{\,1} \cdot B_n^{1.806}}_{\rm Histéresis\;(Bertotti)}$$
 
 donde $V_{\rm core}$ es el volumen del núcleo en m³.
 
@@ -1114,7 +1114,34 @@ $$\frac{P_v}{f} = k_h \cdot B^n + k_e \cdot f \cdot B^2$$
 
 Esta expresión es **lineal en $f$**: la ordenada en el origen da el término de histéresis y la pendiente da el coeficiente eddy $k_e$. Con los 9 puntos de frecuencia disponibles en las curvas del fabricante (5–50 kHz) y varios valores de $B_m$, el ajuste permite obtener $k_h$, $n$ y $k_e$ por separado.
 
-**Este paso está pendiente de ejecución** pero es directo dado que las curvas digitalizadas ya están disponibles. Una vez obtenido $k_e$, se puede:
+**Resultado de la separación ejecutada** sobre los datos del fabricante (Excel `Copia de Amorphous data and relative curves.xlsx`, hoja `DataFromChart`, 62 puntos, $f$ = 5–50 kHz, $B_m$ = 0.1–0.8 T). El script `bertotti_separation.py` agrupa los puntos por nivel nominal de $B$, realiza regresión lineal de $P/f$ vs $f$ para cada grupo, y finalmente hace un ajuste no lineal global de los tres parámetros:
+
+$$\boxed{P_v^{\rm Bertotti} = \underbrace{1{.}357 \times 10^{-2} \cdot f \cdot B^{1.806}}_{\text{histéresis}} + \underbrace{8{.}009 \times 10^{-7} \cdot f^2 \cdot B^2}_{\text{eddy (paralelo)}}} \quad [{\rm W/kg}]$$
+
+| Parámetro | Valor | Unidades |
+|:---:|:---:|:---|
+| $k_h$ | $1{.}357 \times 10^{-2}$ | W·s/kg |
+| $n$ | $1{.}806$ | — |
+| $k_e$ | $8{.}009 \times 10^{-7}$ | W·s²/kg |
+| $R^2$ | $0{.}992$ | — |
+
+Para comparar: el ajuste Steinmetz clásico sobre los mismos datos da $k = 9{.}85 \times 10^{-5}$, $\alpha = 1{.}579$, $\beta = 1{.}927$ con $R^2 = 0{.}988$. El modelo Bertotti supera al Steinmetz en bondad de ajuste ($R^2$ = 0.992 vs 0.988) y, adicionalmente, **descompone la pérdida por mecanismo**, lo que es esencial para evitar el doble conteo.
+
+**Fracción histéresis/eddy** (depende de $f$ — la histéresis domina a baja frecuencia):
+
+| $f$ (kHz) | $B = 0{.}3$ T | $B = 0{.}5$ T |
+|:---:|:---:|:---:|
+| 5 | Hyst 81 % / Eddy 19 % | Hyst 80 % / Eddy 21 % |
+| 10 | Hyst 68 % / Eddy 32 % | Hyst 66 % / Eddy 34 % |
+| 20 | Hyst 52 % / Eddy 48 % | Hyst 49 % / Eddy 51 % |
+| 30 | Hyst 42 % / Eddy 58 % | Hyst 39 % / Eddy 61 % |
+| 50 | Hyst 30 % / Eddy 70 % | Hyst 28 % / Eddy 72 % |
+
+El cruce histéresis = eddy ocurre alrededor de 22 kHz para $B = 0{.}3$ T y 19 kHz para $B = 0{.}5$ T. Por encima de esas frecuencias las corrientes de Foucault **dominan**; FEMM modela precisamente ese mecanismo.
+
+Ver figura 13 (`fig13_bertotti_separation.png`) para los cuatro paneles de validación (método gráfico $P/f$ vs $f$, constancia de $k_e(B)$, ajuste potencial $a(B) = k_h B^n$, y paridad predicho/medido).
+
+Una vez obtenido $k_e$, se puede:
 
 1. **Validar los parámetros de material en FEMM** simulando un toroide equivalente (sin gap, $B$ uniforme) y comprobando que:
    $$P_{\rm FEMM}^{\rm toroide}(f, B) \stackrel{?}{=} k_e \cdot f^2 \cdot B^2 \cdot V_{\rm core}$$
@@ -1130,7 +1157,7 @@ $$\boxed{P_{\rm core}^{\rm total} = \underbrace{P_{\rm FEMM}^{\rm LT2\_ON}(B_{\r
 
 donde:
 - $P_{\rm FEMM}^{\rm LT2\_ON}$ = `blockintegral(3)` sobre todos los bloques del núcleo — integra las pérdidas eddy con la distribución espacial real de $B$ incluyendo el fringing 2D (corrección Bessel para $B_\perp$)
-- $k_h \cdot f \cdot B_n^n \cdot m_{\rm core}$ = histéresis pura, con $k_h$ y $n$ obtenidos de la separación Bertotti sobre las curvas del fabricante
+- $k_h \cdot f \cdot B_n^n \cdot m_{\rm core}$ = histéresis pura, con $k_h = 1{.}357 \times 10^{-2}$ W·s/kg y $n = 1{.}806$ obtenidos de la separación Bertotti (§14.2)
 - $B_n$ = inducción nominal calibrada de FEMM (la misma que ya se usa para `blockintegral`)
 
 > **Nota sobre el término de exceso:** puede omitirse con seguridad para materiales amorfos. La teoría estadística de Bertotti (1988) predice $P_{\rm exc} \propto f^{1.5} B^{1.5}$, pero el parámetro estadístico $V_0$ que controla su magnitud es 10–50× menor en amorfos que en acero al silicio, haciendo que este término represente < 5–8% de las pérdidas totales en el rango 1–100 kHz (Herzer, 1992). Ver §12.2.4 para la justificación detallada.
@@ -1269,7 +1296,7 @@ La integración natural sería: usar **FEMM para las pérdidas eddy** (con la di
 
 ### 14.8 Pasos Pendientes para Completar el Método
 
-1. **Digitalizar las curvas del fabricante** y ajustar la separación Bertotti ($P_v/f$ vs $f$ para cada $B_m$) → obtener $k_h$, $n$, $k_e$
+1. ~~**Digitalizar las curvas del fabricante** y ajustar la separación Bertotti ($P_v/f$ vs $f$ para cada $B_m$) → obtener $k_h$, $n$, $k_e$~~ ✅ **Completado** — ver §14.2 y fig. 13. Resultado: $k_h = 1{.}357 \times 10^{-2}$ W·s/kg, $n = 1{.}806$, $k_e = 8{.}009 \times 10^{-7}$ W·s²/kg.
 2. **Simular toroide equivalente en FEMM** con los parámetros actuales del material → verificar que $P_{\rm FEMM}^{\rm toroide} = k_e \cdot f^2 \cdot B^2 \cdot V$. Si no, recalibrar $\sigma$ o $d_{\rm eff}$
 3. **Aplicar la ecuación de diseño** de §14.3 al inductor real con gap, sustituyendo `blockintegral(3)` de FEMM y $k_h$ del fabricante
 4. **Validación experimental** midiendo pérdidas en el inductor real (calorimétrica o por diferencia de potencia) y comparando con la predicción
@@ -1292,6 +1319,7 @@ La integración natural sería: usar **FEMM para las pérdidas eddy** (con la di
 | [Fig. 10](fig10_alpha_vs_dlam.png) | Exponente α vs $d$ (semi-log); dos modos; línea de referencia α = 2 |
 | [Fig. 11](fig11_grid_bxfraction.png) | Fracción $\Sigma B_x^2/\Sigma B^2$ (\%) en cuadrícula 2D vs $d$; $f$ = 100 kHz |
 | [Fig. 12](fig12_ratio_on_off_dlam.png) | Ratio $P_{\rm ON}/P_{\rm OFF}$ vs $d$ (izq.) y diferencia relativa % vs $f$ (der.) |
+| [Fig. 13](fig13_bertotti_separation.png) | Separación de Bertotti: (a) $P/f$ vs $f$ por nivel de $B$; (b) constancia de $k_e(B)$; (c) ajuste potencial $a(B) = k_h B^n$; (d) paridad predicho/medido Bertotti vs Steinmetz |
 
 ---
 

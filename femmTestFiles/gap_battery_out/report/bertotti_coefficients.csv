@@ -1,0 +1,10 @@
+# Bertotti separation — coeficientes obtenidos por regresión
+# P [W/kg] = k_h * f[Hz] * B[T]^n  +  k_e * f[Hz]^2 * B[T]^2
+model,k_h,n,k_e,R2,note
+Bertotti_nonlinear,1.356615e-02,1.805758,8.008990e-07,0.9922,ajuste global no lineal
+Bertotti_linreg,1.614434e-02,1.724692,6.382063e-07,,separacion por grupos de B
+
+# Steinmetz clasico (referencia)
+# P [W/kg] = k * f[Hz]^alpha * B[T]^beta
+model,k,alpha,beta,R2,note
+Steinmetz,9.849356e-05,1.578770,1.926682,0.9877,ajuste global Steinmetz
