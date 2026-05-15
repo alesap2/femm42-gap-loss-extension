@@ -1,11 +1,12 @@
 # Caracterización de Pérdidas en Núcleos Amorfos Laminados con Entrehierro
-## Análisis FEM Paramétrico — Baterías 1+2+3 (1536 casos totales) — FEMM 4.2 Solver Armónico
+## Análisis FEM Paramétrico — Baterías 1+2+3 (1536 casos completados) + Batería 4 (diseñada) — FEMM 4.2 Solver Armónico
 
 **Fecha:** Mayo 2026  
 **Código:** FEMM 4.2 (VS2022 x64, Release64) — `femm.exe` compilado localmente  
 **Scripts batería 1:** `run_gap_battery.py` / `gap_battery_case.lua`  
 **Scripts batería 2:** `run_gap_battery2.py` / `gap_battery2_case.lua`  
 **Scripts batería 3:** `run_gap_battery3.py` / `gap_battery3_case.lua`  
+**Scripts batería 4:** `run_gap_battery4.py` / `gap_battery4_case.lua`  
 **Scripts calibración:** `calibrate_ke.py` / `calibrate_ke_case.lua`
 
 ---
@@ -21,6 +22,7 @@ Se realizó un barrido paramétrico de **1536 simulaciones armónicas FEM** sobr
 - La ecuación de diseño sin doble conteo combina `blockintegral(3)` de FEMM (eddy intra-lámina) con la separación de Bertotti sobre curvas del fabricante (histéresis).
 - Los coeficientes de Bertotti obtenidos del fabricante son: k_h = 1.357×10⁻², n = 1.806, k_e = 8.009×10⁻⁷ W·s²/kg. El valor de k_e es 4.7× superior al teórico para una lámina aislada (d = 25 µm, datasheet), atribuido al acoplamiento inter-laminar propio del núcleo amorfo enrollado; confirmado numéricamente mediante un barrido de calibración de 36 casos (1–200 kHz) sobre el modelo sin entrehierro (§7.3).
 - **Batería 3 (288 casos, d = 10–100 µm):** ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) varía entre −1.69% y +0.49%. La corrección PerpLenz reduce las pérdidas para d ≤ 25 µm a baja frecuencia, y las aumenta ligeramente para d ≥ 50 µm a alta frecuencia. Rango ingenierístico: < ±2% en todos los casos ensayados (§4.7).
+- **Batería 4 (112 casos, diseñada, pendiente de simulación):** Aislamiento directo de $P_x$ (pérdidas por flujo perpendicular) mediante la fracción $f_{Bx}$ sobre una malla 2D. Objetivo: verificar si $P_x \propto g^\gamma$ con $\gamma \approx 1$, conforme a Wang et al. (2017). Ver §4.8.
 
 ---
 
@@ -34,6 +36,7 @@ FEMM 4.2 implementa ambos efectos mediante la permeabilidad compleja efectiva: l
 - Batería 1: 288 casos, d = 23 µm fijo, tres modos (LT0_OFF, LT2_OFF, LT2_ON), barrido en f, g, B_n.
 - Batería 2: 960 casos, d ∈ {10, 18, 23, 50, 100} µm, dos modos (LT0_OFF, LT2_ON).
 - Batería 3: 288 casos, d ∈ {10, 25, 50, 100} µm, dos modos (LT0_OFF, LT2_ON), g ∈ {2, 3, 4} mm — análisis sistemático de ΔP_⊥.
+- Batería 4: 112 casos (pendiente), d = 25 µm fijo, g ∈ {1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0} mm, LT0_OFF + LT2_ON — aislamiento de $P_x$ y escalado con el entrehierro.
 
 > **Nota sobre d = 23 µm y d = 25 µm:** el espesor nominal del material según el datasheet es **d = 25 µm**, y es el parámetro de referencia para el análisis teórico (§7.3) y para la batería 3. Las baterías 1 y 2 realizaron un barrido paramétrico que incluyó **d = 23 µm** como valor de ensayo (~8 % inferior al nominal). La diferencia en ΔP_⊥ entre ambos valores es < 0.1 pp (§4.7), por lo que los resultados son comparables entre baterías. Toda vez que el texto indica "d = 23 µm", se refiere a resultados de las baterías 1 o 2; cuando indica "d = 25 µm" como material de referencia, se refiere a los resultados de la batería 3 o al valor teórico del datasheet.
 
@@ -230,7 +233,18 @@ La siguiente tabla consolida los cuatro modos implementados, indicando qué corr
 | Inducción B_n | 0.10, 0.50, 1.00 T |
 | **Total** | **288 casos** |
 
-Resultados: **288/288 [OK], 960/960 [OK], 288/288 [OK] — NaN: 0** en las tres baterías.
+**Batería 4 — 2 modos, d fijo, rango de gap ampliado, extracción de $P_x$:**
+
+| Variable | Valores |
+|----------|---------|
+| Modos | LT0_OFF, LT2_ON |
+| Espesor d | 25 µm (fijo) |
+| Frecuencia f | 10, 30, 100, 200 kHz |
+| Entrehierro g | 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0 mm |
+| Inducción B_n | 0.50, 1.00 T |
+| **Total** | **112 casos (pendiente)** |
+
+Resultados: **288/288 [OK], 960/960 [OK], 288/288 [OK] — NaN: 0** en las tres baterías completadas. La batería 4 está diseñada y lista para ejecutar.
 
 La batería 2 incluye también la exportación de un campo nodal 2D (14 × 20 = 280 puntos) en el bloque "Amorphous gap" para los 10 casos base (f = 100 kHz, B_n = 1.0 T, g = 2.0 mm, d = 10–100 µm), que se usa para validar la fracción de flujo perpendicular (§4.6).
 
@@ -420,6 +434,62 @@ Rango total: [−1.69%, +0.49%]. La dependencia con B_n es β = 2.0000 exacto (R
 **Guía de diseño:** la corrección PerpLenz modifica las pérdidas en menos de ±2 % en todos los casos estudiados. Para el material de referencia (d = 25 µm, f ≤ 30 kHz), LT2_ON predice ≈1.5 % menos pérdidas que LT0_OFF — corrección pequeña pero físicamente correcta. A f ≥ 100 kHz o d ≥ 50 µm la diferencia es inferior al 0.5 % y puede despreciarse para ingeniería.
 
 Ver [fig_battery3_overview.png](../gap_battery3_out/fig_battery3_overview.png) y [fig_battery3_scaling.png](../gap_battery3_out/fig_battery3_scaling.png).
+
+### 4.8 Batería 4: Escalado de $P_x$ con el Entrehierro — Verificación de Wang (112 Casos, Pendiente)
+
+#### 4.8.1 Motivación
+
+Las baterías 1–3 cuantificaron $ΔP_⊥ = P(\text{LT2\_ON}) - P(\text{LT0\_OFF})$ como indicador indirecto del flujo perpendicular. Wang et al. (2017) obtuvieron experimentalmente $P_g \propto l_g^1$ (pérdidas de fringing proporcionales al entrehierro) a inducción constante. Las baterías 1–3 confirmó que $P_\text{side} \propto g^{-0.02} \approx \text{cte}$ cuando $B_n$ está calibrado — resultado coherente con Wang porque miden cantidades distintas ($I$ fija vs $B_n$ fijo).
+
+La batería 4 reinterpreta esto con una nueva variable: la **fracción geométrica de flujo perpendicular** $f_{Bx}$, calculada sobre una malla 2D de 120 puntos en los bloques de fringing. Esto permite aislar **directamente** $P_x$ sin depender del modo de simulación:
+
+$$f_{Bx} = \frac{\sum_{i=1}^{120} |B_{x,i}|^2}{\sum_{i=1}^{120} (|B_{x,i}|^2 + |B_{y,i}|^2)}$$
+
+Bajo LT0\_OFF, $\mu_{fd,x} = \mu_{fd,y}$ (mismo coeficiente tanh), por lo que la descomposición es exacta:
+
+$$\boxed{P_x = f_{Bx} \times P_\text{side}, \qquad P_y = (1 - f_{Bx}) \times P_\text{side}}$$
+
+El parámetro $P_x$ es el equivalente FEMM 2D de $P_g$ de Wang.
+
+#### 4.8.2 Diseño Experimental
+
+Se amplió el rango de entrehierro a $g \in \{1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0\}$ mm para cubrir una década completa en escala log-log y obtener un ajuste robusto del exponente $\gamma$. El espesor se fijó en $d = 25$ µm (valor nominal del datasheet) y se redujeron los niveles de $B_n$ a dos (0.5 y 1.0 T), suficientes para confirmar $\beta = 2$ sin multiplicar innecesariamente el número de casos.
+
+La malla 2D cubre ambos bloques "Amorphous gap" del tramo interior:
+- Posiciones x: {1, 3, 5, 7, 9, 11} mm (6 puntos, dentro del ancho 0–14 mm)
+- Posiciones y bloque inferior: {15, 17, ..., 33} mm (10 puntos)
+- Posiciones y bloque superior: {37, 39, ..., 55} + $g_\text{extra}$ mm (10 puntos)
+- Total: $6 \times 20 = 120$ puntos por caso
+
+**Predicción física:** $f_{Bx}$ debe crecer con el entrehierro porque una zona de fringing más larga intensifica la componente radial $B_x$; mientras $P_\text{side} / B_n^2 \approx \text{cte}$ (confirmado en batería 1). Por tanto:
+
+$$P_x \propto f_{Bx}(g) \times P_\text{side} \approx f_{Bx}(g) \times \text{cte} \quad \Rightarrow \quad \gamma_{P_x} \approx \gamma_{f_{Bx}}$$
+
+Si la geometría de fringing escala linealmente con $g$ (como asume Wang), se espera $\gamma_{P_x} \approx 1$.
+
+#### 4.8.3 Métrica de comparación con Wang
+
+Wang escribe $P_g = k_g \cdot l_g \cdot D^{1.65} \cdot f_\text{kHz}^{1.72} \cdot B_m^2$. En esta batería $D$ es fijo (geometría no varía), de modo que la comparación directa es:
+
+| Cantidad | Wang (2017) | Esta batería (FEMM 2D) |
+|---|---|---|
+| Pérdidas por flujo $\perp$ | $P_g$ (empírico, 3D) | $P_x = f_{Bx} \times P_\text{side}$ (analítico, 2D) |
+| Exponente de gap | $\gamma = +1.0$ | $\gamma_{P_x}$ (a medir) |
+| Exponente de frecuencia | $\alpha = 1.72$ | $\alpha$ medido en batería 2 (§4.4) |
+| Variable fija | $B_m$ constante | $B_n$ constante (calibrado) |
+| Dimensionalidad | 3D completo | 2D planar |
+
+Una diferencia $\gamma_{P_x} < 1$ indicaría que el modelo 2D subestima la extensión axial del fringing (efecto 3D que FEMM no captura). Un $\gamma_{P_x}$ entre 0.7 y 1.3 se consideraría consistente con Wang dada la diferencia de dimensionalidad.
+
+#### 4.8.4 Salidas esperadas
+
+- `gap_battery4_out/gap_battery4_summary.csv` — 112 filas con $f_{Bx}$ y $P_x$ por caso
+- `gap_battery4_out/gap_battery4_wang.csv` — tabla $f_{Bx}$, $P_x$, $P_y$ vs $g$ (LT0\_OFF, $B_n=1$ T)
+- `gap_battery4_out/fit4_gap_gamma_px.csv` — exponente $\gamma$ de $P_x$ vs $g$ por frecuencia
+- `gap_battery4_out/fit4_gap_gamma_ps.csv` — exponente $\gamma$ de $P_\text{side}$ vs $g$ (referencia, esperado $\approx 0$)
+- Figuras: $f_{Bx}$ vs $g$; $P_x$ vs $g$ (log-log + pendiente Wang); resumen de $\gamma(f)$
+
+> **Estado:** scripts completos y pusheados (`gap_battery4_case.lua` / `run_gap_battery4.py`). Resultados pendientes de simulación. Esta sección se actualizará con los valores numéricos una vez completada.
 
 ---
 
