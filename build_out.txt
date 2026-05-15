@@ -1,0 +1,943 @@
+Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+Compilaci├│n iniciada a las 13/05/2026 21:55:43.
+
+     1>Proyecto "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" en el nodo 1 (Rebuild destinos).
+     1>_PrepareForClean:
+         Se eliminar├í el archivo "x64\Release\femm.tlog\femm.lastbuildstate".
+     1>El proyecto "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (1) est├í compilando "D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj" (2) en el nodo 1 (Clean destinos).
+     2>_PrepareForClean:
+         Se eliminar├í el archivo "x64\Release\liblua.tlog\liblua.lastbuildstate".
+       CoreClean:
+         Se eliminar├í el archivo "D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\x64\Release\liblua.lib".
+     2>Compilaci├│n del proyecto terminada "D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj" (Clean destinos).
+     1>El proyecto "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (1) est├í compilando "D:\FEMM Source\femm42src_22Oct2023\femm42src\ResizableLib\ResizableLib.vcxproj" (3) en el nodo 2 (Clean destinos).
+     3>_PrepareForClean:
+         Se eliminar├í el archivo "x64\Release\ResizableLib.tlog\ResizableLib.lastbuildstate".
+       CoreClean:
+         Se eliminar├í el archivo "D:\FEMM Source\femm42src_22Oct2023\femm42src\ResizableLib\x64\Release\ResizableLib.lib".
+     3>Compilaci├│n del proyecto terminada "D:\FEMM Source\femm42src_22Oct2023\femm42src\ResizableLib\ResizableLib.vcxproj" (Clean destinos).
+     1>El proyecto "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (1) est├í compilando "D:\FEMM Source\femm42src_22Oct2023\femm42src\ResizableLib\ResizableLib.vcxproj" (3:2) en el nodo 2 (destinos predeterminados).
+     3>InitializeBuildStatus:
+         Se crear├í "x64\Release\ResizableLib.tlog\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+         Aplicando tarea Touch a "x64\Release\ResizableLib.tlog\unsuccessfulbuild".
+     1>El proyecto "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (1) est├í compilando "D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj" (2:2) en el nodo 1 (destinos predeterminados).
+     2>InitializeBuildStatus:
+         Se crear├í "x64\Release\liblua.tlog\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+         Aplicando tarea Touch a "x64\Release\liblua.tlog\unsuccessfulbuild".
+     3>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\CL.exe /c /Zi /nologo /W4 /WX- /diagnostics:column /O2 /Ob1 /D WIN32 /D NDEBUG /D _WINDOWS /D WINVER=0x0501 /D _VC80_UPGRADE=0x0600 /D _AFXDLL /GF /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yc"stdafx.h" /Fp".\x64\Release/ResizableLib.pch" /Fo".\x64\Release/" /Fd".\x64\Release/ResizableLib.pdb" /Gd /TP /FC /errorReport:queue StdAfx.cpp
+         StdAfx.cpp
+     2>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\CL.exe /c /Zi /nologo /W3 /WX- /diagnostics:column /O2 /Ob1 /D WIN32 /D NDEBUG /D _WINDOWS /D _CRT_SECURE_NO_WARNINGS /D _VC80_UPGRADE=0x0600 /D _AFXDLL /GF /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo".\Release/" /Fd".\Release/liblua.pdb" /Gd /TP /FC /errorReport:queue COMPLEX.CPP lapi.cpp lauxlib.cpp lbaselib.cpp lcode.cpp ldblib.cpp ldebug.cpp ldo.cpp lfunc.cpp lgc.cpp liolib.cpp llex.cpp lmathlib.cpp lmem.cpp lobject.cpp lparser.cpp lstate.cpp lstring.cpp lstrlib.cpp ltable.cpp ltests.cpp ltm.cpp lundump.cpp lvm.cpp lzio.cpp
+         COMPLEX.CPP
+         lapi.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lapi.cpp(58,25): warning C4244: 'return': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lapi.cpp(69,18): warning C4244: 'return': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lauxlib.cpp
+         lbaselib.cpp
+         lcode.cpp
+         ldblib.cpp
+         ldebug.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldebug.cpp(60,20): warning C4244: '=': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldebug.cpp(128,44): warning C4244: 'return': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldebug.cpp(391,18): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         ldo.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldo.cpp(69,12): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldo.cpp(84,9): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lfunc.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lfunc.cpp(71,29): warning C4267: '+=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lfunc.cpp(77,31): warning C4267: '-=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lgc.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lgc.cpp(289,56): warning C4267: '+=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lgc.cpp(291,5): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         liolib.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liolib.cpp(341,18): warning C4267: '=': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         llex.cpp
+         lmathlib.cpp
+         _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+     3>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\CL.exe /c /Zi /nologo /W4 /WX- /diagnostics:column /O2 /Ob1 /D WIN32 /D NDEBUG /D _WINDOWS /D WINVER=0x0501 /D _VC80_UPGRADE=0x0600 /D _AFXDLL /GF /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp".\x64\Release/ResizableLib.pch" /Fo".\x64\Release/" /Fd".\x64\Release/ResizableLib.pdb" /Gd /TP /FC /errorReport:queue ResizableDialog.cpp ResizableFormView.cpp ResizableFrame.cpp ResizableGrip.cpp ResizableLayout.cpp ResizableMDIChild.cpp ResizableMDIFrame.cpp ResizableMinMax.cpp ResizablePage.cpp ResizableSheet.cpp ResizableState.cpp
+         ResizableDialog.cpp
+     2>ClCompile:
+         lmem.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lmem.cpp(127,51): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lmem.cpp(127,57): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lobject.cpp
+     3>ClCompile:
+         ResizableFormView.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(63,5): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(64,50): warning C4267: '+=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+       ClCompile:
+         ResizableFrame.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(181,25): warning C4267: '=': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(190,38): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lparser.cpp
+       ClCompile:
+         ResizableGrip.cpp
+         ResizableLayout.cpp
+     2>ClCompile:
+         lstate.cpp
+     3>ClCompile:
+         ResizableMDIChild.cpp
+         ResizableMDIFrame.cpp
+         ResizableMinMax.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstate.cpp(123,65): warning C4267: '-=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstate.cpp(129,44): warning C4267: '-=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lstring.cpp
+       ClCompile:
+         ResizablePage.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(48,22): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(65,58): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(65,58): warning C4302: 'conversi├│n de tipo': truncamiento de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(116,1): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(125,28): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(125,28): warning C4302: 'conversi├│n de tipo': truncamiento de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(131,12): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(131,12): warning C4302: 'conversi├│n de tipo': truncamiento de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lstrlib.cpp
+       ClCompile:
+         ResizableSheet.cpp
+         ResizableState.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(25,30): warning C4244: 'argumento': conversi├│n de 'size_t' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(42,29): warning C4267: '=': conversi├│n de 'size_t' a 'long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+       ClCompile:
+         Generando c├│digo...
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(302,27): warning C4244: '=': conversi├│n de '__int64' a 'long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(417,38): warning C4244: 'argumento': conversi├│n de '__int64' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(418,38): warning C4244: 'argumento': conversi├│n de 'size_t' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(477,15): warning C4244: 'argumento': conversi├│n de 'size_t' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         ltable.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(52,11): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'TString *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(52,11): warning C4302: 'conversi├│n de tipo': truncamiento de 'TString *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(55,11): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'Hash *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(55,11): warning C4302: 'conversi├│n de tipo': truncamiento de 'Hash *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(58,11): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'Closure *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(58,11): warning C4302: 'conversi├│n de tipo': truncamiento de 'Closure *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(147,11): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         Generando c├│digo...
+       ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\CL.exe /c /Zi /nologo /W4 /WX- /diagnostics:column /O2 /Ob1 /D WIN32 /D NDEBUG /D _WINDOWS /D WINVER=0x0501 /D _VC80_UPGRADE=0x0600 /D _AFXDLL /GF /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo".\x64\Release/" /Fd".\x64\Release/ResizableLib.pdb" /Gd /TP /FC /errorReport:queue ResizablePageEx.cpp ResizableSheetEx.cpp
+         ResizablePageEx.cpp
+     2>ClCompile:
+         Compilando...
+         ltests.cpp
+         ltm.cpp
+         lundump.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(38,20): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(47,13): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(51,20): warning C4267: 'argumento': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(62,14): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(68,22): warning C4267: 'argumento': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lvm.cpp
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(70,10): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(303,36): warning C4267: '+=': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(312,16): warning C4267: '+=': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+     2>D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(337,15): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         lzio.cpp
+         Generando c├│digo...
+       Lib:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\Lib.exe /OUT:".\x64\Release\liblua.lib" /NOLOGO /MACHINE:X64 .\Release/COMPLEX.obj
+         .\Release/lapi.obj
+         .\Release/lauxlib.obj
+         .\Release/lbaselib.obj
+         .\Release/lcode.obj
+         .\Release/ldblib.obj
+         .\Release/ldebug.obj
+         .\Release/ldo.obj
+         .\Release/lfunc.obj
+         .\Release/lgc.obj
+         .\Release/liolib.obj
+         .\Release/llex.obj
+         .\Release/lmathlib.obj
+         .\Release/lmem.obj
+         .\Release/lobject.obj
+         .\Release/lparser.obj
+         .\Release/lstate.obj
+         .\Release/lstring.obj
+         .\Release/lstrlib.obj
+         .\Release/ltable.obj
+         .\Release/ltests.obj
+         .\Release/ltm.obj
+         .\Release/lundump.obj
+         .\Release/lvm.obj
+         .\Release/lzio.obj
+         liblua.vcxproj -> D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\x64\Release\liblua.lib
+     3>ClCompile:
+         ResizableSheetEx.cpp
+     2>FinalizeBuildStatus:
+         Se eliminar├í el archivo "x64\Release\liblua.tlog\unsuccessfulbuild".
+         Aplicando tarea Touch a "x64\Release\liblua.tlog\liblua.lastbuildstate".
+     2>Compilaci├│n del proyecto terminada "D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj" (destinos predeterminados).
+     3>ClCompile:
+         Generando c├│digo...
+       Lib:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\Lib.exe /OUT:".\x64\Release\ResizableLib.lib" /NOLOGO /MACHINE:X64 .\x64\Release/ResizableDialog.obj
+         .\x64\Release/ResizableFormView.obj
+         .\x64\Release/ResizableFrame.obj
+         .\x64\Release/ResizableGrip.obj
+         .\x64\Release/ResizableLayout.obj
+         .\x64\Release/ResizableMDIChild.obj
+         .\x64\Release/ResizableMDIFrame.obj
+         .\x64\Release/ResizableMinMax.obj
+         .\x64\Release/ResizablePage.obj
+         .\x64\Release/ResizablePageEx.obj
+         .\x64\Release/ResizableSheet.obj
+         .\x64\Release/ResizableSheetEx.obj
+         .\x64\Release/ResizableState.obj
+         .\x64\Release/StdAfx.obj
+         ResizableLib.vcxproj -> D:\FEMM Source\femm42src_22Oct2023\femm42src\ResizableLib\x64\Release\ResizableLib.lib
+       FinalizeBuildStatus:
+         Se eliminar├í el archivo "x64\Release\ResizableLib.tlog\unsuccessfulbuild".
+         Aplicando tarea Touch a "x64\Release\ResizableLib.tlog\ResizableLib.lastbuildstate".
+     3>Compilaci├│n del proyecto terminada "D:\FEMM Source\femm42src_22Oct2023\femm42src\ResizableLib\ResizableLib.vcxproj" (destinos predeterminados).
+     1>InitializeBuildStatus:
+         Aplicando tarea Touch a "x64\Release\femm.tlog\unsuccessfulbuild".
+       Midl:
+         D:\Windows Kits\10\bin\10.0.26100.0\x86\midl.exe /D NDEBUG /mktyplib203 /W1 /nologo /char signed /env win32 /tlb "..\Release/femm.tlb" /target "NT60" femm.odl 
+         Processing .\femm.odl
+         femm.odl
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\um\oaidl.idl
+         oaidl.idl
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\um\objidl.idl
+         objidl.idl
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\um\unknwn.idl
+         unknwn.idl
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\shared\wtypes.idl
+         wtypes.idl
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\shared\wtypesbase.idl
+         wtypesbase.idl
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\shared\basetsd.h
+         basetsd.h
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\shared\guiddef.h
+         guiddef.h
+         Processing D:\Windows Kits\10\Include\10.0.26100.0\um\oaidl.acf
+         oaidl.acf
+       ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\CL.exe /c /Zi /nologo /W3 /WX- /diagnostics:column /Ox /Ob1 /D WIN32 /D NDEBUG /D _WINDOWS /D WINVER=0x0501 /D _VC80_UPGRADE=0x0600 /D _MBCS /D _AFXDLL /GF /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yc"stdafx.h" /Fp".\Release/femm.pch" /Fo".\Release/" /Fd".\Release/vc142.pdb" /Gd /TP /FC /errorReport:queue StdAfx.cpp
+         StdAfx.cpp
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\CL.exe /c /Zi /nologo /W3 /WX- /diagnostics:column /Ox /Ob1 /D WIN32 /D NDEBUG /D _WINDOWS /D WINVER=0x0501 /D _VC80_UPGRADE=0x0600 /D _MBCS /D _AFXDLL /GF /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp".\Release/femm.pch" /Fo".\Release/" /Fd".\Release/vc142.pdb" /Gd /TP /FC /errorReport:queue ActiveFEMM.cpp ArcDlg.cpp BdryDlg.cpp bd_BdryDlg.cpp bd_CircProp.cpp bd_libdlg.cpp bd_MatDlg.cpp bd_movecopy.cpp bd_NodeProp.cpp bd_nosebl.cpp bd_OpArcSegDlg.cpp bd_OpBlkDlg.cpp bd_OpNodeDlg.cpp bd_OpSegDlg.cpp bd_Pref.cpp bd_probdlg.cpp bd_PtProp.cpp bd_writepoly.cpp beladrawDoc.cpp beladrawLua.cpp beladrawView.cpp belaviewDoc.cpp belaviewLua.cpp belaviewView.cpp BendContourDlg.cpp BHData.cpp BHDatafile.cpp bhplot.cpp BlockInt.cpp bv_BlockInt.cpp bv_CircDlg.cpp bv_CplotDlg2.cpp bv_DPlotDlg2.cpp bv_LIntDlg.cpp bv_makemask.cpp bv_Pref.cpp bv_problem.cpp bv_VPlotDlg.cpp bv_XYPlotDlg.cpp CDRAWDOC.CPP CDRAWLUA.CPP cdrawView.cpp cd_BdryDlg.cpp cd_CircProp.cpp cd_libdlg.cpp cd_MatDlg.cpp cd_movecopy.cpp cd_NodeProp.cpp cd_nosebl.cpp cd_OpArcSegDlg.cpp cd_OpBlkDlg.cpp cd_OpNodeDlg.cpp cd_OpSegDlg.cpp CD_PREF.CPP cd_probdlg.cpp cd_PtProp.cpp cd_writepoly.cpp ChildFrm.cpp CircDlg.cpp CircProp.cpp CopyDlg.cpp CPlotDlg.cpp CplotDlg2.cpp CVIEWDOC.CPP CVIEWLUA.CPP cviewView.cpp cv_BlockInt.cpp cv_CircDlg.cpp cv_CplotDlg2.cpp cv_DPlotDlg2.cpp cv_LIntDlg.cpp cv_makemask.cpp CV_PREF.CPP cv_problem.cpp cv_VPlotDlg.cpp cv_XYPlotDlg.cpp DXFImport.cpp EnterPt.cpp ExteriorProps.cpp femm.cpp FemmeDoc.cpp femmeLua.cpp FemmeView.cpp femmplotDoc.cpp femmplotView.cpp FemmviewDoc.cpp femmviewLua.cpp FemmviewView.cpp fe_libdlg.cpp fullmatrix.cpp GapIntegral.cpp GapPlotDlg.cpp GeneralPrefs.cpp GRIDDLG.CPP GridMod.cpp GroupNumber.cpp HDRAWDOC.CPP HDRAWLUA.CPP hdrawView.cpp hd_BdryDlg.cpp hd_CircProp.cpp hd_libdlg.cpp hd_MatDlg.cpp hd_movecopy.cpp hd_NodeProp.cpp hd_nosebl.cpp hd_OpArcSegDlg.cpp hd_OpBlkDlg.cpp hd_OpNodeDlg.cpp hd_OpSegDlg.cpp HD_PREF.CPP hd_probdlg.cpp hd_PtProp.cpp hd_writepoly.cpp hviewDoc.cpp hviewLua.cpp hviewView.cpp hv_BlockInt.cpp hv_CircDlg.cpp hv_CplotDlg2.cpp hv_DPlotDlg2.cpp hv_LIntDlg.cpp HV_PREF.CPP hv_problem.cpp hv_VPlotDlg.cpp hv_XYPlotDlg.cpp KbdZoom.cpp KCurve.cpp LibFolderInfo.cpp LIntDlg.cpp LuaConsoleDlg.cpp luaDDX.cpp LuaEdit.cpp MainFrm.cpp MakeABCDlg.cpp makemask.cpp MaskProgress.cpp MatDlg.cpp MDITabs.cpp MirrorDlg.cpp MOVECOPY.CPP MyCommandLineInfo.cpp MyMsgBox.cpp MyRecentFileList.cpp MyTabCtrl.cpp NewDocDlg.cpp NodeProp.cpp NOSEBL.CPP OpArcSegDlg.cpp OpBlkDlg.cpp OpGrp.cpp OpNodeDlg.cpp OpSegDlg.cpp OutBox.cpp Pref.cpp Preferences.cpp probdlg.cpp Problem.cpp PromptBox.cpp PtProp.cpp ScaleDlg.cpp spars.cpp TKDatafile.cpp viewpref.cpp VPlotDlg.cpp writepoly.cpp Xyplot.cpp XYPlotDlg.cpp
+         ActiveFEMM.cpp
+         ArcDlg.cpp
+         BdryDlg.cpp
+         bd_BdryDlg.cpp
+         bd_CircProp.cpp
+         bd_libdlg.cpp
+         bd_MatDlg.cpp
+         bd_movecopy.cpp
+         bd_NodeProp.cpp
+         bd_nosebl.cpp
+         bd_OpArcSegDlg.cpp
+         bd_OpBlkDlg.cpp
+         bd_OpNodeDlg.cpp
+         bd_OpSegDlg.cpp
+         bd_Pref.cpp
+         bd_probdlg.cpp
+         bd_PtProp.cpp
+         bd_writepoly.cpp
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(302,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(302,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(302,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(302,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(323,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(323,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(323,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(323,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(374,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(374,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(374,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(374,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(643,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(643,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(643,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(643,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(651,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(651,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(651,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(651,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(689,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(689,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(689,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(689,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1424,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1424,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1424,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1424,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1445,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1445,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1445,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1445,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1477,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1477,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1477,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1477,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1540,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1540,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1540,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1540,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         beladrawDoc.cpp
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1911,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1911,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1911,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1911,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1921,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1921,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1921,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1921,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1934,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1934,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1934,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1934,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1945,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1945,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1945,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1945,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1957,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1957,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1957,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1957,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1971,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1971,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1971,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1971,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1987,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1987,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1987,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1987,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(2014,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(2014,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(2014,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(2014,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         beladrawLua.cpp
+         Generando c├│digo...
+         Compilando...
+         beladrawView.cpp
+         belaviewDoc.cpp
+         belaviewLua.cpp
+         belaviewView.cpp
+         BendContourDlg.cpp
+         BHData.cpp
+         BHDatafile.cpp
+         bhplot.cpp
+         BlockInt.cpp
+         bv_BlockInt.cpp
+         bv_CircDlg.cpp
+         bv_CplotDlg2.cpp
+         bv_DPlotDlg2.cpp
+         bv_LIntDlg.cpp
+         bv_makemask.cpp
+         bv_Pref.cpp
+         bv_problem.cpp
+         bv_VPlotDlg.cpp
+         bv_XYPlotDlg.cpp
+         CDRAWDOC.CPP
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(1989,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(1989,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(1989,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(1989,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2001,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2001,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2001,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2001,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2018,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2018,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2018,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2018,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2032,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2032,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2032,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2032,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2046,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2046,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2046,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2046,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2060,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2060,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2060,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2060,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2076,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2076,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2076,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2076,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2103,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2103,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2103,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2103,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         Generando c├│digo...
+         Compilando...
+         CDRAWLUA.CPP
+         cdrawView.cpp
+         cd_BdryDlg.cpp
+         cd_CircProp.cpp
+         cd_libdlg.cpp
+         cd_MatDlg.cpp
+         cd_movecopy.cpp
+         cd_NodeProp.cpp
+         cd_nosebl.cpp
+         cd_OpArcSegDlg.cpp
+         cd_OpBlkDlg.cpp
+         cd_OpNodeDlg.cpp
+         cd_OpSegDlg.cpp
+         CD_PREF.CPP
+         cd_probdlg.cpp
+         cd_PtProp.cpp
+         cd_writepoly.cpp
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(277,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(277,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(277,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(277,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(298,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(298,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(298,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(298,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(349,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(349,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(349,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(349,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(610,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(610,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(610,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(610,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(618,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(618,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(618,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(618,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(656,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(656,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(656,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(656,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1384,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1384,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1384,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1384,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1405,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1405,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1405,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1405,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1437,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1437,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1437,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1437,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1500,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1500,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1500,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1500,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         ChildFrm.cpp
+         CircDlg.cpp
+         CircProp.cpp
+         Generando c├│digo...
+         Compilando...
+         CopyDlg.cpp
+         CPlotDlg.cpp
+         CplotDlg2.cpp
+         CVIEWDOC.CPP
+         CVIEWLUA.CPP
+         cviewView.cpp
+         cv_BlockInt.cpp
+         cv_CircDlg.cpp
+         cv_CplotDlg2.cpp
+         cv_DPlotDlg2.cpp
+         cv_LIntDlg.cpp
+         cv_makemask.cpp
+         CV_PREF.CPP
+         cv_problem.cpp
+         cv_VPlotDlg.cpp
+         cv_XYPlotDlg.cpp
+         DXFImport.cpp
+         EnterPt.cpp
+         ExteriorProps.cpp
+         femm.cpp
+         Generando c├│digo...
+         Compilando...
+         FemmeDoc.cpp
+         femmeLua.cpp
+         FemmeView.cpp
+         femmplotDoc.cpp
+         femmplotView.cpp
+         FemmviewDoc.cpp
+         femmviewLua.cpp
+         FemmviewView.cpp
+         fe_libdlg.cpp
+         fullmatrix.cpp
+         GapIntegral.cpp
+         GapPlotDlg.cpp
+         GeneralPrefs.cpp
+         GRIDDLG.CPP
+         GridMod.cpp
+         GroupNumber.cpp
+         HDRAWDOC.CPP
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1988,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1988,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1988,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1988,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1998,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1998,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1998,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1998,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2013,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2013,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2013,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2013,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2033,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2033,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2033,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2033,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2045,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2045,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2045,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2045,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2059,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2059,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2059,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2059,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2075,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2075,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2075,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2075,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2102,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2102,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2102,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2102,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         HDRAWLUA.CPP
+         hdrawView.cpp
+         hd_BdryDlg.cpp
+         Generando c├│digo...
+         Compilando...
+         hd_CircProp.cpp
+         hd_libdlg.cpp
+         hd_MatDlg.cpp
+         hd_movecopy.cpp
+         hd_NodeProp.cpp
+         hd_nosebl.cpp
+         hd_OpArcSegDlg.cpp
+         hd_OpBlkDlg.cpp
+         hd_OpNodeDlg.cpp
+         hd_OpSegDlg.cpp
+         HD_PREF.CPP
+         hd_probdlg.cpp
+         hd_PtProp.cpp
+         hd_writepoly.cpp
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(277,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(277,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(277,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(277,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(298,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(298,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(298,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(298,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(349,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(349,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(349,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(349,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(610,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(610,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(610,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(610,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(618,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(618,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(618,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(618,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(656,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(656,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(656,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(656,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1384,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1384,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1384,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1384,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1405,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1405,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1405,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1405,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1437,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1437,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1437,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1437,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1500,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1500,13): message : considere el uso de ' %lli' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1500,13): message : considere el uso de ' %Ii' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1500,13): message : considere el uso de ' %I64i' en la cadena de formato [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         hviewDoc.cpp
+         hviewLua.cpp
+         hviewView.cpp
+         hv_BlockInt.cpp
+         hv_CircDlg.cpp
+         hv_CplotDlg2.cpp
+         Generando c├│digo...
+         Compilando...
+         hv_DPlotDlg2.cpp
+         hv_LIntDlg.cpp
+         HV_PREF.CPP
+         hv_problem.cpp
+         hv_VPlotDlg.cpp
+         hv_XYPlotDlg.cpp
+         KbdZoom.cpp
+         KCurve.cpp
+         LibFolderInfo.cpp
+         LIntDlg.cpp
+         LuaConsoleDlg.cpp
+         luaDDX.cpp
+         LuaEdit.cpp
+         MainFrm.cpp
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(491,5): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(491,5): warning C4302: 'conversi├│n de tipo': truncamiento de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(506,4): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(506,4): warning C4302: 'conversi├│n de tipo': truncamiento de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         MakeABCDlg.cpp
+         makemask.cpp
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\makemask.cpp(53,9): warning C4101: 'bsq': variable local sin referencia [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\makemask.cpp(53,13): warning C4101: 'dbsq': variable local sin referencia [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         MaskProgress.cpp
+         MatDlg.cpp
+         MDITabs.cpp
+         MirrorDlg.cpp
+         Generando c├│digo...
+         Compilando...
+         MOVECOPY.CPP
+         MyCommandLineInfo.cpp
+         MyMsgBox.cpp
+         MyRecentFileList.cpp
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,29): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,29): warning C4302: 'conversi├│n de tipo': truncamiento de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,45): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+     1>D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,45): warning C4302: 'conversi├│n de tipo': truncamiento de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         MyTabCtrl.cpp
+         NewDocDlg.cpp
+         NodeProp.cpp
+         NOSEBL.CPP
+         OpArcSegDlg.cpp
+         OpBlkDlg.cpp
+         OpGrp.cpp
+         OpNodeDlg.cpp
+         OpSegDlg.cpp
+         OutBox.cpp
+         Pref.cpp
+         Preferences.cpp
+         probdlg.cpp
+         Problem.cpp
+         PromptBox.cpp
+         PtProp.cpp
+         Generando c├│digo...
+         Compilando...
+         ScaleDlg.cpp
+         spars.cpp
+         TKDatafile.cpp
+         viewpref.cpp
+         VPlotDlg.cpp
+         writepoly.cpp
+         Xyplot.cpp
+         XYPlotDlg.cpp
+         Generando c├│digo...
+       ResourceCompile:
+         D:\Windows Kits\10\bin\10.0.26100.0\x86\rc.exe /D NDEBUG /D _VC80_UPGRADE=0x0600 /D _AFXDLL /l"0x0409" /Ix64\Release\ /nologo /fo"x64\Release\femm.res" femm.rc 
+     1>D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Msbuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1369,5): warning MSB8012: TargetPath(D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\x64\Release\femm.exe) no coincide con el valor de la propiedad OutputFile de Linker (D:\FEMM Source\femm42src_22Oct2023\femm42src\Release64\femm.exe). Esto puede hacer que el proyecto no se compile correctamente. Para solucionar este problema, aseg├║rese de que los valores de propiedad $(OutDir), $(TargetName) y $(TargetExt) coinciden con el valor especificado en %(Link.OutputFile). [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+       Link:
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"..\Release64/femm.exe" /INCREMENTAL:NO /NOLOGO ..\liblua\x64\Release\liblua.lib ..\ResizableLib\x64\Release\ResizableLib.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\Include\Manifest\dpiaware.manifest" /DEBUG:FULL /PDB:".\Release/femm_nomath.pdb" /MAP:".\Release/femm_nomath.map" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"x64\Release\femm.lib" /MACHINE:X64 x64\Release\femm.res
+         .\Release/ActiveFEMM.obj
+         .\Release/ArcDlg.obj
+         .\Release/BdryDlg.obj
+         .\Release/bd_BdryDlg.obj
+         .\Release/bd_CircProp.obj
+         .\Release/bd_libdlg.obj
+         .\Release/bd_MatDlg.obj
+         .\Release/bd_movecopy.obj
+         .\Release/bd_NodeProp.obj
+         .\Release/bd_nosebl.obj
+         .\Release/bd_OpArcSegDlg.obj
+         .\Release/bd_OpBlkDlg.obj
+         .\Release/bd_OpNodeDlg.obj
+         .\Release/bd_OpSegDlg.obj
+         .\Release/bd_Pref.obj
+         .\Release/bd_probdlg.obj
+         .\Release/bd_PtProp.obj
+         .\Release/bd_writepoly.obj
+         .\Release/beladrawDoc.obj
+         .\Release/beladrawLua.obj
+         .\Release/beladrawView.obj
+         .\Release/belaviewDoc.obj
+         .\Release/belaviewLua.obj
+         .\Release/belaviewView.obj
+         .\Release/BendContourDlg.obj
+         .\Release/BHData.obj
+         .\Release/BHDatafile.obj
+         .\Release/bhplot.obj
+         .\Release/BlockInt.obj
+         .\Release/bv_BlockInt.obj
+         .\Release/bv_CircDlg.obj
+         .\Release/bv_CplotDlg2.obj
+         .\Release/bv_DPlotDlg2.obj
+         .\Release/bv_LIntDlg.obj
+         .\Release/bv_makemask.obj
+         .\Release/bv_Pref.obj
+         .\Release/bv_problem.obj
+         .\Release/bv_VPlotDlg.obj
+         .\Release/bv_XYPlotDlg.obj
+         .\Release/CDRAWDOC.obj
+         .\Release/CDRAWLUA.obj
+         .\Release/cdrawView.obj
+         .\Release/cd_BdryDlg.obj
+         .\Release/cd_CircProp.obj
+         .\Release/cd_libdlg.obj
+         .\Release/cd_MatDlg.obj
+         .\Release/cd_movecopy.obj
+         .\Release/cd_NodeProp.obj
+         .\Release/cd_nosebl.obj
+         .\Release/cd_OpArcSegDlg.obj
+         .\Release/cd_OpBlkDlg.obj
+         .\Release/cd_OpNodeDlg.obj
+         .\Release/cd_OpSegDlg.obj
+         .\Release/CD_PREF.obj
+         .\Release/cd_probdlg.obj
+         .\Release/cd_PtProp.obj
+         .\Release/cd_writepoly.obj
+         .\Release/ChildFrm.obj
+         .\Release/CircDlg.obj
+         .\Release/CircProp.obj
+         .\Release/CopyDlg.obj
+         .\Release/CPlotDlg.obj
+         .\Release/CplotDlg2.obj
+         .\Release/CVIEWDOC.obj
+         .\Release/CVIEWLUA.obj
+         .\Release/cviewView.obj
+         .\Release/cv_BlockInt.obj
+         .\Release/cv_CircDlg.obj
+         .\Release/cv_CplotDlg2.obj
+         .\Release/cv_DPlotDlg2.obj
+         .\Release/cv_LIntDlg.obj
+         .\Release/cv_makemask.obj
+         .\Release/CV_PREF.obj
+         .\Release/cv_problem.obj
+         .\Release/cv_VPlotDlg.obj
+         .\Release/cv_XYPlotDlg.obj
+         .\Release/DXFImport.obj
+         .\Release/EnterPt.obj
+         .\Release/ExteriorProps.obj
+         .\Release/femm.obj
+         .\Release/FemmeDoc.obj
+         .\Release/femmeLua.obj
+         .\Release/FemmeView.obj
+         .\Release/femmplotDoc.obj
+         .\Release/femmplotView.obj
+         .\Release/FemmviewDoc.obj
+         .\Release/femmviewLua.obj
+         .\Release/FemmviewView.obj
+         .\Release/fe_libdlg.obj
+         .\Release/fullmatrix.obj
+         .\Release/GapIntegral.obj
+         .\Release/GapPlotDlg.obj
+         .\Release/GeneralPrefs.obj
+         .\Release/GRIDDLG.obj
+         .\Release/GridMod.obj
+         .\Release/GroupNumber.obj
+         .\Release/HDRAWDOC.obj
+         .\Release/HDRAWLUA.obj
+         .\Release/hdrawView.obj
+         .\Release/hd_BdryDlg.obj
+         .\Release/hd_CircProp.obj
+         .\Release/hd_libdlg.obj
+         .\Release/hd_MatDlg.obj
+         .\Release/hd_movecopy.obj
+         .\Release/hd_NodeProp.obj
+         .\Release/hd_nosebl.obj
+         .\Release/hd_OpArcSegDlg.obj
+         .\Release/hd_OpBlkDlg.obj
+         .\Release/hd_OpNodeDlg.obj
+         .\Release/hd_OpSegDlg.obj
+         .\Release/HD_PREF.obj
+         .\Release/hd_probdlg.obj
+         .\Release/hd_PtProp.obj
+         .\Release/hd_writepoly.obj
+         .\Release/hviewDoc.obj
+         .\Release/hviewLua.obj
+         .\Release/hviewView.obj
+         .\Release/hv_BlockInt.obj
+         .\Release/hv_CircDlg.obj
+         .\Release/hv_CplotDlg2.obj
+         .\Release/hv_DPlotDlg2.obj
+         .\Release/hv_LIntDlg.obj
+         .\Release/HV_PREF.obj
+         .\Release/hv_problem.obj
+         .\Release/hv_VPlotDlg.obj
+         .\Release/hv_XYPlotDlg.obj
+         .\Release/KbdZoom.obj
+         .\Release/KCurve.obj
+         .\Release/LibFolderInfo.obj
+         .\Release/LIntDlg.obj
+         .\Release/LuaConsoleDlg.obj
+         .\Release/luaDDX.obj
+         .\Release/LuaEdit.obj
+         .\Release/MainFrm.obj
+         .\Release/MakeABCDlg.obj
+         .\Release/makemask.obj
+         .\Release/MaskProgress.obj
+         .\Release/MatDlg.obj
+         .\Release/MDITabs.obj
+         .\Release/MirrorDlg.obj
+         .\Release/MOVECOPY.obj
+         .\Release/MyCommandLineInfo.obj
+         .\Release/MyMsgBox.obj
+         .\Release/MyRecentFileList.obj
+         .\Release/MyTabCtrl.obj
+         .\Release/NewDocDlg.obj
+         .\Release/NodeProp.obj
+         .\Release/NOSEBL.obj
+         .\Release/OpArcSegDlg.obj
+         .\Release/OpBlkDlg.obj
+         .\Release/OpGrp.obj
+         .\Release/OpNodeDlg.obj
+         .\Release/OpSegDlg.obj
+         .\Release/OutBox.obj
+         .\Release/Pref.obj
+         .\Release/Preferences.obj
+         .\Release/probdlg.obj
+         .\Release/Problem.obj
+         .\Release/PromptBox.obj
+         .\Release/PtProp.obj
+         .\Release/ScaleDlg.obj
+         .\Release/spars.obj
+         .\Release/StdAfx.obj
+         .\Release/TKDatafile.obj
+         .\Release/viewpref.obj
+         .\Release/VPlotDlg.obj
+         .\Release/writepoly.obj
+         .\Release/Xyplot.obj
+         .\Release/XYPlotDlg.obj
+         "D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\x64\Release\liblua.lib"
+         "D:\FEMM Source\femm42src_22Oct2023\femm42src\ResizableLib\x64\Release\ResizableLib.lib"
+         femm.vcxproj -> D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\x64\Release\femm.exe
+       FinalizeBuildStatus:
+         Se eliminar├í el archivo "x64\Release\femm.tlog\unsuccessfulbuild".
+         Aplicando tarea Touch a "x64\Release\femm.tlog\femm.lastbuildstate".
+     1>Compilaci├│n del proyecto terminada "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (Rebuild destinos).
+
+Compilaci├│n correcta.
+
+       "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (Rebuild destino) (1) ->
+       "D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj" (destino predeterminado) (2:2) ->
+       (ClCompile destino) -> 
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lapi.cpp(58,25): warning C4244: 'return': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lapi.cpp(69,18): warning C4244: 'return': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldebug.cpp(60,20): warning C4244: '=': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldebug.cpp(128,44): warning C4244: 'return': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldebug.cpp(391,18): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldo.cpp(69,12): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ldo.cpp(84,9): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lfunc.cpp(71,29): warning C4267: '+=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lfunc.cpp(77,31): warning C4267: '-=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lgc.cpp(289,56): warning C4267: '+=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lgc.cpp(291,5): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liolib.cpp(341,18): warning C4267: '=': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lmem.cpp(127,51): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lmem.cpp(127,57): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(63,5): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(64,50): warning C4267: '+=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(181,25): warning C4267: '=': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lobject.cpp(190,38): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstate.cpp(123,65): warning C4267: '-=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstate.cpp(129,44): warning C4267: '-=': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(48,22): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'unsigned long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(65,58): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(65,58): warning C4302: 'conversi├│n de tipo': truncamiento de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(116,1): warning C4267: 'argumento': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(125,28): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(125,28): warning C4302: 'conversi├│n de tipo': truncamiento de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(131,12): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstring.cpp(131,12): warning C4302: 'conversi├│n de tipo': truncamiento de 'void *' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(25,30): warning C4244: 'argumento': conversi├│n de 'size_t' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(42,29): warning C4267: '=': conversi├│n de 'size_t' a 'long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(302,27): warning C4244: '=': conversi├│n de '__int64' a 'long'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(417,38): warning C4244: 'argumento': conversi├│n de '__int64' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(418,38): warning C4244: 'argumento': conversi├│n de 'size_t' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lstrlib.cpp(477,15): warning C4244: 'argumento': conversi├│n de 'size_t' a 'double'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(52,11): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'TString *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(52,11): warning C4302: 'conversi├│n de tipo': truncamiento de 'TString *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(55,11): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'Hash *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(55,11): warning C4302: 'conversi├│n de tipo': truncamiento de 'Hash *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(58,11): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'Closure *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(58,11): warning C4302: 'conversi├│n de tipo': truncamiento de 'Closure *const ' a 'unsigned long' [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\ltable.cpp(147,11): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(38,20): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(47,13): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(51,20): warning C4267: 'argumento': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(62,14): warning C4267: 'inicializando': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lundump.cpp(68,22): warning C4267: 'argumento': conversi├│n de 'size_t' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(70,10): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(303,36): warning C4267: '+=': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(312,16): warning C4267: '+=': conversi├│n de 'size_t' a 'lint32'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\lvm.cpp(337,15): warning C4244: 'inicializando': conversi├│n de '__int64' a 'int'; posible p├®rdida de datos [D:\FEMM Source\femm42src_22Oct2023\femm42src\liblua\liblua.vcxproj]
+
+
+       "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (Rebuild destino) (1) ->
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(302,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(323,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(374,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(643,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(651,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(689,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1424,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1445,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1477,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\bd_writepoly.cpp(1540,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1911,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1921,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1934,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1945,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1957,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1971,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(1987,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\beladrawDoc.cpp(2014,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(1989,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2001,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2018,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2032,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2046,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2060,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2076,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\CDRAWDOC.CPP(2103,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(277,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(298,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(349,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(610,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(618,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(656,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1384,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1405,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1437,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\cd_writepoly.cpp(1500,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1988,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(1998,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2013,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2033,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2045,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2059,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2075,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\HDRAWDOC.CPP(2102,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(277,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(298,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(349,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(610,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(618,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(656,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1384,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1405,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1437,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\hd_writepoly.cpp(1500,13): warning C4477: 'fprintf' : la cadena de formato '%i' requiere un argumento de tipo 'int', pero el argumento vari├ídico 1 tiene el tipo 'INT_PTR' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(491,5): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(491,5): warning C4302: 'conversi├│n de tipo': truncamiento de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(506,4): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MainFrm.cpp(506,4): warning C4302: 'conversi├│n de tipo': truncamiento de 'HINSTANCE' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\makemask.cpp(53,9): warning C4101: 'bsq': variable local sin referencia [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\makemask.cpp(53,13): warning C4101: 'dbsq': variable local sin referencia [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,29): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,29): warning C4302: 'conversi├│n de tipo': truncamiento de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,45): warning C4311: 'conversi├│n de tipo': truncamiento de puntero de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+         D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\MyRecentFileList.cpp(65,45): warning C4302: 'conversi├│n de tipo': truncamiento de 'const TCHAR *' a 'int' [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+
+
+       "D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj" (Rebuild destino) (1) ->
+       (DoLinkOutputFilesMatch destino) -> 
+         D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Msbuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1369,5): warning MSB8012: TargetPath(D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\x64\Release\femm.exe) no coincide con el valor de la propiedad OutputFile de Linker (D:\FEMM Source\femm42src_22Oct2023\femm42src\Release64\femm.exe). Esto puede hacer que el proyecto no se compile correctamente. Para solucionar este problema, aseg├║rese de que los valores de propiedad $(OutDir), $(TargetName) y $(TargetExt) coinciden con el valor especificado en %(Link.OutputFile). [D:\FEMM Source\femm42src_22Oct2023\femm42src\femm\femm.vcxproj]
+
+    115 Advertencia(s)
+    0 Errores
+
+Tiempo transcurrido 00:01:01.95

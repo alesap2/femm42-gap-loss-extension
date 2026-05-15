@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <afx.h>
 #include <afxtempl.h>
+#include "bessel_perplenz.h"
 #include "problem.h"
 #include "femm.h"
 #include "xyplot.h"
@@ -614,6 +615,7 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.Cduct_t=0.;
 			MProp.Cduct_n=0.;
 			MProp.bAnisoConductivity=FALSE;
+			MProp.bPerpLenz=FALSE;
 			q[0]=NULL;
 		}
 
@@ -707,6 +709,14 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		   sscanf(v,"%i",&MProp.LamType);
 		   q[0]=NULL;
 		}	
+
+		if( _strnicmp(q,"<PerpLenz>",10)==0){
+		   int pl=0;
+		   v=StripKey(s);
+		   sscanf(v,"%i",&pl);
+		   MProp.bPerpLenz = (pl != 0) ? TRUE : FALSE;
+		   q[0]=NULL;
+		}
 
 		if( _strnicmp(q,"<NStrands>",10)==0){
 		   v=StripKey(s);
@@ -1391,6 +1401,100 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				else{
 					blockproplist[k].mu_fdy=(blockproplist[k].mu_fdy)*
 					blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+				}
+			}
+		}
+		else if (blockproplist[k].LamType==1 || blockproplist[k].LamType==2) {
+			// Mirror safeguard + permeability logic from prob2big.cpp.
+			// This ensures blockintegral(3) and (6) are consistent with the solve.
+			if (!blockproplist[k].bPerpLenz) {
+				// Safeguard path: solver downgraded this to LamType=0.
+				blockproplist[k].mu_fdx = blockproplist[k].mu_x *
+				                          exp(-I*blockproplist[k].Theta_hx*PI/180.);
+				blockproplist[k].mu_fdy = blockproplist[k].mu_y *
+				                          exp(-I*blockproplist[k].Theta_hy*PI/180.);
+				if (blockproplist[k].Lam_d != 0) {
+					// Always use Cduct (bulk in-plane conductivity) for the tanh formula.
+					// bAnisoConductivity may be TRUE here only because <Sigma_t> was
+					// present in the .fem file (PerpLenz material), not because Cduct_n
+					// is the relevant through-lamination conductivity.  Using Cduct_n
+					// (which defaults to 0) would yield K=0 => tanh(K)/K = NaN.
+					double CductTanh = blockproplist[k].Cduct;
+					halflag = exp(-I*blockproplist[k].Theta_hx*PI/360.);
+					ds = sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_x));
+					K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					if (blockproplist[k].Cduct != 0)
+						blockproplist[k].mu_fdx = (blockproplist[k].mu_fdx*tanh(K)/K)*
+							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+					else
+						blockproplist[k].mu_fdx = blockproplist[k].mu_fdx*
+							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+					halflag = exp(-I*blockproplist[k].Theta_hy*PI/360.);
+					ds = sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_y));
+					K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					if (blockproplist[k].Cduct != 0)
+						blockproplist[k].mu_fdy = (blockproplist[k].mu_fdy*tanh(K)/K)*
+							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+					else
+						blockproplist[k].mu_fdy = blockproplist[k].mu_fdy*
+							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+				}
+			} else {
+				// PerpLenz active: parallel gets tanh, perpendicular gets Bessel or series.
+				blockproplist[k].mu_fdx = blockproplist[k].mu_x *
+				                          exp(-I*blockproplist[k].Theta_hx*PI/180.);
+				blockproplist[k].mu_fdy = blockproplist[k].mu_y *
+				                          exp(-I*blockproplist[k].Theta_hy*PI/180.);
+				if (blockproplist[k].Lam_d != 0) {
+					if (blockproplist[k].LamType == 2) {
+						// By=PARALLEL (tanh), Bx=PERPENDICULAR (Bessel or series).
+						halflag = exp(-I*blockproplist[k].Theta_hy*PI/360.);
+						ds = sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
+						K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+						if (blockproplist[k].Cduct != 0)
+							blockproplist[k].mu_fdy = (blockproplist[k].mu_fdy*tanh(K)/K)*
+								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+						else
+							blockproplist[k].mu_fdy = blockproplist[k].mu_fdy*
+								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+						if (blockproplist[k].Cduct_t > 0.) {
+							CComplex mufe = blockproplist[k].mu_fdx;
+							double sig_SI = blockproplist[k].Cduct_t * 1.e6;
+							CComplex g2 = -I * w * mufe * muo * sig_SI;
+							double a = blockproplist[k].Lam_d * 0.001 * 0.5;
+							CComplex za = sqrt(g2) * a;
+							blockproplist[k].mu_fdx = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
+							                        + (1. - blockproplist[k].LamFill);
+						} else {
+							CComplex inv_mu = blockproplist[k].LamFill / blockproplist[k].mu_fdx
+							                + (1. - blockproplist[k].LamFill);
+							blockproplist[k].mu_fdx = 1.0 / inv_mu;
+						}
+					} else { // LamType == 1
+						// Bx=PARALLEL (tanh), By=PERPENDICULAR (Bessel or series).
+						halflag = exp(-I*blockproplist[k].Theta_hx*PI/360.);
+						ds = sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+						K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+						if (blockproplist[k].Cduct != 0)
+							blockproplist[k].mu_fdx = (blockproplist[k].mu_fdx*tanh(K)/K)*
+								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+						else
+							blockproplist[k].mu_fdx = blockproplist[k].mu_fdx*
+								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+						if (blockproplist[k].Cduct_t > 0.) {
+							CComplex mufe = blockproplist[k].mu_fdy;
+							double sig_SI = blockproplist[k].Cduct_t * 1.e6;
+							CComplex g2 = -I * w * mufe * muo * sig_SI;
+							double a = blockproplist[k].Lam_d * 0.001 * 0.5;
+							CComplex za = sqrt(g2) * a;
+							blockproplist[k].mu_fdy = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
+							                        + (1. - blockproplist[k].LamFill);
+						} else {
+							CComplex inv_mu = blockproplist[k].LamFill / blockproplist[k].mu_fdy
+							                + (1. - blockproplist[k].LamFill);
+							blockproplist[k].mu_fdy = 1.0 / inv_mu;
+						}
+					}
 				}
 			}
 		}
