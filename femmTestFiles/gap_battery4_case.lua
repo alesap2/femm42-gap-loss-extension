@@ -291,8 +291,10 @@ while xi <= ngx do
     local Av, Bxv, Byv = mo_getpointvalues(gxv, gyv)
     if Bxv == nil then Bxv = 0.0 end
     if Byv == nil then Byv = 0.0 end
-    sum_bx2 = sum_bx2 + Bxv * Bxv
-    sum_b2  = sum_b2  + Bxv * Bxv + Byv * Byv
+    local bxm = abs(Bxv)
+    local bym = abs(Byv)
+    sum_bx2 = sum_bx2 + bxm * bxm
+    sum_b2  = sum_b2  + bxm * bxm + bym * bym
     grid_n  = grid_n + 1
     yi = yi + 1
   end
@@ -304,8 +306,10 @@ while xi <= ngx do
     local Av, Bxv, Byv = mo_getpointvalues(gxv, gyv)
     if Bxv == nil then Bxv = 0.0 end
     if Byv == nil then Byv = 0.0 end
-    sum_bx2 = sum_bx2 + Bxv * Bxv
-    sum_b2  = sum_b2  + Bxv * Bxv + Byv * Byv
+    local bxm = abs(Bxv)
+    local bym = abs(Byv)
+    sum_bx2 = sum_bx2 + bxm * bxm
+    sum_b2  = sum_b2  + bxm * bxm + bym * bym
     grid_n  = grid_n + 1
     yi = yi + 1
   end

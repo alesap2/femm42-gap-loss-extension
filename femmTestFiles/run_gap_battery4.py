@@ -30,7 +30,7 @@ Matrix
 ------
   modes    : LT0_OFF (baseline, used for P_x decomposition)
              LT2_ON  (Bessel correction; f_Bx shown for comparison only)
-  gap_mm   : 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0  (7 values — wider than bat.1-3)
+  gap_mm   : 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0  (7 values — all >= base 2.0 mm; wider than bat.1-3)
   freq_hz  : 10 000 , 30 000 , 100 000 , 200 000
   d_lam_mm : 0.025  (nominal 25 µm, fixed)
   bn_t     : 0.5 , 1.0                            (2 levels; β=2 so others trivial)
@@ -90,7 +90,7 @@ MODES = [
     {"mode_name": "LT2_ON",  "lam_type": 2, "perp_enable": 1},
 ]
 
-GAP_MM_LIST      = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]  # wider than bat. 1-3
+GAP_MM_LIST      = [2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0]  # all >= BASE_GAP_MM=2.0
 FREQ_HZ_LIST     = [10_000, 30_000, 100_000, 200_000]
 D_LAM_MM         = 0.025                                   # 25 µm fixed
 TARGET_BN_T_LIST = [0.5, 1.0]                             # 2 levels

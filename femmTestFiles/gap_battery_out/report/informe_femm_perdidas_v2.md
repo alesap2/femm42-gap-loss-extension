@@ -22,7 +22,7 @@ Se realizó un barrido paramétrico de **1536 simulaciones armónicas FEM** sobr
 - La ecuación de diseño sin doble conteo combina `blockintegral(3)` de FEMM (eddy intra-lámina) con la separación de Bertotti sobre curvas del fabricante (histéresis).
 - Los coeficientes de Bertotti obtenidos del fabricante son: k_h = 1.357×10⁻², n = 1.806, k_e = 8.009×10⁻⁷ W·s²/kg. El valor de k_e es 4.7× superior al teórico para una lámina aislada (d = 25 µm, datasheet), atribuido al acoplamiento inter-laminar propio del núcleo amorfo enrollado; confirmado numéricamente mediante un barrido de calibración de 36 casos (1–200 kHz) sobre el modelo sin entrehierro (§7.3).
 - **Batería 3 (288 casos, d = 10–100 µm):** ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) varía entre −1.69% y +0.49%. La corrección PerpLenz reduce las pérdidas para d ≤ 25 µm a baja frecuencia, y las aumenta ligeramente para d ≥ 50 µm a alta frecuencia. Rango ingenierístico: < ±2% en todos los casos ensayados (§4.7).
-- **Batería 4 (112 casos, diseñada, pendiente de simulación):** Aislamiento directo de $P_x$ (pérdidas por flujo perpendicular) mediante la fracción $f_{Bx}$ sobre una malla 2D. Objetivo: verificar si $P_x \propto g^\gamma$ con $\gamma \approx 1$, conforme a Wang et al. (2017). Ver §4.8.
+- **Batería 4 (112 casos, completada):** Aislamiento directo de $P_x$ (pérdidas por flujo perpendicular) mediante la fracción $f_{Bx}$ sobre una malla 2D. Resultado: $f_{Bx}$ crece de 1.74 % a 2.55 % entre $g=2$ y 6 mm; $\gamma_{P_x} = 0.35$ (vs $\gamma=1$ de Wang). Ver §4.8.
 
 ---
 
@@ -244,6 +244,8 @@ La siguiente tabla consolida los cuatro modos implementados, indicando qué corr
 | Inducción B_n | 0.50, 1.00 T |
 | **Total** | **112 casos (pendiente)** |
 
+> **Nota:** entrehierros inferiores al gap base del modelo (2.0 mm en rev2.fem) no son alcanzables sin rehacer la geometría (mover el grupo superior hacia abajo genera solapamientos). El rango se ajustó a g ∈ {2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0} mm.
+
 Resultados: **288/288 [OK], 960/960 [OK], 288/288 [OK] — NaN: 0** en las tres baterías completadas. La batería 4 está diseñada y lista para ejecutar.
 
 La batería 2 incluye también la exportación de un campo nodal 2D (14 × 20 = 280 puntos) en el bloque "Amorphous gap" para los 10 casos base (f = 100 kHz, B_n = 1.0 T, g = 2.0 mm, d = 10–100 µm), que se usa para validar la fracción de flujo perpendicular (§4.6).
@@ -435,7 +437,7 @@ Rango total: [−1.69%, +0.49%]. La dependencia con B_n es β = 2.0000 exacto (R
 
 Ver [fig_battery3_overview.png](../gap_battery3_out/fig_battery3_overview.png) y [fig_battery3_scaling.png](../gap_battery3_out/fig_battery3_scaling.png).
 
-### 4.8 Batería 4: Escalado de $P_x$ con el Entrehierro — Verificación de Wang (112 Casos, Pendiente)
+### 4.8 Batería 4: Escalado de $P_x$ con el Entrehierro — Verificación de Wang (112 Casos, Completada)
 
 #### 4.8.1 Motivación
 
@@ -453,7 +455,7 @@ El parámetro $P_x$ es el equivalente FEMM 2D de $P_g$ de Wang.
 
 #### 4.8.2 Diseño Experimental
 
-Se amplió el rango de entrehierro a $g \in \{1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0\}$ mm para cubrir una década completa en escala log-log y obtener un ajuste robusto del exponente $\gamma$. El espesor se fijó en $d = 25$ µm (valor nominal del datasheet) y se redujeron los niveles de $B_n$ a dos (0.5 y 1.0 T), suficientes para confirmar $\beta = 2$ sin multiplicar innecesariamente el número de casos.
+Se amplió el rango de entrehierro a $g \in \{2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0\}$ mm para obtener un ajuste robusto del exponente $\gamma$ respetando la restricción $g \geq g_\text{base} = 2$ mm de la geometría. El espesor se fijó en $d = 25$ µm (valor nominal del datasheet) y se redujeron los niveles de $B_n$ a dos (0.5 y 1.0 T), suficientes para confirmar $\beta = 2$ sin multiplicar innecesariamente el número de casos.
 
 La malla 2D cubre ambos bloques "Amorphous gap" del tramo interior:
 - Posiciones x: {1, 3, 5, 7, 9, 11} mm (6 puntos, dentro del ancho 0–14 mm)
@@ -474,8 +476,8 @@ Wang escribe $P_g = k_g \cdot l_g \cdot D^{1.65} \cdot f_\text{kHz}^{1.72} \cdot
 | Cantidad | Wang (2017) | Esta batería (FEMM 2D) |
 |---|---|---|
 | Pérdidas por flujo $\perp$ | $P_g$ (empírico, 3D) | $P_x = f_{Bx} \times P_\text{side}$ (analítico, 2D) |
-| Exponente de gap | $\gamma = +1.0$ | $\gamma_{P_x}$ (a medir) |
-| Exponente de frecuencia | $\alpha = 1.72$ | $\alpha_{P_x}$ (a medir en batería 4) |
+| Exponente de gap | $\gamma = +1.0$ | $\gamma_{P_x} = \mathbf{0.351}$ (medido, $R^2=0.994$) |
+| Exponente de frecuencia | $\alpha = 1.72$ | $\alpha_{P_x}$ independiente de $g$ (idem $P_\text{side}$) |
 | Variable fija | $B_m$ constante | $B_n$ constante (calibrado) |
 | Dimensionalidad | 3D completo | 2D planar |
 
@@ -483,15 +485,46 @@ Wang escribe $P_g = k_g \cdot l_g \cdot D^{1.65} \cdot f_\text{kHz}^{1.72} \cdot
 
 Una diferencia $\gamma_{P_x} < 1$ indicaría que el modelo 2D subestima la extensión axial del fringing (efecto 3D que FEMM no captura). Un $\gamma_{P_x}$ entre 0.7 y 1.3 se consideraría consistente con Wang dada la diferencia de dimensionalidad.
 
-#### 4.8.4 Salidas esperadas
+#### 4.8.4 Resultados
 
-- `gap_battery4_out/gap_battery4_summary.csv` — 112 filas con $f_{Bx}$ y $P_x$ por caso
-- `gap_battery4_out/gap_battery4_wang.csv` — tabla $f_{Bx}$, $P_x$, $P_y$ vs $g$ (LT0\_OFF, $B_n=1$ T)
-- `gap_battery4_out/fit4_gap_gamma_px.csv` — exponente $\gamma$ de $P_x$ vs $g$ por frecuencia
-- `gap_battery4_out/fit4_gap_gamma_ps.csv` — exponente $\gamma$ de $P_\text{side}$ vs $g$ (referencia, esperado $\approx 0$)
-- Figuras: $f_{Bx}$ vs $g$; $P_x$ vs $g$ (log-log + pendiente Wang); resumen de $\gamma(f)$
+**$f_{Bx}$ [%] en función del entrehierro** (LT0\_OFF, $B_n=1$ T):
 
-> **Estado:** scripts completos y pusheados (`gap_battery4_case.lua` / `run_gap_battery4.py`). Resultados pendientes de simulación. Esta sección se actualizará con los valores numéricos una vez completada.
+| $g$ (mm) | 10 kHz | 30 kHz | 100 kHz | 200 kHz |
+|---:|---:|---:|---:|---:|
+| 2.0 | 1.74 | 1.74 | 1.74 | 1.74 |
+| 2.5 | 1.83 | 1.83 | 1.83 | 1.83 |
+| 3.0 | 1.96 | 1.96 | 1.96 | 1.96 |
+| 3.5 | 2.08 | 2.08 | 2.08 | 2.08 |
+| 4.0 | 2.19 | 2.19 | 2.19 | 2.19 |
+| 5.0 | 2.40 | 2.40 | 2.40 | 2.40 |
+| 6.0 | 2.55 | 2.55 | 2.55 | 2.55 |
+
+> $f_{Bx}$ es **independiente de la frecuencia** — confirma que es una cantidad puramente geométrica, determinada únicamente por la distribución del campo magnetostático del entrehierro.
+
+**$P_x$ [mW] en función del entrehierro** (LT0\_OFF, $B_n=1$ T):
+
+| $g$ (mm) | 10 kHz | 30 kHz | 100 kHz | 200 kHz |
+|---:|---:|---:|---:|---:|
+| 2.0 | 34.1 | 305.7 | 3250.0 | 11529.6 |
+| 2.5 | 35.8 | 321.3 | 3415.4 | 12116.2 |
+| 3.0 | 38.3 | 343.0 | 3646.5 | 12936.3 |
+| 3.5 | 40.4 | 362.5 | 3854.0 | 13672.1 |
+| 4.0 | 42.7 | 382.5 | 4066.9 | 14427.7 |
+| 5.0 | 46.6 | 418.0 | 4443.6 | 15764.0 |
+| 6.0 | 49.5 | 443.3 | 4713.0 | 16719.6 |
+
+**Ajuste de ley de potencia $P_x \propto g^{\gamma}$** (LT0\_OFF, $B_n=1$ T):
+
+| $f$ (kHz) | $\gamma_{P_x}$ | $R^2$ | $\gamma_{f_{Bx}}$ | $\gamma_{P_\text{side}}$ |
+|---:|---:|---:|---:|---:|
+| 10 | 0.351 | 0.994 | 0.363 | −0.012 |
+| 30 | 0.351 | 0.994 | 0.363 | −0.012 |
+| 100 | 0.351 | 0.994 | 0.363 | −0.012 |
+| 200 | 0.351 | 0.994 | 0.363 | −0.012 |
+
+**Interpretación:** $\gamma_{P_x} = 0.351$ frente a $\gamma_\text{Wang} = 1.0$ indica que el modelo 2D captura la proyección transversal del fringing, pero no la **extensión axial** de la zona de dispersión, que en 3D crece aproximadamente con $g$ (Wang) y aporta el resto del exponente. La relación $\gamma_{P_x} \approx \gamma_{f_{Bx}} + \gamma_{P_\text{side}}$ (0.351 ≈ 0.363 − 0.012) se cumple exactamente, confirmando que la descomposición $P_x = f_{Bx} \times P_\text{side}$ es exacta bajo LT0\_OFF.
+
+Ver figuras: [fig_battery4_fbx.png](../gap_battery4_out/fig_battery4_fbx.png), [fig_battery4_px.png](../gap_battery4_out/fig_battery4_px.png), [fig_battery4_gamma.png](../gap_battery4_out/fig_battery4_gamma.png).
 
 ---
 
