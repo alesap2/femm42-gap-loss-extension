@@ -34,6 +34,9 @@ FEMM 4.2 implementa ambos efectos mediante la permeabilidad compleja efectiva: l
 - Batería 1: 288 casos, d = 23 µm fijo, tres modos (LT0_OFF, LT2_OFF, LT2_ON), barrido en f, g, B_n.
 - Batería 2: 960 casos, d ∈ {10, 18, 23, 50, 100} µm, dos modos (LT0_OFF, LT2_ON).
 - Batería 3: 288 casos, d ∈ {10, 25, 50, 100} µm, dos modos (LT0_OFF, LT2_ON), g ∈ {2, 3, 4} mm — análisis sistemático de ΔP_⊥.
+
+> **Nota sobre d = 23 µm y d = 25 µm:** el espesor nominal del material según el datasheet es **d = 25 µm**, y es el parámetro de referencia para el análisis teórico (§7.3) y para la batería 3. Las baterías 1 y 2 realizaron un barrido paramétrico que incluyó **d = 23 µm** como valor de ensayo (~8 % inferior al nominal). La diferencia en ΔP_⊥ entre ambos valores es < 0.1 pp (§4.7), por lo que los resultados son comparables entre baterías. Toda vez que el texto indica "d = 23 µm", se refiere a resultados de las baterías 1 o 2; cuando indica "d = 25 µm" como material de referencia, se refiere a los resultados de la batería 3 o al valor teórico del datasheet.
+
 - Comparación metodológica con Wang et al. (2017).
 - Procedimiento de diseño sin doble conteo, incluyendo separación de Bertotti sobre datos del fabricante.
 - Calibración numérica de k_e_FEMM mediante simulación sin entrehierro (36 casos, 1–200 kHz), verificando la consistencia interna del modelo FEMM respecto a la teoría analítica de lámina aislada.
@@ -65,9 +68,11 @@ Los bloques de material se dividen en dos regiones: "Amorphous" (cuerpo del núc
 | Ángulo de pérdidas de histéresis | Φ_h | 0 | ° |
 | Densidad del material | ρ_Fe | 7 180 | kg/m³ |
 
+> **Nota:** la tabla de profundidades de piel siguiente se calcula con d = 25 µm (valor nominal del datasheet). Para d = 23 µm (baterías 1 y 2), los valores de d/(2δ) son un 8 % menores: por ejemplo, 1.10 a 100 kHz en lugar de 1.19 (véase §4.4 y §5.2).
+
 Con estos parámetros, la profundidad de piel δ = √(2/(ωμ_rμ_0σ)) vale:
 
-| f (kHz) | δ (µm) | d/(2δ) | Régimen |
+| f (kHz) | δ (µm) | d/(2δ), d = 25 µm | Régimen |
 |---------|--------|--------|---------|
 | 10 | 33.1 | 0.38 | Lámina delgada |
 | 30 | 19.1 | 0.65 | Transición temprana |
@@ -214,7 +219,18 @@ La siguiente tabla consolida los cuatro modos implementados, indicando qué corr
 | Inducción B_n | 0.10, 0.20, 0.40, 0.80, 1.00, 1.30 T |
 | **Total** | **960 casos** |
 
-Resultados: **288/288 [OK], 960/960 [OK] — NaN: 0** en ambas baterías.
+**Batería 3 — 2 modos, d y g variables, análisis ΔP_⊥:**
+
+| Variable | Valores |
+|----------|---------|
+| Modos | LT0_OFF, LT2_ON |
+| Espesor d | 10, 25, 50, 100 µm |
+| Frecuencia f | 10, 30, 100, 200 kHz |
+| Entrehierro g | 2.0, 3.0, 4.0 mm |
+| Inducción B_n | 0.10, 0.50, 1.00 T |
+| **Total** | **288 casos** |
+
+Resultados: **288/288 [OK], 960/960 [OK], 288/288 [OK] — NaN: 0** en las tres baterías.
 
 La batería 2 incluye también la exportación de un campo nodal 2D (14 × 20 = 280 puntos) en el bloque "Amorphous gap" para los 10 casos base (f = 100 kHz, B_n = 1.0 T, g = 2.0 mm, d = 10–100 µm), que se usa para validar la fracción de flujo perpendicular (§4.6).
 
@@ -248,7 +264,7 @@ Para la ley global se combina log P = log K + γ·log g + α·log f + β·log B_
 
 ### 4.1 Exponente β — Inducción
 
-**β = 2.0000 exacto en los 1248 casos, R² = 1.000000 sin excepción**.
+**β = 2.0000 exacto en los 1536 casos, R² = 1.000000 sin excepción**.
 
 El ajuste es perfecto hasta la precisión doble en todos los modos, frecuencias, gaps y espesores. La causa física se explica en §5.1.
 
@@ -399,7 +415,7 @@ Rango total: [−1.69%, +0.49%]. La dependencia con B_n es β = 2.0000 exacto (R
 
 **Dependencia con el entrehierro:** a d y f fijos, mayor gap → mayor |ΔP_⊥|. Para ΔP < 0 (d pequeño), el valor absoluto crece con el gap al aumentar la zona de fringing y la intensidad de B_x. Para ΔP > 0 (d grande), el valor positivo decrece con el gap, ya que la fracción B_x en la línea de medida se diluye en una región de fringing más amplia.
 
-**Consistencia con baterías 1+2:** los valores a d = 25 µm de la batería 3 son coherentes con d = 23 µm de las baterías anteriores (diferencia < 0.1 pp), confirmando la reproducibilidad.
+**Relación con baterías 1+2:** la batería 3 usa d = 25 µm (valor nominal del datasheet) mientras que las baterías 1 y 2 incluían d = 23 µm como punto de barrido paramétrico (~8 % inferior). Los valores de ΔP_⊥ a d = 25 µm difieren en menos de 0.1 pp de los que se obtendrían interpolando en d = 23 µm: la pequeña diferencia de espesor no altera ninguna de las conclusiones. Véase la nota al inicio de §1 para el contexto completo sobre la distinción entre estos dos valores.
 
 **Guía de diseño:** la corrección PerpLenz modifica las pérdidas en menos de ±2 % en todos los casos estudiados. Para el material de referencia (d = 25 µm, f ≤ 30 kHz), LT2_ON predice ≈1.5 % menos pérdidas que LT0_OFF — corrección pequeña pero físicamente correcta. A f ≥ 100 kHz o d ≥ 50 µm la diferencia es inferior al 0.5 % y puede despreciarse para ingeniería.
 
@@ -487,7 +503,7 @@ No hay contradicción entre los resultados: responden a preguntas distintas.
 | Qué mide P | Eddy totales (todo el núcleo) | Incremento por fringing (P_total − P_base) |
 | Variable de normalización | B_n calibrado = constante | I constante |
 | Material | Amorfo (μ_r = 30 000) | Finemet (μ_r = 2 500) |
-| d/(2δ) a 100 kHz | ~1.10 (transición) | ~0.58 (semi-delgado) |
+| d/(2δ) a 100 kHz | ~1.10 (d = 23 µm, bat. 1) | ~0.58 (semi-delgado) |
 | Validación | Numérica (R² > 0.999) | Experimental (error < 15%) |
 
 **Wang no incorpora la corrección Bessel de disco cilíndrico para el flujo perpendicular.** Su modelo de material para el flujo perpendicular es la reluctancia en serie (equivalente a LT2_OFF), sin PerpLenz. La corrección Bessel (PerpLenz, LT2_ON) mejora el modelo FEMM 2D incorporando física que un modelo 3D completo tipo Wang capturaría de forma implícita al resolver la geometría real.
@@ -503,7 +519,7 @@ No hay contradicción: miden cosas distintas (incremento vs total, I fija vs B_n
 **Exponente de frecuencia:**
 - Wang α = 1.72 vs este trabajo α = 1.97
 
-Esta diferencia tiene tres causas simultáneas: (1) P_g mide el incremento por flujo perpendicular, cuyo mecanismo (disco Bessel) tiene un exponente propio inferior a 2, especialmente cuando |z_a| ~ 1; (2) el Finemet (μ_r = 2500) opera en régimen más delgado (d/(2δ) ≈ 0.58 a 100 kHz) que el amorfo (d/(2δ) ≈ 1.10), por lo que el flujo paralelo del Finemet también tiene un α propio más cercano a 2 antes de aplicar la corrección Wang; (3) el exponente diferencial de la corrección tanh varía con el régimen de operación y los dos materiales están en regímenes distintos. **No es válido comparar directamente los dos α** para extraer conclusiones sobre cuál material es "mejor".
+Esta diferencia tiene tres causas simultáneas: (1) P_g mide el incremento por flujo perpendicular, cuyo mecanismo (disco Bessel) tiene un exponente propio inferior a 2, especialmente cuando |z_a| ~ 1; (2) el Finemet (μ_r = 2500) opera en régimen más delgado (d/(2δ) ≈ 0.58 a 100 kHz) que el amorfo (d/(2δ) ≈ 1.10 para d = 23 µm, batería 1; o ≈ 1.19 para d = 25 µm nominal), por lo que el flujo paralelo del Finemet también tiene un α propio más cercano a 2 antes de aplicar la corrección Wang; (3) el exponente diferencial de la corrección tanh varía con el régimen de operación y los dos materiales están en regímenes distintos. **No es válido comparar directamente los dos α** para extraer conclusiones sobre cuál material es "mejor".
 
 **Exponente de inducción:** β ≈ 2 en ambos casos. Es universal para el modelo lineal.
 
@@ -513,7 +529,7 @@ Esta diferencia tiene tres causas simultáneas: (1) P_g mide el incremento por f
 
 Las dos ecuaciones son **complementarias, no alternativas**. La ecuación de diseño combinada se presenta en §7.4.
 
-**Limitación de Wang en este contexto:** la ecuación fue derivada y validada para Finemet. Aplicarla al amorfo de alta permeabilidad requeriría recalibrar k_g y posiblemente los exponentes, dado que el régimen de efecto piel es distinto (d/(2δ) ≈ 1.10 vs 0.58 a 100 kHz).
+**Limitación de Wang en este contexto:** la ecuación fue derivada y validada para Finemet. Aplicarla al amorfo de alta permeabilidad requeriría recalibrar k_g y posiblemente los exponentes, dado que el régimen de efecto piel es distinto (d/(2δ) ≈ 1.10 para el amorfo con d = 23 µm de la batería 1, o ≈ 1.19 con d = 25 µm nominal, vs 0.58 para el Finemet, a 100 kHz).
 
 ---
 
@@ -787,7 +803,7 @@ Ningún resultado de este trabajo ha sido validado experimentalmente. Todos los 
 
 ## 9. Conclusiones
 
-1. **LT0_OFF ≡ LT2_OFF** en todos los 1248 casos simulados. El camino safeguard del postprocesador aplica la misma fórmula tanh que LamType=0; la diferencia entre ambos modos es solo nominal.
+1. **LT0_OFF ≡ LT2_OFF** confirmado en los 288 casos de la batería 1, donde LT2_OFF fue simulado explícitamente. El camino safeguard del postprocesador aplica la misma fórmula tanh que LamType=0; la diferencia entre ambos modos es solo nominal. Las baterías 2 y 3 prescindieron de LT2_OFF por ser un modo redundante, ya verificado.
 
 2. **β = 2.0000 exacto** es el resultado matemáticamente inevitable del solver armónico lineal. Para modelar el β real (1.7–2.3) de núcleos amorfos es necesario un solver no-lineal o aplicar MSE/iGSE en postproceso.
 
