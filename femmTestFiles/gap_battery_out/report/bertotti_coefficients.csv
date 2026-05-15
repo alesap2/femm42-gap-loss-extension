@@ -8,3 +8,8 @@ Bertotti_linreg,1.614434e-02,1.724692,6.382063e-07,,separacion por grupos de B
 # P [W/kg] = k * f[Hz]^alpha * B[T]^beta
 model,k,alpha,beta,R2,note
 Steinmetz,9.849356e-05,1.578770,1.926682,0.9877,ajuste global Steinmetz
+
+# Bertotti 3 terminos
+# P [W/kg] = k_h*f*B^n + k_ex*f^1.5*B^1.5 + k_e*f^2*B^2
+model,k_h,n,k_ex,k_e,R2,ke_th_pure,ke_th_eta,ke_ratio_2T,ke_ratio_3T
+Bertotti_3term,1.356615e-02,1.805757,1.129746e-22,8.008989e-07,0.9922,9.293900e-08,1.452172e-07,5.515,5.515

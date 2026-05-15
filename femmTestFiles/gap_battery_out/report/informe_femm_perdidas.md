@@ -1141,6 +1141,82 @@ El cruce histéresis = eddy ocurre alrededor de 22 kHz para $B = 0{.}3$ T y 19 k
 
 Ver figura 13 (`fig13_bertotti_separation.png`) para los cuatro paneles de validación (método gráfico $P/f$ vs $f$, constancia de $k_e(B)$, ajuste potencial $a(B) = k_h B^n$, y paridad predicho/medido).
 
+#### 14.2.1 Justificación Teórica de $k_e$ y Separación Completa en 3 Términos
+
+**Predicción teórica de $k_e$**
+
+La fórmula clásica para pérdidas eddy en una lámina delgada ($d \ll \delta$) con inducción senoidal de amplitud media $B_{\rm avg}$ (prescrita sobre el paquete laminado Fe + aislamiento) es:
+
+$$k_e^{\rm th} = \frac{\pi^2 \sigma d^2}{6\,\eta^2\,\rho_{\rm Fe}}$$
+
+El factor $1/\eta^2$ surge porque $B_{\rm Fe} = B_{\rm avg}/\eta$ dentro del Fe, y los dos factores $\eta$ de potencia y masa del Fe se cancelan mutuamente (la potencia es proporcional a $\eta$ y la masa también). Con los parámetros del material:
+
+| Parámetro | Valor |
+|:---|:---:|
+| $\sigma$ | $0{.}769 \times 10^6$ S/m |
+| $d$ | $23\,\mu$m |
+| $\eta$ | $0{.}80$ |
+| $\rho_{\rm Fe}$ | $7200$ kg/m³ |
+
+$$k_e^{\rm th} = \frac{9{.}87 \times 0{.}769 \times 10^6 \times (23 \times 10^{-6})^2}{6 \times 0{.}64 \times 7200} = 1{.}45 \times 10^{-7} \; \text{W·s}^2/\text{kg}$$
+
+**Discrepancia: el $k_e$ ajustado es 5.5× mayor que el teórico**
+
+| Estimación | Valor | Ratio |
+|:---|:---:|:---:|
+| Teórico puro: $\pi^2\sigma d^2/(6\rho)$ | $9{.}3 \times 10^{-8}$ W·s²/kg | $1{.}0\times$ |
+| Teórico + fill factor $1/\eta^2$ | $1{.}45 \times 10^{-7}$ W·s²/kg | $1{.}6\times$ |
+| Ajuste 2 términos (datos fabricante) | $8{.}01 \times 10^{-7}$ W·s²/kg | $\mathbf{5{.}5\times}$ |
+
+El efecto piel no explica el factor 5.5: a 50 kHz, $d/(2\delta) = 0{.}775$ (régimen moderado) y la corrección sobre $k_e$ efectivo es pequeña. El diagnóstico más revelador es que $k_e^{\rm local}(B)$ **no es constante**:
+
+| $B_m$ [T] | $k_e^{\rm local}$ [W·s²/kg] | Ratio vs $k_e^{\rm th}/\eta^2$ |
+|:---:|:---:|:---:|
+| 0.10 | $4{.}81 \times 10^{-7}$ | $3{.}3\times$ |
+| 0.20 | $4{.}85 \times 10^{-7}$ | $3{.}3\times$ |
+| 0.30 | $5{.}53 \times 10^{-7}$ | $3{.}8\times$ |
+| 0.50 | $7{.}85 \times 10^{-7}$ | $5{.}4\times$ |
+| 0.70 | $6{.}34 \times 10^{-7}$ | $4{.}4\times$ |
+
+La variación de factor 1.63× con $B$ es la huella del término de exceso $k_{\rm ex} f^{1.5} B^{1.5}$, que al no estar en el modelo se proyecta sobre la pendiente eddy con peso creciente en $B$.
+
+**Intento de separación libre en 3 términos y su fracaso**
+
+La ecuación de la recta por grupo $B_m$ con los 3 términos sería:
+
+$$\frac{P_v}{f} = k_h B^n + k_{\rm ex} B^{1.5} \cdot \sqrt{f} + k_e B^2 \cdot f$$
+
+es decir, una regresión multilineal en $(1,\,\sqrt{f},\,f)$. El problema es que $\sqrt{f}$ y $f$ son **casi colineales** sobre el rango de medida 5–50 kHz: la correlación de Pearson es $r = 0{.}988$ y el número de condición de la matriz de diseño normalizada es 43.5, lo que hace la regresión numéricamente inestable.
+
+Confirmación: el ajuste global no lineal libre de 4 parámetros colapsa a $k_{\rm ex} \approx 10^{-22} \approx 0$ — el optimizador asigna todo a los otros dos términos porque no puede distinguir $\sqrt{f}$ de $f$ con los datos disponibles. El ajuste libre de 3 términos **es equivalente al de 2 términos** sobre este dataset.
+
+**Separación condicionada: k_e fijado al valor teórico**
+
+Una alternativa es fijar $k_e = k_e^{\rm th}/\eta^2 = 1{.}45 \times 10^{-7}$ W·s²/kg y ajustar solo $(k_h, n, k_{\rm ex})$. El ajuste global condicionado da:
+
+$$k_h = 9{.}73 \times 10^{-3}, \quad n = 2{.}69, \quad k_{\rm ex} = 1{.}21 \times 10^{-4} \quad (R^2 = 0{.}983, \text{ err}_{\rm max} = 99\%)$$
+
+El resultado es **físicamente inconsistente**: $n = 2{.}69$ está muy por encima del rango esperado (1.6–2.0), el error máximo alcanza el 99%, y lo más revelador:
+
+| $f$ | $B$ | $P_{\rm hist}$ | $P_{\rm exc}$ | $P_{\rm eddy}$ |
+|:---:|:---:|:---:|:---:|:---:|
+| 20 kHz | 0.3 T | 11% | **81%** | 8% |
+| 50 kHz | 0.3 T | 7% | **81%** | 12% |
+
+El ajuste condicionado requeriría que el **81% de las pérdidas sea de exceso** en todo el rango de frecuencias — lo cual contradice directamente la evidencia para materiales amorfos (< 5–8%, §12.2.4). Por tanto el modelo condicionado es rechazado.
+
+**Conclusión: el factor 5.5× es real y físico, no un artefacto numérico**
+
+Las pérdidas de exceso son genuinamente pequeñas en este material amorfo, y el $k_e$ medido de $8 \times 10^{-7}$ W·s²/kg es el coeficiente eddy real del sistema. La discrepancia de 5.5× respecto a la fórmula de lámina delgada se debe muy probablemente al **acoplamiento inter-laminar** en el núcleo cortado: bajo la presión de clamping mecánico y con aislamiento imperfecto entre láminas, los bucles de corriente de Foucault pueden cerrarse a través de varias láminas en paralelo, aumentando el $d_{\rm eff}$ respecto al espesor nominal:
+
+$$d_{\rm eff} = \sqrt{\frac{k_e^{\rm med} \cdot 6\,\eta^2\,\rho_{\rm Fe}}{\pi^2 \sigma}} = \sqrt{\frac{8{.}01 \times 10^{-7} \times 6 \times 0{.}64 \times 7200}{9{.}87 \times 7{.}69 \times 10^5}} \approx 67\,\mu\text{m}$$
+
+Un $d_{\rm eff} \approx 67\,\mu$m sobre láminas de 23 µm equivale a grupos de ~3 láminas acopladas magnéticamente, lo cual es plausible en un núcleo cortado con presión de montaje. Esta interpretación es **consistente con la literatura** sobre núcleos amorfos cortados vs. toroidales: los toroides muestran $k_e$ mucho más cercano al teórico porque no hay superficie de corte.
+
+> **Consecuencia práctica:** el valor $k_e = 8 \times 10^{-7}$ W·s²/kg obtenido del fabricante es el correcto para usar en predicciones para este tipo de núcleo (cortado, prensado), y no debe ser sustituido por el valor teórico de lámina delgada. La separación 2T es suficiente y robusta para este dataset.
+
+Ver figura 14 (`fig14_bertotti_3term.png`) para: (a) comparación $k_e(B)$ medido vs teórico; (b) coeficientes $k_{\rm ex}^{\rm local}(B)$ del modelo condicionado (inconsistentes); (c) paridad Bertotti 2T vs 3T condicionado; (d) desglose de fracciones del 3T condicionado (muestra la dominancia irrealista del término de exceso).
+
 Una vez obtenido $k_e$, se puede:
 
 1. **Validar los parámetros de material en FEMM** simulando un toroide equivalente (sin gap, $B$ uniforme) y comprobando que:
@@ -1320,6 +1396,7 @@ La integración natural sería: usar **FEMM para las pérdidas eddy** (con la di
 | [Fig. 11](fig11_grid_bxfraction.png) | Fracción $\Sigma B_x^2/\Sigma B^2$ (\%) en cuadrícula 2D vs $d$; $f$ = 100 kHz |
 | [Fig. 12](fig12_ratio_on_off_dlam.png) | Ratio $P_{\rm ON}/P_{\rm OFF}$ vs $d$ (izq.) y diferencia relativa % vs $f$ (der.) |
 | [Fig. 13](fig13_bertotti_separation.png) | Separación de Bertotti: (a) $P/f$ vs $f$ por nivel de $B$; (b) constancia de $k_e(B)$; (c) ajuste potencial $a(B) = k_h B^n$; (d) paridad predicho/medido Bertotti vs Steinmetz |
+| [Fig. 14](fig14_bertotti_3term.png) | Justificación teórica de $k_e$: (a) $k_e(B)$ medido vs teórico; (b) $k_{\rm ex}(B)$ del modelo condicionado; (c) paridad 2T vs 3T condicionado; (d) desglose de fracciones (modelo condicionado, $B=0{.}3$ T) |
 
 ---
 
