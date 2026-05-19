@@ -119,12 +119,12 @@ class CMaterialProp
 		double Theta_hy;		// and y-direction, for anisotropic linear problems.
 		int    NStrands;		// number of strands per wire
 		double WireD;			// strand diameter, mm
-		// Anisotropic conductivity for homogenized laminated cores (Wang 2015)
-		double Cduct_t;          // tangential conductivity [MS/m] = F * Cduct
-		double Cduct_n;          // normal conductivity [S/m]
-		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
-		// Perpendicular Lenz feedback — Bessel disc model (geometric Wperp; no material-side width)
-		BOOL   bPerpLenz;        // TRUE = use Bessel μ⊥(ω) model
+		// Homogenized laminated-core conductivity data.
+		double Cduct_t;          // tangential conductivity [MS/m] = sigma_z_eff
+		double Cduct_n;          // normal through-stack conductivity [S/m]
+		BOOL   bAnisoConductivity; // TRUE = sigma_t/sigma_n data are present
+		BOOL   bLamHybridSigmaZ; // TRUE = use Cduct_t as sigma_z_eff in Az solve
+		BOOL   bPerpLenz;        // deprecated compatibility flag; ignored
 
 		// Compute Cduct_t and Cduct_n from lamination parameters (Wang 2015 eqs 4-3/4-4)
 		void ComputeAnisoConductivity(double Wcore_mm);

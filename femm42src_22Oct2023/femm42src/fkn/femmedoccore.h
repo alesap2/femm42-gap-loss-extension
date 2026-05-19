@@ -23,6 +23,7 @@ public:
 	int		ACSolver;
 	BOOL    ProblemType;
 	BOOL	Coords;
+	double  Depth;      // Problem out-of-plane depth in problem units (raw from [Depth] tag)
 	CString	PrevSoln;
 	int		PrevType;
 

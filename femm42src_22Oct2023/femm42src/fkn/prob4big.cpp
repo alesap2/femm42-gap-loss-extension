@@ -1,13 +1,13 @@
 #include<stdafx.h>
 #include<stdio.h>
 #include<math.h>
+#include<vector>
 #include "fkn.h"
 #include "fknDlg.h"
 #include "complex.h"
 #include "mesh.h"
 #include "spars.h"
 #include "FemmeDocCore.h"
-#include "bessel_perplenz.h"
 #define Log log
 
 // #define NEWTON
@@ -15,6 +15,17 @@
 // since all node positions were converted to units of cm
 // the proper LengthConv is converts centimeters to meters
 #define LengthConv 0.01
+
+static double EffectiveAzConductivity(const CMaterialProp &m)
+{
+	// Laminated materials: the nu_perp'' complex-reluctivity model handles all
+	// macro gap-loss eddy currents.  The Az/Jz conductive channel is disabled
+	// for all laminated materials (Lam_d > 0) to avoid double-counting.
+	// Only solid conductors (Lam_d == 0) retain their bulk conductivity.
+	if (m.Lam_d > 0.)
+		return 0.;
+	return m.Cduct;
+}
 
 void CFemmeDocCore::GetPrevAxiB(int k, double &B1p, double &B2p)
 {
@@ -108,10 +119,65 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 
 
 	// LamType==1 (parallel to X) and LamType==2 (parallel to Y) are now
-	// supported for AC problems using the tanh skin-depth model.
+	// supported for AC problems. The parallel component uses tanh skin-depth
+	// permeability; the perpendicular component uses static series reluctance.
 	
 	// Go through and evaluate permeability for regions subject to prox effects
 	for(i=0;i<NumBlockLabels;i++) GetFillFactor(i);
+
+	// -----------------------------------------------------------------------
+	// Pre-compute per-block-label imaginary reluctivity coefficient
+	// nu_perp_coeff[lbl] for the macro gap-loss complex-reluctivity model.
+	// For axisymmetric: A = 2π × r_mean of block (circumferential depth).
+	// For planar:       A = problem depth from [Depth] tag.
+	// ν_perp'' = 0.4π·σ_t[MS/m]·ω·L_eff²[m²]  (relative-ν units)
+	// L_eff² = A²·B²/(12·(A²+B²)),  B = block bounding width in B_perp direction
+	// -----------------------------------------------------------------------
+	std::vector<double> nu_perp_coeff(NumBlockLabels, 0.0);
+	{
+		if(w > 0.)
+		{
+			// Bounding box per block label (cm)
+			std::vector<double> bxmin(NumBlockLabels,  1e30);
+			std::vector<double> bxmax(NumBlockLabels, -1e30);
+			std::vector<double> bymin(NumBlockLabels,  1e30);
+			std::vector<double> bymax(NumBlockLabels, -1e30);
+			for(int ei=0; ei<NumEls; ei++){
+				int lbl = meshele[ei].lbl;
+				if(lbl < 0) continue;
+				for(int kk=0; kk<3; kk++){
+					double xx = meshnode[meshele[ei].p[kk]].x;
+					double yy = meshnode[meshele[ei].p[kk]].y;
+					if(xx < bxmin[lbl]) bxmin[lbl]=xx;
+					if(xx > bxmax[lbl]) bxmax[lbl]=xx;
+					if(yy < bymin[lbl]) bymin[lbl]=yy;
+					if(yy > bymax[lbl]) bymax[lbl]=yy;
+				}
+			}
+			// For axisymmetric: A = 2π × r_mean (circumferential depth)
+			for(int lbl=0; lbl<NumBlockLabels; lbl++){
+				int blk = labellist[lbl].BlockType;
+				const CMaterialProp &m = blockproplist[blk];
+				if(m.Lam_d <= 0.) continue;
+				if(!m.bLamHybridSigmaZ) continue;
+				if(m.LamType!=1 && m.LamType!=2) continue;
+				double sigma_t = (m.Cduct_t>0.) ? m.Cduct_t : m.LamFill * m.Cduct;
+				if(sigma_t <= 0.) continue;
+				// A_m: circumferential depth = 2π × r_mean of block [m]
+				double r_mean = 0.5*(bxmin[lbl]+bxmax[lbl]) * LengthConv;
+				double A_m = 2.*PI * r_mean;
+				if(A_m <= 0.) continue;
+				double B_m = (m.LamType==1)
+					? (bxmax[lbl]-bxmin[lbl]) * LengthConv
+					: (bymax[lbl]-bymin[lbl]) * LengthConv;
+				if(B_m <= 0.) continue;
+				double A2=A_m*A_m, B2=B_m*B_m;
+				double Leff2 = A2*B2 / (12.*(A2+B2));
+				nu_perp_coeff[lbl] = 0.4*PI * sigma_t * w * Leff2;
+			}
+		}
+	}
+	// -----------------------------------------------------------------------
 
 	V_old=(CComplex *) calloc(NumNodes+NumCircProps,sizeof(CComplex));
 
@@ -187,12 +253,6 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 	for(i=0;i<NumBlockProps;i++) Mu[i]=(CComplex *)calloc(2,sizeof(CComplex));
 
 	for(k=0;k<NumBlockProps;k++){
-		// Safeguard: LamType != 0 requires bPerpLenz for AC problems
-		if(w > 0. && blockproplist[k].LamType != 0 && !blockproplist[k].bPerpLenz){
-			blockproplist[k].LamType = 0;  // Downgrade to isotropic
-			blockproplist[k].bAnisoConductivity = FALSE;  // Also disable aniso tensor
-		}
-
 		if (blockproplist[k].LamType==0){
 		
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*PI/180.);
@@ -223,45 +283,18 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 		}
 		else if (blockproplist[k].LamType==2){
 			// Lams stacked in X (lam plane = YZ).
-			// B_x PERPENDICULAR: uses mu2=Mu[k][1]. Static value below is series-reluctance
-			//                    default; bPerpLenz override happens per-element via
-			//                    labellist[lbl].MuPerp.
-			// B_y PARALLEL:      uses mu1=Mu[k][0] → tanh skin effect.
+			// mu1/Mu[k][0] acts on B_x; mu2/Mu[k][1] acts on B_y.
+			// B_x is perpendicular; B_y is parallel.
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*PI/180.);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*PI/180.);
 			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR (mu2=Mu[k][1], B_x): static series reluctance default.
-				{
-					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
-					                + (1. - blockproplist[k].LamFill) / 1.0;
-					Mu[k][1] = 1.0 / inv_mu;
-				}
-				// PARALLEL (mu1=Mu[k][0], B_y): tanh skin effect
-				if(blockproplist[k].Cduct!=0){
-					halflag=exp(-I*blockproplist[k].Theta_hx*PI/360.);
-					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
-					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill
-						+(1.-blockproplist[k].LamFill);
-				} else {
-					Mu[k][0]=Mu[k][0]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
-				}
-			}
-		}
-		else if (blockproplist[k].LamType==1){
-			// Lams stacked in Y (lam plane = XZ).
-			// B_y PERPENDICULAR: uses mu1=Mu[k][0] (series-reluctance default; per-element override via labellist[lbl].MuPerp).
-			// B_x PARALLEL:      uses mu2=Mu[k][1] → tanh skin effect.
-			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*PI/180.);
-			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*PI/180.);
-			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR (mu1=Mu[k][0], B_y): static series reluctance default.
+				// PERPENDICULAR (mu1=Mu[k][0], B_x): static series reluctance default.
 				{
 					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][0]
 					                + (1. - blockproplist[k].LamFill) / 1.0;
 					Mu[k][0] = 1.0 / inv_mu;
 				}
-				// PARALLEL (mu2=Mu[k][1], B_x): tanh skin effect
+				// PARALLEL (mu2=Mu[k][1], B_y): tanh skin effect.
 				if(blockproplist[k].Cduct!=0){
 					halflag=exp(-I*blockproplist[k].Theta_hy*PI/360.);
 					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
@@ -273,74 +306,35 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 				}
 			}
 		}
+		else if (blockproplist[k].LamType==1){
+			// Lams stacked in Y (lam plane = XZ).
+			// mu1/Mu[k][0] acts on B_x; mu2/Mu[k][1] acts on B_y.
+			// B_y is perpendicular; B_x is parallel.
+			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*PI/180.);
+			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*PI/180.);
+			if(blockproplist[k].Lam_d!=0){
+				// PERPENDICULAR (mu2=Mu[k][1], B_y): static series reluctance default.
+				{
+					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
+					                + (1. - blockproplist[k].LamFill) / 1.0;
+					Mu[k][1] = 1.0 / inv_mu;
+				}
+				// PARALLEL (mu1=Mu[k][0], B_x): tanh skin effect.
+				if(blockproplist[k].Cduct!=0){
+					halflag=exp(-I*blockproplist[k].Theta_hx*PI/360.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill
+						+(1.-blockproplist[k].LamFill);
+				} else {
+					Mu[k][0]=Mu[k][0]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+				}
+			}
+		}
 		else{
 			Mu[k][0]=1;
 			Mu[k][1]=1;
 		}
-	}
-
-	// =====================================================================
-	// Perpendicular Lenz feedback (Bessel disc model) — geometric pre-pass.
-	// See prob2big.cpp for full commentary.
-	// In axisymmetric (prob4big) the mesh x-axis is r and y-axis is z.
-	// LamType==2 → lams stacked in r (radial); perp extent = z (axial).
-	// LamType==1 → lams stacked in z (axial);  perp extent = r (radial).
-	// =====================================================================
-	{
-		for(int l=0; l<NumBlockLabels; l++){
-			labellist[l].Wperp = 0.;
-			labellist[l].MuPerp = 0.;
-		}
-		double *xmn = new double[NumBlockLabels];
-		double *xmx = new double[NumBlockLabels];
-		double *ymn = new double[NumBlockLabels];
-		double *ymx = new double[NumBlockLabels];
-		BOOL   *seen = new BOOL[NumBlockLabels];
-		for(int l=0; l<NumBlockLabels; l++){
-			xmn[l]= 1.e30; xmx[l]=-1.e30;
-			ymn[l]= 1.e30; ymx[l]=-1.e30;
-			seen[l]=FALSE;
-		}
-		for(int i=0; i<NumEls; i++){
-			int lbl = meshele[i].lbl;
-			if(lbl<0 || lbl>=NumBlockLabels) continue;
-			seen[lbl]=TRUE;
-			for(int kk=0; kk<3; kk++){
-				int nn = meshele[i].p[kk];
-				double xn=meshnode[nn].x, yn=meshnode[nn].y;
-				if(xn<xmn[lbl]) xmn[lbl]=xn;
-				if(xn>xmx[lbl]) xmx[lbl]=xn;
-				if(yn<ymn[lbl]) ymn[lbl]=yn;
-				if(yn>ymx[lbl]) ymx[lbl]=yn;
-			}
-		}
-		for(int l=0; l<NumBlockLabels; l++){
-			if(!seen[l]) continue;
-			int k = labellist[l].BlockType;
-			if(k<0 || k>=NumBlockProps) continue;
-			CMaterialProp &mp = blockproplist[k];
-			if(!mp.bPerpLenz)               continue;
-			if(mp.Lam_d<=0.)                continue;
-			if(mp.Cduct_t<=0.)              continue;
-			if(mp.LamType!=1 && mp.LamType!=2) continue;
-			// Laminated pack model: Wperp = Lam_d (laminella thickness).
-			double Wperp_m = mp.Lam_d * 1.e-3;  // mm → m
-			if(Wperp_m<=0.) continue;
-			labellist[l].Wperp = Wperp_m;
-			// Iron μ in the perpendicular slot.
-			// For BH-curve materials mu_x/mu_y is stored as 1 (unused); derive the
-			// initial permeability from the first non-zero BH segment instead.
-			double mu_r_lin = (mp.LamType==2) ? mp.mu_y : mp.mu_x;
-			if(mp.BHpoints>=2 && mp.Bdata[1]>0. && abs(mp.Hdata[1])>0.)
-				mu_r_lin = mp.Bdata[1] / (muo * abs(mp.Hdata[1]));
-			double hyst_deg = (mp.LamType==2) ? mp.Theta_hy : mp.Theta_hx;
-			CComplex mufe = mu_r_lin * exp(-I*hyst_deg*PI/180.);
-			CComplex g2 = -I * w * mufe * muo * mp.Cduct_t * 1.e6;
-			CComplex za = sqrt(g2) * (Wperp_m * 0.5);
-			labellist[l].MuPerp = mp.LamFill * mufe * PerpLenzShape(za)
-			                    + (1. - mp.LamFill);
-		}
-		delete[] xmn; delete[] xmx; delete[] ymn; delete[] ymx; delete[] seen;
 	}
 
 do{
@@ -500,14 +494,7 @@ do{
 		// contribution from eddy currents;
 		// induced current interpolated as constant (avg. of nodal values)
 		// over the entire element;
-		K = -I*R*a*w*blockproplist[meshele[i].blk].Cduct*c/6.;
-
-		// K=0 for all laminated block types (LamType=0/1/2): same reasoning as prob2big.
-		if(blockproplist[El->blk].Lam_d>0)
-		{
-			int lt = blockproplist[El->blk].LamType;
-			if(lt==0 || lt==1 || lt==2) K=0;
-		}
+		K = -I*R*a*w*EffectiveAzConductivity(blockproplist[meshele[i].blk])*c/6.;
 		
 		// if this element is part of a wound coil, 
 		// it should have a zero "bulk" conductivity...
@@ -598,17 +585,6 @@ do{
 			meshele[i].mu1=Mu[k][0];
 			meshele[i].mu2=Mu[k][1];
 			meshele[i].v12=0;
-			// Per-element Perpendicular Lenz override (see prob2big.cpp).
-			if(blockproplist[k].bPerpLenz && blockproplist[k].Lam_d>0. &&
-			   blockproplist[k].Cduct_t>0.){
-				int l = meshele[i].lbl;
-				if(l>=0 && l<NumBlockLabels && labellist[l].Wperp>0.){
-					if(blockproplist[k].LamType==2)
-						meshele[i].mu2 = labellist[l].MuPerp;
-					else if(blockproplist[k].LamType==1)
-						meshele[i].mu1 = labellist[l].MuPerp;
-				}
-			}
 			if (blockproplist[k].BHpoints > 0)
 			{
 				if (bIncremental==FALSE) LinearFlag=FALSE;
@@ -736,7 +712,22 @@ do{
 //#endif			
 				
 			}
-			
+
+		// Macro gap-loss: imaginary reluctivity ν_perp'' for hybrid laminates.
+		{
+			int lbl_i = meshele[i].lbl;
+			if(lbl_i >= 0 && nu_perp_coeff[lbl_i] > 0.)
+			{
+				CComplex jnu = I * nu_perp_coeff[lbl_i];
+				int blk_i = meshele[i].blk;
+				int lt = blockproplist[blk_i].LamType;
+				for(j=0;j<3;j++)
+					for(k=0;k<3;k++)
+						Me[j][k] += (lt==1) ? jnu * Mx[j][k]
+						                    : jnu * My[j][k];
+			}
+		}
+		
 		for (j=0;j<3;j++){
 			for (k=j;k<3;k++)
 			{

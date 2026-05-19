@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include <afx.h>
 #include <afxtempl.h>
-#include "bessel_perplenz.h"
 #include "problem.h"
 #include "femm.h"
 #include "xyplot.h"
@@ -50,6 +49,17 @@ END_MESSAGE_MAP()
 double sqr(double x)
 {
 	return x*x;
+}
+
+static double EffectiveAzConductivity(const CMaterialProp &m)
+{
+	// Laminated materials: the nu_perp'' complex-reluctivity model handles all
+	// macro gap-loss eddy currents.  The Az/Jz conductive channel is disabled
+	// for all laminated materials (Lam_d > 0) to avoid double-counting.
+	// Only solid conductors (Lam_d == 0) retain their bulk conductivity.
+	if (m.Lam_d > 0.)
+		return 0.;
+	return m.Cduct;
 }
 
 CFemmviewDoc::CFemmviewDoc()
@@ -615,6 +625,7 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.Cduct_t=0.;
 			MProp.Cduct_n=0.;
 			MProp.bAnisoConductivity=FALSE;
+			MProp.bLamHybridSigmaZ=FALSE;
 			MProp.bPerpLenz=FALSE;
 			q[0]=NULL;
 		}
@@ -714,7 +725,9 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		   int pl=0;
 		   v=StripKey(s);
 		   sscanf(v,"%i",&pl);
-		   MProp.bPerpLenz = (pl != 0) ? TRUE : FALSE;
+		   // Deprecated modified-branch option. Parse for compatibility,
+		   // but the Bessel perpendicular-flux model is no longer enabled.
+		   MProp.bPerpLenz=FALSE;
 		   q[0]=NULL;
 		}
 
@@ -740,6 +753,14 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		if( _strnicmp(q,"<sigma_n>",9)==0){
 		   v=StripKey(s);
 		   sscanf(v,"%lf",&MProp.Cduct_n);
+		   q[0]=NULL;
+		}
+
+		if( _strnicmp(q,"<LamHybridSigmaZ>",17)==0){
+		   int en=0;
+		   v=StripKey(s);
+		   sscanf(v,"%i",&en);
+		   MProp.bLamHybridSigmaZ=(en!=0);
 		   q[0]=NULL;
 		}
 		
@@ -1373,15 +1394,11 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 									  exp(-I*blockproplist[k].Theta_hy*PI/180.);
 			
 			if(blockproplist[k].Lam_d!=0){
-				// For anisotropic case use Cduct_n [S/m] -> MS/m for through-lam skin depth
-				double CductTanh = blockproplist[k].bAnisoConductivity
-					? blockproplist[k].Cduct_n * 1.e-06
-					: blockproplist[k].Cduct;
-				halflag=exp(-I*blockproplist[k].Theta_hx*PI/360.);
-				ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_x));
-				K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 				if (blockproplist[k].Cduct!=0)
 				{
+					halflag=exp(-I*blockproplist[k].Theta_hx*PI/360.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 					blockproplist[k].mu_fdx=(blockproplist[k].mu_fdx*tanh(K)/K)*
 					blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
 				}
@@ -1389,12 +1406,12 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 					blockproplist[k].mu_fdx=(blockproplist[k].mu_fdx)*
 					blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
 				}
-				
-				halflag=exp(-I*blockproplist[k].Theta_hy*PI/360.);
-				ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_y));
-				K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+
 				if (blockproplist[k].Cduct!=0)
 				{
+					halflag=exp(-I*blockproplist[k].Theta_hy*PI/360.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 					blockproplist[k].mu_fdy=(blockproplist[k].mu_fdy*tanh(K)/K)*
 					blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
 				}
@@ -1405,96 +1422,42 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			}
 		}
 		else if (blockproplist[k].LamType==1 || blockproplist[k].LamType==2) {
-			// Mirror safeguard + permeability logic from prob2big.cpp.
-			// This ensures blockintegral(3) and (6) are consistent with the solve.
-			if (!blockproplist[k].bPerpLenz) {
-				// Safeguard path: solver downgraded this to LamType=0.
-				blockproplist[k].mu_fdx = blockproplist[k].mu_x *
-				                          exp(-I*blockproplist[k].Theta_hx*PI/180.);
-				blockproplist[k].mu_fdy = blockproplist[k].mu_y *
-				                          exp(-I*blockproplist[k].Theta_hy*PI/180.);
-				if (blockproplist[k].Lam_d != 0) {
-					// Always use Cduct (bulk in-plane conductivity) for the tanh formula.
-					// bAnisoConductivity may be TRUE here only because <Sigma_t> was
-					// present in the .fem file (PerpLenz material), not because Cduct_n
-					// is the relevant through-lamination conductivity.  Using Cduct_n
-					// (which defaults to 0) would yield K=0 => tanh(K)/K = NaN.
-					double CductTanh = blockproplist[k].Cduct;
-					halflag = exp(-I*blockproplist[k].Theta_hx*PI/360.);
-					ds = sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_x));
-					K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-					if (blockproplist[k].Cduct != 0)
-						blockproplist[k].mu_fdx = (blockproplist[k].mu_fdx*tanh(K)/K)*
-							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-					else
-						blockproplist[k].mu_fdx = blockproplist[k].mu_fdx*
-							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-					halflag = exp(-I*blockproplist[k].Theta_hy*PI/360.);
-					ds = sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_y));
-					K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-					if (blockproplist[k].Cduct != 0)
-						blockproplist[k].mu_fdy = (blockproplist[k].mu_fdy*tanh(K)/K)*
-							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-					else
-						blockproplist[k].mu_fdy = blockproplist[k].mu_fdy*
-							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-				}
-			} else {
-				// PerpLenz active: parallel gets tanh, perpendicular gets Bessel or series.
-				blockproplist[k].mu_fdx = blockproplist[k].mu_x *
-				                          exp(-I*blockproplist[k].Theta_hx*PI/180.);
-				blockproplist[k].mu_fdy = blockproplist[k].mu_y *
-				                          exp(-I*blockproplist[k].Theta_hy*PI/180.);
-				if (blockproplist[k].Lam_d != 0) {
-					if (blockproplist[k].LamType == 2) {
-						// By=PARALLEL (tanh), Bx=PERPENDICULAR (Bessel or series).
+			// Mirror LamType 1/2 permeability logic from the solver. The
+			// perpendicular component is static series reluctance; macro eddy
+			// loss, when enabled, is reported through the conductive Jz channel.
+			blockproplist[k].mu_fdx = blockproplist[k].mu_x *
+			                          exp(-I*blockproplist[k].Theta_hx*PI/180.);
+			blockproplist[k].mu_fdy = blockproplist[k].mu_y *
+			                          exp(-I*blockproplist[k].Theta_hy*PI/180.);
+			if (blockproplist[k].Lam_d != 0) {
+				if (blockproplist[k].LamType == 2) {
+					// By=parallel to lamination plane; Bx=perpendicular.
+					CComplex inv_mu = blockproplist[k].LamFill / blockproplist[k].mu_fdx
+					                + (1. - blockproplist[k].LamFill) / 1.0;
+					blockproplist[k].mu_fdx = 1.0 / inv_mu;
+					if (blockproplist[k].Cduct != 0) {
 						halflag = exp(-I*blockproplist[k].Theta_hy*PI/360.);
 						ds = sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
 						K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-						if (blockproplist[k].Cduct != 0)
-							blockproplist[k].mu_fdy = (blockproplist[k].mu_fdy*tanh(K)/K)*
-								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-						else
-							blockproplist[k].mu_fdy = blockproplist[k].mu_fdy*
-								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-						if (blockproplist[k].Cduct_t > 0.) {
-							CComplex mufe = blockproplist[k].mu_fdx;
-							double sig_SI = blockproplist[k].Cduct_t * 1.e6;
-							CComplex g2 = -I * w * mufe * muo * sig_SI;
-							double a = blockproplist[k].Lam_d * 0.001 * 0.5;
-							CComplex za = sqrt(g2) * a;
-							blockproplist[k].mu_fdx = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
-							                        + (1. - blockproplist[k].LamFill);
-						} else {
-							CComplex inv_mu = blockproplist[k].LamFill / blockproplist[k].mu_fdx
-							                + (1. - blockproplist[k].LamFill);
-							blockproplist[k].mu_fdx = 1.0 / inv_mu;
-						}
-					} else { // LamType == 1
-						// Bx=PARALLEL (tanh), By=PERPENDICULAR (Bessel or series).
+						blockproplist[k].mu_fdy = (blockproplist[k].mu_fdy*tanh(K)/K)*
+							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+					}
+					else blockproplist[k].mu_fdy = blockproplist[k].mu_fdy*
+						blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
+				} else {
+					// Bx=parallel to lamination plane; By=perpendicular.
+					CComplex inv_mu = blockproplist[k].LamFill / blockproplist[k].mu_fdy
+					                + (1. - blockproplist[k].LamFill) / 1.0;
+					blockproplist[k].mu_fdy = 1.0 / inv_mu;
+					if (blockproplist[k].Cduct != 0) {
 						halflag = exp(-I*blockproplist[k].Theta_hx*PI/360.);
 						ds = sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
 						K = halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-						if (blockproplist[k].Cduct != 0)
-							blockproplist[k].mu_fdx = (blockproplist[k].mu_fdx*tanh(K)/K)*
-								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-						else
-							blockproplist[k].mu_fdx = blockproplist[k].mu_fdx*
-								blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
-						if (blockproplist[k].Cduct_t > 0.) {
-							CComplex mufe = blockproplist[k].mu_fdy;
-							double sig_SI = blockproplist[k].Cduct_t * 1.e6;
-							CComplex g2 = -I * w * mufe * muo * sig_SI;
-							double a = blockproplist[k].Lam_d * 0.001 * 0.5;
-							CComplex za = sqrt(g2) * a;
-							blockproplist[k].mu_fdy = blockproplist[k].LamFill * mufe * PerpLenzShape(za)
-							                        + (1. - blockproplist[k].LamFill);
-						} else {
-							CComplex inv_mu = blockproplist[k].LamFill / blockproplist[k].mu_fdy
-							                + (1. - blockproplist[k].LamFill);
-							blockproplist[k].mu_fdy = 1.0 / inv_mu;
-						}
+						blockproplist[k].mu_fdx = (blockproplist[k].mu_fdx*tanh(K)/K)*
+							blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
 					}
+					else blockproplist[k].mu_fdx = blockproplist[k].mu_fdx*
+						blockproplist[k].LamFill + (1.-blockproplist[k].LamFill);
 				}
 			}
 		}
@@ -2212,22 +2175,22 @@ BOOL CFemmviewDoc::GetPointValues(double x, double y, int k, CPointVals &u)
 			else u.Js+=blocklist[lbl].J;
 		}	
 
-		// report just loss-related part of conductivity.
-		if (blockproplist[meshelem[k].blk].Cduct!=0)
+		// Effective z-conductivity for eddy-current display, consistent with solver.
+		// Laminated materials: sigma_z_eff = sigma_t only when hybrid is enabled.
+		// LamType 0 or hybrid-OFF LamType 1/2: u.c = 0 (no conductive J_z channel).
+		// Solid conductors: u.c from block o (original FEMM behavior preserved).
+		if (blockproplist[meshelem[k].blk].Lam_d!=0) {
+			u.c=EffectiveAzConductivity(blockproplist[meshelem[k].blk]);
+		} else if (blockproplist[meshelem[k].blk].Cduct!=0)
 			u.c=1./Re(1./(blocklist[meshelem[k].lbl].o));
 		else u.c=0;
-		
-		// Anisotropic laminate: use in-plane Cduct_t; otherwise zero out eddy term
-		if (blockproplist[meshelem[k].blk].Lam_d!=0) {
-			if (blockproplist[meshelem[k].blk].bAnisoConductivity)
-				u.c = blockproplist[meshelem[k].blk].Cduct_t;
-			else
-				u.c=0;
-		}
 
-		// only add in eddy currents if the region is solid (or anisotropic lam)
+		// J_z = -j * omega * sigma_z_eff * A_z  (standard FEMM conductor formulation).
+		// For hybrid-ON laminates: sigma_z_eff = sigma_t = F*sigma_m (Wang macro channel).
+		// Length scale is set by macroscopic A_z geometry, not d_lam/2.
+		// For hybrid-OFF laminates and LamType 0: u.c = 0, so u.Je = 0.
 		if (blocklist[meshelem[k].lbl].FillFactor<0 ||
-			blockproplist[meshelem[k].blk].bAnisoConductivity)
+		    (blockproplist[meshelem[k].blk].Lam_d!=0 && u.c!=0))
 			u.Je=-I*Frequency*2.*PI*u.c*u.A;
 
 		if(ProblemType!=0){
@@ -3069,24 +3032,37 @@ CComplex CFemmviewDoc::GetJA(int k,CComplex *J,CComplex *A)
 	for(i=0;i<3;i++) J[i]=blockproplist[blk].Jr+I*blockproplist[blk].Ji;
 	Javg=blockproplist[blk].Jr+I*blockproplist[blk].Ji;
 
-	c=blockproplist[blk].Cduct;
-	if ((blockproplist[blk].Lam_d > 0) &&
-	    (blockproplist[blk].LamType==0 || blockproplist[blk].LamType==1 || blockproplist[blk].LamType==2)) {
-		// Laminated: K=0 in solver → conductive J term is zero in the FEM solution.
-		// Eddy losses are accounted for via complex mu (integral 3) for parallel flux
-		// and via the thin-lam formula (integral 31) for perpendicular flux.
-		c = 0;
-	}
-	if (blocklist[lbl].FillFactor>0) c=0; 
-	
+	// c: conductivity for eddy-current display  (J_z = -j*omega*c*A_z).
+	//
+	// Effective z-conductivity for eddy-current display, consistent with the solver.
+	// Laminated materials: EffectiveAzConductivity returns sigma_z_eff = sigma_t only
+	// when the hybrid sigma_z channel is explicitly enabled (bLamHybridSigmaZ).
+	// LamType 0 or hybrid-OFF LamType 1/2: c = 0 (no conductive J_z channel).
+	// Solid conductors (Lam_d == 0): c = Cduct (original FEMM behavior preserved).
+	// c_circ (circuit voltage source J term) uses the same value for self-consistency.
+	if (blockproplist[blk].Lam_d > 0)
+		c = EffectiveAzConductivity(blockproplist[blk]);
+	else
+		c = blockproplist[blk].Cduct;
+	double c_circ = c;
 
-	// contribution from eddy currents;
-	if(Frequency!=0) 
+	// Wound conductors (FillFactor>0): suppress both eddy and circuit J here;
+	// their losses are handled via the integral post-processing path.
+	if (blocklist[lbl].FillFactor>0) { c = 0; c_circ = 0; }
+
+	// contribution from eddy currents:
+	// J_z = -j * omega * sigma_z_eff * A_z  (standard FEMM conductor formulation).
+	// For hybrid-ON laminates: sigma_z_eff = sigma_t = F * sigma_m (Wang macro channel).
+	// The length scale is set by the macroscopic A_z field geometry, not by d_lam/2.
+	// For hybrid-OFF laminates and LamType=0: sigma_z_eff = 0, so J_z = 0.
+	if(Frequency!=0)
+	{
 		for(i=0;i<3;i++)
 		{
 			J[i]-=I*Frequency*2.*PI*c*A[i];
 			Javg-=I*Frequency*2.*PI*c*A[i]/3.;
 		}
+	}
 	
 
 	// contribution from circuit currents //
@@ -3095,19 +3071,19 @@ CComplex CFemmviewDoc::GetJA(int k,CComplex *J,CComplex *A)
 		if(blocklist[lbl].Case==0){ // specified voltage
 			if(ProblemType==0){
 				for(i=0;i<3;i++)
-					J[i]-=c*blocklist[lbl].dVolts;
-				Javg-=c*blocklist[lbl].dVolts;
+					J[i]-=c_circ*blocklist[lbl].dVolts;
+				Javg-=c_circ*blocklist[lbl].dVolts;
 			}
 			else{
 				for(i=0;i<3;i++){
 					rn=meshnode[meshelem[k].p[i]].x;
 					if(fabs(rn/LengthConv[LengthUnits])<1.e-06)
-						J[i]-=c*blocklist[lbl].dVolts/r;
+						J[i]-=c_circ*blocklist[lbl].dVolts/r;
 					else 
-						J[i]-=c*blocklist[lbl].dVolts/(rn*LengthConv[LengthUnits]);
+						J[i]-=c_circ*blocklist[lbl].dVolts/(rn*LengthConv[LengthUnits]);
 
 				}
-				Javg-=c*blocklist[lbl].dVolts/r;
+				Javg-=c_circ*blocklist[lbl].dVolts/r;
 			}
 		}
 		else 
@@ -3384,11 +3360,15 @@ CComplex CFemmviewDoc::BlockIntegral(int inttype)
 			case 4: // Resistive Losses
 				if (abs(blocklist[meshelem[i].lbl].o)==0) sig=0;
 				else sig=1.e06/Re(1./blocklist[meshelem[i].lbl].o);
-				// Legacy: zero out eddy for in-plane laminates (tanh-mu handles it).
-				// Anisotropic: allow sig from Cduct_t (already folded into .o by solver).
 				if((blockproplist[meshelem[i].blk].Lam_d!=0) &&
-					(blockproplist[meshelem[i].blk].LamType==0) &&
-					!blockproplist[meshelem[i].blk].bAnisoConductivity) sig=0;
+					(blockproplist[meshelem[i].blk].LamType==0 ||
+					 blockproplist[meshelem[i].blk].LamType==1 ||
+					 blockproplist[meshelem[i].blk].LamType==2))
+				{
+					double sigz=EffectiveAzConductivity(blockproplist[meshelem[i].blk]);
+					if(sigz>0.) sig=sigz*1.e06;
+					else sig=0;
+				}
 				if(sig!=0){
 					
 					if (ProblemType==0){
@@ -3530,42 +3510,10 @@ CComplex CFemmviewDoc::BlockIntegral(int inttype)
 				}
 				break;
 
-			case 31: // Eddy loss via thin-lamination analytical formula.
-				// Valid when t_lam << skin depth within a single lamination
-				// (typically true for 10-30 µm lams at 1-100 kHz).
-				//
-				// P_vol = sigma_t * omega^2 * B_perp_peak^2 * t_lam^2 / 24 * fill
-				// (factor 24 = 12 from the formula * 2 from peak->RMS conversion).
-				//
-				// B_perp = flux PERPENDICULAR to lamination plane:
-				//   LamType==0 (lams in XY, stacked Z): no perp flux in 2D plane → 0.
-				//   LamType==1 (lams in XZ, stacked Y): B_y is perpendicular.
-				//   LamType==2 (lams in YZ, stacked X): B_x is perpendicular.
-				//
-				// sigma_t (in-lamination plane) = bulk Cduct by default,
-				// or Cduct_t [MS/m] if mi_setmataniso has been used to override it.
-				if ((blockproplist[meshelem[i].blk].Lam_d > 0) && (Frequency != 0))
-				{
-					int lt = blockproplist[meshelem[i].blk].LamType;
-					if (lt==1 || lt==2)
-					{
-						double sig_t = blockproplist[meshelem[i].blk].bAnisoConductivity
-							? blockproplist[meshelem[i].blk].Cduct_t * 1.e06   // MS/m → S/m
-							: blockproplist[meshelem[i].blk].Cduct  * 1.e06;   // bulk default
-						double d_lam = blockproplist[meshelem[i].blk].Lam_d * 0.001;     // mm → m
-						double fill  = blockproplist[meshelem[i].blk].LamFill;
-						double omega = Frequency * 2.0 * PI;
-						double B2x   = Re(meshelem[i].B1 * conj(meshelem[i].B1));
-						double B2y   = Re(meshelem[i].B2 * conj(meshelem[i].B2));
-						double B2_perp = (lt==2) ? B2x : B2y;
-						double P_factor = sig_t * omega * omega * d_lam * d_lam / 24.0 * fill;
-						if (ProblemType==0)
-							y = P_factor * B2_perp * a * Depth;
-						else
-							y = P_factor * B2_perp * 2.0 * PI * R * a;
-						z += y;
-					}
-				}
+			case 31:
+				// Deprecated modified-branch thin-lamination perpendicular loss
+				// indicator. The hybrid model reports its equivalent conductive
+				// Az/Jz loss through case 4 so this path intentionally returns 0.
 				break;
 
 			default:

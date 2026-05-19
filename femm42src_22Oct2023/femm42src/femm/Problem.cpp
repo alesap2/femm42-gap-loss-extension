@@ -150,6 +150,8 @@ CMaterialProp::CMaterialProp()
 		Cduct_t=0.;
 		Cduct_n=0.;
 		bAnisoConductivity=FALSE;
+		bLamHybridSigmaZ=FALSE;
+		bPerpLenz=FALSE;
 }
 
 CMaterialProp::~CMaterialProp()

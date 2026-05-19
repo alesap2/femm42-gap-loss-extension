@@ -1,4 +1,16 @@
-# FEMM 4.2 — Anisotropic Conductivity Extension
+# FEMM 4.2 - Anisotropic Conductivity Notes
+
+> Current status, 2026-05-18: this document describes an earlier extension
+> design and validation workflow. The active implementation no longer treats
+> Bessel/PerpLenz or `BlockIntegral(31)` as physical gap-loss models.
+>
+> The current laminated hybrid model uses `Cduct_t = sigma_t` as an explicitly
+> enabled FEMM `A_z`/`J_z` equivalent conductivity for `LamType` 1/2.
+> `Cduct_n` is stored only as through-stack metadata/future tensor support and
+> is not used for macro gap-loss eddies. Presence of `<sigma_t>` alone does not
+> activate the solver channel. See `HYBRID_LAMINATED_SIGMA_Z.md`.
+
+# Historical Extension Notes
 
 This document describes the modifications made to the FEMM 4.2 source tree
 (`femm42src_22Oct2023`) to support **anisotropic electrical conductivity** in

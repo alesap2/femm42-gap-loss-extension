@@ -1,0 +1,10 @@
+rev5 lamtype probe, hybrid sigma_z disabled
+as-is mixed file: |flux|=9.736882e-06 |Z|=6.117864e+00
+  probe side gap  (4.4,17.15): |Bx|=3.570397e-04 |By|=2.059390e-03
+  probe centre gap (22.0,35.3): |Bx|=2.624217e-04 |By|=9.061975e-05
+all LamType=1: |flux|=9.736882e-06 |Z|=6.117864e+00
+  probe side gap  (4.4,17.15): |Bx|=3.570397e-04 |By|=2.059390e-03
+  probe centre gap (22.0,35.3): |Bx|=2.624217e-04 |By|=9.061975e-05
+all LamType=2: |flux|=5.187319e-03 |Z|=3.259289e+03
+  probe side gap  (4.4,17.15): |Bx|=1.804647e-01 |By|=1.145342e+00
+  probe centre gap (22.0,35.3): |Bx|=1.073263e-04 |By|=1.527049e-05

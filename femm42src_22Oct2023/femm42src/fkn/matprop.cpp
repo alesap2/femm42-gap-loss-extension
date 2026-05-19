@@ -12,9 +12,6 @@
 
 #define ElementsPerSkinDepth 10
 
-// Complex Bessel helpers for perpendicular Lenz μ⊥(ω) model
-#include "bessel_perplenz.h"
-
 CMaterialProp::~CMaterialProp()
 {
 	if (Bdata!=NULL) free(Bdata);
@@ -30,6 +27,7 @@ CMaterialProp::CMaterialProp()
 	Cduct_t=0.;
 	Cduct_n=0.;
 	bAnisoConductivity=FALSE;
+	bLamHybridSigmaZ=FALSE;
 	bPerpLenz   = FALSE;
 }
 
@@ -39,6 +37,8 @@ void CMaterialProp::ComputeAnisoConductivity(double Wcore_mm)
 	// eq. 4-3: sigma_t = F * sigma_m
 	// eq. 4-4: sigma_n = (t_l / W_core)^2 * sigma_m / F
 	// where F=LamFill, t_l=Lam_d [mm], W_core=Wcore_mm [mm], sigma_m=Cduct [MS/m]
+	// FEMM uses sigma_t as the optional equivalent Az/Jz conductivity channel.
+	// sigma_n is stored for documentation/future tensor support, not for that channel.
 	if (Cduct <= 0. || LamFill <= 0. || Lam_d <= 0. || Wcore_mm <= 0.) return;
 
 	double F = LamFill;

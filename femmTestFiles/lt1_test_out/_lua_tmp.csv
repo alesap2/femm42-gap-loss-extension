@@ -1,0 +1,2 @@
+case_id,mode,gap_mm,freq_hz,target_bn_t,d_lam_mm,lam_type,perp_enable,current_a,bn_mean_t,bx_h_mean_t,by_h_mean_t,l_h,z_ohm,p_tot_w,p_core_w,p_side_w,f_bx_grid,grid_n,px_bessel_w,py_tanh_w,f_bx_mesh
+LT10006,LT1_ON,6.000000,100000,1.000000,0.025000,1,1,7.018866e+02,1.004090e+00,2.843249e-02,9.929304e-01,5.584948e-06,3.509127e+00,1.320252e+03,1.522706e+02,7.611923e+01,0.03021572,120

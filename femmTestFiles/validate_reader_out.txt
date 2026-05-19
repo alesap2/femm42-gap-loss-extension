@@ -1,0 +1,10 @@
+Script started
+fem opened
+solution loaded
+blocks selected
+blockintegral(3)  = 652.242109 W
+blockintegral(4)  = 0.000000 W
+blockintegral(6)  = 652.242109 W  [= 3+4]
+blockintegral(31) = 15.284484 W  [thin-lam Bx]
+blockintegral(5)  = 5.684000e-04 m2
+done

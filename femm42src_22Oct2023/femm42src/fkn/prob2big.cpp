@@ -1,13 +1,13 @@
 #include"stdafx.h"
 #include<stdio.h>
 #include<math.h>
+#include<vector>
 #include "fkn.h"
 #include "fknDlg.h"
 #include "complex.h"
 #include "mesh.h"
 #include "spars.h"
 #include "FemmeDocCore.h"
-#include "bessel_perplenz.h"
 
 // #define NEWTON
 
@@ -16,6 +16,17 @@
 #define LengthConv 0.01
 
 double Power(double x, int y);
+
+static double EffectiveAzConductivity(const CMaterialProp &m)
+{
+	// Laminated materials: the nu_perp'' complex-reluctivity model handles all
+	// macro gap-loss eddy currents.  The Az/Jz conductive channel is disabled
+	// for all laminated materials (Lam_d > 0) to avoid double-counting.
+	// Only solid conductors (Lam_d == 0) retain their bulk conductivity.
+	if (m.Lam_d > 0.)
+		return 0.;
+	return m.Cduct;
+}
 
 void CFemmeDocCore::GetPrev2DB(int k, double &B1p, double &B2p)
 {
@@ -80,12 +91,73 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 
 
 	// LamType==1 (lams parallel to X) and LamType==2 (lams parallel to Y) are
-	// now supported in AC problems. The effective permeability is computed using
-	// the tanh skin-depth correction on the component transverse to the laminations,
-	// and a simple fill-factor average on the parallel component.
+	// now supported in AC problems. The component parallel to the lamination
+	// plane uses the tanh skin-depth correction; the perpendicular component
+	// uses static series reluctance unless the separate hybrid sigma_z channel
+	// is explicitly enabled.
 
 	// Go through and evaluate permeability for regions subject to prox effects
 	for(i=0;i<NumBlockLabels;i++) GetFillFactor(i);
+
+	// -----------------------------------------------------------------------
+	// Pre-compute per-block-label imaginary reluctivity coefficient
+	// nu_perp_coeff[lbl] for the macro gap-loss complex-reluctivity model.
+	//
+	// For LamType=1 (lams stacked in Y, B_perp = B_y):
+	//   Im(ν_y) += nu_perp_coeff  →  added via I * nu_perp_coeff * Mx stiffness.
+	// For LamType=2 (lams stacked in X, B_perp = B_x):
+	//   Im(ν_x) += nu_perp_coeff  →  added via I * nu_perp_coeff * My stiffness.
+	//
+	// ν_perp'' = μ₀ · σ_t · ω · L_eff²  (relative-ν units, 0.4π·σ_t[MS/m]·ω·L²[m²])
+	// L_eff²   = A²·B² / (12·(A²+B²))
+	//   A = problem depth [m];  B = block bounding width in the B_perp direction [m]
+	// -----------------------------------------------------------------------
+	std::vector<double> nu_perp_coeff(NumBlockLabels, 0.0);
+	{
+		static const double toCm[]={2.54,0.1,1.,100.,0.00254,1.e-04};
+		double A_m = Depth * toCm[LengthUnits] * LengthConv;  // problem units → m
+
+		if(A_m > 0. && w > 0.)
+		{
+			// Bounding box per block label (cm, matching meshnode.x/y units)
+			std::vector<double> bxmin(NumBlockLabels,  1e30);
+			std::vector<double> bxmax(NumBlockLabels, -1e30);
+			std::vector<double> bymin(NumBlockLabels,  1e30);
+			std::vector<double> bymax(NumBlockLabels, -1e30);
+			for(int ei=0; ei<NumEls; ei++){
+				int lbl = meshele[ei].lbl;
+				if(lbl < 0) continue;
+				for(int kk=0; kk<3; kk++){
+					double xx = meshnode[meshele[ei].p[kk]].x;
+					double yy = meshnode[meshele[ei].p[kk]].y;
+					if(xx < bxmin[lbl]) bxmin[lbl]=xx;
+					if(xx > bxmax[lbl]) bxmax[lbl]=xx;
+					if(yy < bymin[lbl]) bymin[lbl]=yy;
+					if(yy > bymax[lbl]) bymax[lbl]=yy;
+				}
+			}
+			for(int lbl=0; lbl<NumBlockLabels; lbl++){
+				int blk = labellist[lbl].BlockType;
+				const CMaterialProp &m = blockproplist[blk];
+				if(m.Lam_d <= 0.) continue;
+				if(!m.bLamHybridSigmaZ) continue;
+				if(m.LamType!=1 && m.LamType!=2) continue;
+				double sigma_t = (m.Cduct_t>0.) ? m.Cduct_t : m.LamFill * m.Cduct;
+				if(sigma_t <= 0.) continue;
+				// B_m: block dimension perpendicular to the lamination stacking
+				double B_m = (m.LamType==1)
+					? (bxmax[lbl]-bxmin[lbl]) * LengthConv   // LamType=1: x-width (B_perp=B_y)
+					: (bymax[lbl]-bymin[lbl]) * LengthConv;  // LamType=2: y-width (B_perp=B_x)
+				if(B_m <= 0.) continue;
+				double A2=A_m*A_m, B2=B_m*B_m;
+				double Leff2 = A2*B2 / (12.*(A2+B2));
+				nu_perp_coeff[lbl] = 0.4*PI * sigma_t * w * Leff2;
+			}
+		}
+	}
+	// -----------------------------------------------------------------------
+
+
 
 	V_old=(CComplex *) calloc(NumNodes+NumCircProps,sizeof(CComplex));
 
@@ -165,37 +237,22 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 	for(i=0;i<NumBlockProps;i++) Mu[i]=(CComplex *)calloc(2,sizeof(CComplex));
 
 	for(k=0;k<NumBlockProps;k++){
-		// Safeguard: LamType != 0 requires bPerpLenz for AC problems
-		// (FEMM 4.2 public does not support LamType != 0 in AC mode).
-		if(w > 0. && blockproplist[k].LamType != 0 && !blockproplist[k].bPerpLenz){
-			blockproplist[k].LamType = 0;  // Downgrade to isotropic
-			blockproplist[k].bAnisoConductivity = FALSE;  // Also disable aniso tensor
-		}
-
 		if (blockproplist[k].LamType==0){
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
-			
+
 		if(blockproplist[k].Lam_d!=0){
 				if (blockproplist[k].Cduct != 0){
-					// For anisotropic conductivity: use Cduct_n (normal/through-thickness
-					// component) to compute the transverse skin depth, because it is the
-					// through-thickness current path that determines flux penetration.
-					// For legacy scalar conductivity: use Cduct directly.
-					double CductTanh = blockproplist[k].bAnisoConductivity
-						? blockproplist[k].Cduct_n * 1.e-06  // S/m -> MS/m
-						: blockproplist[k].Cduct;
-
 					halflag=exp(-I*blockproplist[k].Theta_hx*DEG/2.);
-					ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_x));
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
 					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
 					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill +
 							(1.- blockproplist[k].LamFill);
 
 					halflag=exp(-I*blockproplist[k].Theta_hy*DEG/2.);
-					ds=sqrt(2./(0.4*PI*w*CductTanh*blockproplist[k].mu_y));
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
 					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-					Mu[k][1]=((Mu[k][1]*tanh(K))/K)*blockproplist[k].LamFill + 
+					Mu[k][1]=((Mu[k][1]*tanh(K))/K)*blockproplist[k].LamFill +
 							(1. - blockproplist[k].LamFill);
 				}
 				else{
@@ -208,50 +265,22 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 		}
 		else if (blockproplist[k].LamType==2){
 			// Laminations stacked in X (lam plane = YZ).
-			// B_x PERPENDICULAR to lam: uses mu2 = Mu[k][1] in assembly (via 1/mu2 * Mx).
-			// B_y PARALLEL     to lam: uses mu1 = Mu[k][0] in assembly (via 1/mu1 * My).
-			// NOTE: if bPerpLenz is enabled for this material, Mu[k][1] is OVERRIDDEN
-			// per-element later (see assembly loop) using labellist[lbl].MuPerp, which
-			// is derived from the per-label geometric Wperp. The static value below
-			// is the series-reluctance fallback (no Lenz feedback).
+			// mu1/Mu[k][0] acts on B_x; mu2/Mu[k][1] acts on B_y.
+			// B_x is perpendicular to the laminations; B_y is parallel.
+			// The perpendicular component uses static series reluctance. Macro
+			// gap-loss eddies, when enabled, enter through the Az/Jz conductivity
+			// term instead of a Bessel permeability correction.
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
 			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR component (mu2, B_x): static series reluctance default.
-				{
-					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
-					                + (1. - blockproplist[k].LamFill) / 1.0;
-					Mu[k][1] = 1.0 / inv_mu;
-				}
-
-				// PARALLEL component (mu1, B_y direction): standard tanh skin effect
-				if(blockproplist[k].Cduct!=0){
-					halflag=exp(-I*blockproplist[k].Theta_hx*DEG/2.);
-					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
-					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
-					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill
-						+(1.-blockproplist[k].LamFill);
-				} else {
-					Mu[k][0]=Mu[k][0]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
-				}
-			}
-		}
-		else if (blockproplist[k].LamType==1){
-			// Laminations stacked in Y (lam plane = XZ).
-			// B_y PERPENDICULAR to lam: uses mu1 = Mu[k][0] in assembly.
-			// B_x PARALLEL     to lam: uses mu2 = Mu[k][1] in assembly.
-			// NOTE: bPerpLenz override happens per-element via labellist[lbl].MuPerp.
-			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
-			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
-			if(blockproplist[k].Lam_d!=0){
-				// PERPENDICULAR component (mu1, B_y): static series reluctance default.
+				// PERPENDICULAR component (mu1, B_x): static series reluctance default.
 				{
 					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][0]
 					                + (1. - blockproplist[k].LamFill) / 1.0;
 					Mu[k][0] = 1.0 / inv_mu;
 				}
 
-				// PARALLEL component (mu2, B_x direction): standard tanh skin effect
+				// PARALLEL component (mu2, B_y direction): standard tanh skin effect
 				if(blockproplist[k].Cduct!=0){
 					halflag=exp(-I*blockproplist[k].Theta_hy*DEG/2.);
 					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_y));
@@ -263,85 +292,40 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 				}
 			}
 		}
+		else if (blockproplist[k].LamType==1){
+			// Laminations stacked in Y (lam plane = XZ).
+			// mu1/Mu[k][0] acts on B_x; mu2/Mu[k][1] acts on B_y.
+			// B_y is perpendicular to the laminations; B_x is parallel.
+			// The perpendicular component uses static series reluctance. Macro
+			// gap-loss eddies, when enabled, enter through the Az/Jz conductivity
+			// term instead of a Bessel permeability correction.
+			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
+			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
+			if(blockproplist[k].Lam_d!=0){
+				// PERPENDICULAR component (mu2, B_y): static series reluctance default.
+				{
+					CComplex inv_mu = blockproplist[k].LamFill / Mu[k][1]
+					                + (1. - blockproplist[k].LamFill) / 1.0;
+					Mu[k][1] = 1.0 / inv_mu;
+				}
+
+				// PARALLEL component (mu1, B_x direction): standard tanh skin effect
+				if(blockproplist[k].Cduct!=0){
+					halflag=exp(-I*blockproplist[k].Theta_hx*DEG/2.);
+					ds=sqrt(2./(0.4*PI*w*blockproplist[k].Cduct*blockproplist[k].mu_x));
+					K=halflag*deg45*blockproplist[k].Lam_d*0.001/(2.*ds);
+					Mu[k][0]=((Mu[k][0]*tanh(K))/K)*blockproplist[k].LamFill
+						+(1.-blockproplist[k].LamFill);
+				} else {
+					Mu[k][0]=Mu[k][0]*blockproplist[k].LamFill+(1.-blockproplist[k].LamFill);
+				}
+			}
+		}
 		else{
 			Mu[k][0]=1;
 			Mu[k][1]=1;
 		}
 
-	}
-
-	// =====================================================================
-	// Perpendicular Lenz feedback (Bessel disc model) — geometric pre-pass.
-	// For every block label whose material has bPerpLenz==TRUE and uses
-	// laminations (LamType==1 or 2) with in-plane conductivity Cduct_t>0,
-	// derive the disc radius a = Wperp/2 from the bounding box of the
-	// elements assigned to that label, then pre-compute μ⊥(ω) via the
-	// closed-form Bessel formula. The result is stashed in labellist[l].MuPerp
-	// and applied per-element later (overriding Mu[k] for the perpendicular slot).
-	// LamType==1 → lams stacked in Y, perpendicular extent = X bounding box
-	// LamType==2 → lams stacked in X, perpendicular extent = Y bounding box
-	// =====================================================================
-	{
-		// Reset per-label storage.
-		for(int l=0; l<NumBlockLabels; l++){
-			labellist[l].Wperp = 0.;
-			labellist[l].MuPerp = 0.;
-		}
-		// Bounding box per label (only labels referenced by mesh).
-		double *xmn = new double[NumBlockLabels];
-		double *xmx = new double[NumBlockLabels];
-		double *ymn = new double[NumBlockLabels];
-		double *ymx = new double[NumBlockLabels];
-		BOOL   *seen = new BOOL[NumBlockLabels];
-		for(int l=0; l<NumBlockLabels; l++){
-			xmn[l]= 1.e30; xmx[l]=-1.e30;
-			ymn[l]= 1.e30; ymx[l]=-1.e30;
-			seen[l]=FALSE;
-		}
-		for(int i=0; i<NumEls; i++){
-			int lbl = meshele[i].lbl;
-			if(lbl<0 || lbl>=NumBlockLabels) continue;
-			seen[lbl]=TRUE;
-			for(int kk=0; kk<3; kk++){
-				int nn = meshele[i].p[kk];
-				double xn=meshnode[nn].x, yn=meshnode[nn].y;
-				if(xn<xmn[lbl]) xmn[lbl]=xn;
-				if(xn>xmx[lbl]) xmx[lbl]=xn;
-				if(yn<ymn[lbl]) ymn[lbl]=yn;
-				if(yn>ymx[lbl]) ymx[lbl]=yn;
-			}
-		}
-		// Per-label Wperp and Bessel μ⊥.
-		for(int l=0; l<NumBlockLabels; l++){
-			if(!seen[l]) continue;
-			int k = labellist[l].BlockType;
-			if(k<0 || k>=NumBlockProps) continue;
-			CMaterialProp &mp = blockproplist[k];
-			if(!mp.bPerpLenz)               continue;
-			if(mp.Lam_d<=0.)                continue;
-			if(mp.Cduct_t<=0.)              continue;
-			if(mp.LamType!=1 && mp.LamType!=2) continue;
-			// Perpendicular Lenz model (Model 1): each lamina is a Bessel "cylinder"
-			// with effective disc diameter = Lam_d. This requires per-label geometry;
-			// Wperp is computed from the label's bbox extent across the stacking axis.
-			// (Model 2 bbox-based was eliminated; see commit notes for rationale.)
-			double Wperp_m = mp.Lam_d * 1.e-3;  // mm → m
-			if(Wperp_m<=0.) continue;
-			labellist[l].Wperp = Wperp_m;
-			// Iron μ in the perpendicular slot with hysteresis lag.
-			// For BH-curve materials mu_x/mu_y==1 (linear field unused); derive
-			// initial permeability from the first non-zero BH segment instead.
-			double mu_r_lin = (mp.LamType==2) ? mp.mu_y : mp.mu_x;
-			if(mp.BHpoints>=2 && mp.Bdata[1]>0. && abs(mp.Hdata[1])>0.)
-				mu_r_lin = mp.Bdata[1] / (muo * abs(mp.Hdata[1]));
-			double hyst_deg = (mp.LamType==2) ? mp.Theta_hy : mp.Theta_hx;
-			CComplex mufe = mu_r_lin * exp(-I*hyst_deg*DEG);
-			CComplex g2 = -I * w * mufe * muo * mp.Cduct_t * 1.e6;	// σ_t MS/m → S/m
-			CComplex za = sqrt(g2) * (Wperp_m * 0.5);				// a = Wperp/2 in metres
-			labellist[l].MuPerp = mp.LamFill * mufe * PerpLenzShape(za)
-			                    + (1. - mp.LamFill);
-		}
-		delete[] xmn; delete[] xmx; delete[] ymn; delete[] ymx; delete[] seen;
 	}
 
 do{
@@ -590,20 +574,11 @@ do{
 				if (j!=k) Mxy[k][j] += K*(p[j]*q[k] + p[k]*q[j]);
 			}
 
-		// contribution from eddy currents;	
-		K=-I*a*w*blockproplist[meshele[i].blk].Cduct*c/12.;
-
-		// Eddy current contribution: K=0 for ALL laminated block types (LamType=0/1/2).
-		// The tanh complex-permeability correction in the mu computation already captures
-		// flux shielding within each lamination. Assigning any bulk sigma to the FEM
-		// mass matrix would create a spurious macro skin effect on the entire block.
-		// Eddy losses are recovered post-solve via blockintegral(31), which applies the
-		// thin-lamination analytical formula directly to B from the field solution.
-		if(blockproplist[El->blk].Lam_d>0)
-		{
-			int lt = blockproplist[El->blk].LamType;
-			if(lt==0 || lt==1 || lt==2) K=0;
-		}
+		// contribution from eddy currents;
+		// For laminated LamType 1/2, EffectiveAzConductivity returns the
+		// optional hybrid sigma_z_eff = sigma_t = Cduct_t. It returns zero for
+		// LamType 0 to avoid double-counting the classical tanh lamination loss.
+		K=-I*a*w*EffectiveAzConductivity(blockproplist[meshele[i].blk])*c/12.;
 		
 		// if this element is part of a wound coil, 
 		// it should have a zero "bulk" conductivity...
@@ -689,22 +664,10 @@ do{
 
 		// update permeability for the element;
 		if (Iter==0){ 
-			k=meshele[i].blk;	
+			k=meshele[i].blk;
 			meshele[i].mu1=Mu[k][0];
 			meshele[i].mu2=Mu[k][1];
 			meshele[i].v12=0;
-			// Per-element Perpendicular Lenz override: replace the perpendicular
-			// slot with the per-label Bessel μ⊥(ω) derived from geometry.
-			if(blockproplist[k].bPerpLenz && blockproplist[k].Lam_d>0. &&
-			   blockproplist[k].Cduct_t>0.){
-				int l = meshele[i].lbl;
-				if(l>=0 && l<NumBlockLabels && labellist[l].Wperp>0.){
-					if(blockproplist[k].LamType==2)
-						meshele[i].mu2 = labellist[l].MuPerp;
-					else if(blockproplist[k].LamType==1)
-						meshele[i].mu1 = labellist[l].MuPerp;
-				}
-			}
 			if (blockproplist[k].BHpoints>0)
 			{
 				if (bIncremental==FALSE)
@@ -808,11 +771,9 @@ do{
 			meshele[i].mu2=labellist[meshele[i].lbl].ProximityMu;
 		}
 
-		// combine block matrices into global matrices;
-		// T-6 audit (perp-Lenz project): the harmonic solver uses full COMPLEX
-		// mu1/mu2 here (no Re() wrapper), so Im(μ⊥) from the Bessel formula
-		// contributes directly to the stiffness matrix — losses and flux
-		// redistribution are both correctly captured without any additional code.
+		// combine block matrices into global matrices. The harmonic solver uses
+		// full complex mu1/mu2 here, so classical lamination loss represented by
+		// complex permeability contributes directly to the stiffness matrix.
 		for(j=0;j<3;j++)
 			for(k=0;k<3;k++){
 
@@ -829,6 +790,24 @@ do{
 				}
 // #endif
 			}
+
+		// Macro gap-loss: add imaginary reluctivity ν_perp'' for hybrid laminates.
+		// LamType=1 (B_perp=B_y): Im(ν_y) via Mx (∂A/∂x · ∂A/∂x terms).
+		// LamType=2 (B_perp=B_x): Im(ν_x) via My (∂A/∂y · ∂A/∂y terms).
+		// ν_perp'' = 0.4π·σ_t[MS/m]·ω·L_eff²[m²]  (relative-ν units, positive→loss)
+		{
+			int lbl_i = meshele[i].lbl;
+			if(lbl_i >= 0 && nu_perp_coeff[lbl_i] > 0.)
+			{
+				CComplex jnu = I * nu_perp_coeff[lbl_i];
+				int blk_i = meshele[i].blk;
+				int lt = blockproplist[blk_i].LamType;
+				for(j=0;j<3;j++)
+					for(k=0;k<3;k++)
+						Me[j][k] += (lt==1) ? jnu * Mx[j][k]
+						                    : jnu * My[j][k];
+			}
+		}
 
 		for (j=0;j<3;j++){
 			for (k=j;k<3;k++)

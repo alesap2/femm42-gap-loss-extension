@@ -61,6 +61,7 @@ void CFemmeDoc::initalise_lua()
 	lua_register(lua,"mi_zoom",lua_zoom);
 	lua_register(lua,"mi_addmaterial",lua_addmatprop);
 	lua_register(lua,"mi_setmataniso",lua_setmataniso);
+	lua_register(lua,"mi_setmatlamhybrid",lua_setmatlamhybrid);
 	lua_register(lua,"mi_setmatperplenz",lua_setmatperplenz);
 	lua_register(lua,"mi_addpointprop",lua_addpointprop);
 	lua_register(lua,"mi_addcircprop",lua_addcircuitprop);
@@ -1554,10 +1555,12 @@ int CFemmeDoc::lua_addmatprop(lua_State *L)
 int CFemmeDoc::lua_setmataniso(lua_State *L)
 {
 	// mi_setmataniso(name, Cduct_t, Cduct_n)
-	//   Enables anisotropic electrical conductivity for a laminated material.
-	//   The conductivity tensor has two independent components:
-	//     Cduct_t  - tangential (in-plane) conductivity [MS/m]
-	//     Cduct_n  - normal (through-thickness) conductivity [S/m]
+	//   Stores laminated homogenized conductivity data.
+	//     Cduct_t  - tangential lamination-plane conductivity [MS/m];
+	//                 can be used as sigma_z_eff for LamType 1/2 only after
+	//                 mi_setmatlamhybrid(name, 1) is called.
+	//     Cduct_n  - normal through-stack conductivity [S/m], stored only
+	//                 for documentation/future tensor support.
 	//   When both are 0, ComputeAnisoConductivity estimates them from
 	//   the lamination geometry (Lam_d) assuming thin-lam skin depth.
 	CatchNullDocument();
@@ -1602,18 +1605,35 @@ int CFemmeDoc::lua_setmataniso(lua_State *L)
 	return 0;
 }
 
+int CFemmeDoc::lua_setmatlamhybrid(lua_State *L)
+{
+	// mi_setmatlamhybrid(name [, enable])
+	//   Explicitly enables/disables the 2D equivalent laminated sigma_z_eff
+	//   channel. This is intentionally separate from mi_setmataniso so older
+	//   files that contain sigma_t/sigma_n do not become solid conductors.
+	CatchNullDocument();
+	CFemmeDoc * thisDoc = (CFemmeDoc *)pFemmeDoc;
+	int n = lua_gettop(L);
+	if (n < 1) return 0;
+
+	CString BlockName;
+	BlockName.Format("%s", lua_tostring(L,1));
+
+	int k;
+	for(k=0; k<thisDoc->blockproplist.GetSize(); k++)
+		if (BlockName == thisDoc->blockproplist[k].BlockName) break;
+	if (k == thisDoc->blockproplist.GetSize()) return 0;
+
+	int enable = (n>1) ? (int)lua_todouble(L,2) : 1;
+	thisDoc->blockproplist[k].bLamHybridSigmaZ = (enable != 0);
+	return 0;
+}
+
 int CFemmeDoc::lua_setmatperplenz(lua_State *L)
 {
 	// mi_setmatperplenz(name [, enable [, model_id]])
-	//   Toggles the perpendicular Lenz μ⊥(ω) Bessel model for a laminated material.
-	//   enable   : 0 = off, non-zero = on (default 1 when arg omitted).
-	//   model_id : optional, 0 = circular Bessel (default; only supported value).
-	//
-	//   The disc radius a = Wperp/2 is derived per-LABEL from the geometry
-	//   by the solver at solve time — no width parameter is stored in the material.
-	//
-	//   Safety: defensive reset — every field is written before return,
-	//   so repeated calls within the same process never leak state.
+	//   Deprecated compatibility no-op. The Bessel PerpLenz model is no
+	//   longer used as a physical perpendicular/gap-loss model.
 	CatchNullDocument();
 	CFemmeDoc * thisDoc = (CFemmeDoc *)pFemmeDoc;
 	int n = lua_gettop(L);
@@ -1627,14 +1647,7 @@ int CFemmeDoc::lua_setmatperplenz(lua_State *L)
 		if (BlockName == thisDoc->blockproplist[k].BlockName) break;
 	if (k == thisDoc->blockproplist.GetSize()) return 0;  // not found
 
-	int enable = (n>1) ? (int)lua_todouble(L,2) : 1;
-
-	if (enable != 0) {
-		thisDoc->blockproplist[k].bPerpLenz = TRUE;
-	} else {
-		// Disable: reset to series-reluctance mode
-		thisDoc->blockproplist[k].bPerpLenz = FALSE;
-	}
+	thisDoc->blockproplist[k].bPerpLenz = FALSE;
 	return 0;
 }
 

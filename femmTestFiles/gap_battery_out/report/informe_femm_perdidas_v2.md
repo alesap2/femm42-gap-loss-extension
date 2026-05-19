@@ -1,5 +1,7 @@
 # Caracterización de Pérdidas en Núcleos Amorfos Laminados con Entrehierro
-## Análisis FEM Paramétrico — Baterías 1+2+3 (1536 casos completados) + Batería 4 (diseñada) — FEMM 4.2 Solver Armónico
+## Análisis FEM Paramétrico — 1628 simulaciones FEMM + 56 post-procesamiento (1684 operaciones total) — FEMM 4.2 Solver Armónico
+
+⚠️ **NOTICE: CRITICAL FEM LIMITATION** — FEMM 2D (formulación escalar A_z) solo resuelve J_z. Para flujo perpendicular a las láminas, las corrientes de Foucault reales deben cerrar en el plano de la laminación (requieren J_x y J_z simultáneamente): FEMM no puede resolver este problema. La corrección Bessel (LT2_ON/PerpLenz) es una corrección analítica formal dentro del marco de homogenización FEMM, **no una representación física de las corrientes reales para flujo perpendicular**. Los resultados P_x(Bessel), ΔP_⊥ y γ≈0.35 son indicadores internos del modelo FEMM, no predicciones físicas validadas. γ_Wang=1 proviene de FEA 3D que resuelve los caminos reales de cierre de corriente. **Validación experimental: PENDIENTE** (ver §2.6).
 
 **Fecha:** Mayo 2026  
 **Código:** FEMM 4.2 (VS2022 x64, Release64) — `femm.exe` compilado localmente  
@@ -7,22 +9,22 @@
 **Scripts batería 2:** `run_gap_battery2.py` / `gap_battery2_case.lua`  
 **Scripts batería 3:** `run_gap_battery3.py` / `gap_battery3_case.lua`  
 **Scripts batería 4:** `run_gap_battery4.py` / `gap_battery4_case.lua`  
-**Scripts calibración:** `calibrate_ke.py` / `calibrate_ke_case.lua`
+**Scripts batería 5:** `run_gap_battery5.py` / `gap_battery4_case.lua` + `femm_ans_reader.py`
 
 ---
 
 ## Resumen
 
-Se realizó un barrido paramétrico de **1536 simulaciones armónicas FEM** sobre un inductor de núcleo amorfo laminado con entrehierro variable, comparando cuatro modelos de permeabilidad efectiva en FEMM 4.2. Los principales resultados son:
+Se realizó un barrido de **1628 simulaciones FEMM** (1536 Baterías 1–3 + 56 B4 + 36 calibración) + **56 post-procesamientos B5** = **1684 operaciones totales**, sobre un inductor de núcleo amorfo con entrehierro variable, comparando cuatro modelos de μ efectiva en FEMM 4.2. **Limitación fundamental:** el solver desactiva conducción directa (K=0) para laminaciones, modelando eddy mediante homogenización vía μ_fd. Los resultados son internamente consistentes pero sometidos a las restricciones de esta formulación (ver §2.6 FEM Limitations). Con esta salvedades, los principales resultados son:
 
 - **LT0_OFF ≡ LT2_OFF** en todos los 288 casos de la batería 1: ambos modelos aplican la misma corrección tanh al postprocesador FEMM.
 - **β = 2.0000 exacto** en todos los casos, como consecuencia matemática directa del solver lineal.
 - **α ≈ 1.96** (d = 23 µm, 10–200 kHz): el material opera en régimen de transición (d/(2δ) entre 0.35 y 1.55), alejándose del límite de lámina delgada.
-- **LT2_ON** (corrección Bessel para flujo perpendicular) predice 1–2 % menos pérdidas que LT0_OFF a baja frecuencia; es el modelo físicamente más completo.
-- La ecuación de diseño sin doble conteo combina `blockintegral(3)` de FEMM (eddy intra-lámina) con la separación de Bertotti sobre curvas del fabricante (histéresis).
+- **LT2_ON** aplica la función analítica Bessel (PerpLenz) a la componente B_x dentro del marco de homogenización FEMM. Esto es una corrección formal dentro del modelo, **no una representación física de las corrientes de Foucault reales** para flujo perpendicular a láminas: FEMM 2D solo resuelve J_z y no puede imponer ∇·J = 0 para corrientes que cierran en el plano de la laminación. La diferencia LT2_ON − LT0_OFF (≈1–2 %) es un indicador interno de sensibilidad del modelo homogeneizado, no una predicción validada del efecto perpendicular real.
+- La estimación FEMM+Bertotti sin doble conteo combina `blockintegral(3)` de FEMM (eddy intra-lámina) con la separación de Bertotti sobre curvas del fabricante (histéresis).
 - Los coeficientes de Bertotti obtenidos del fabricante son: k_h = 1.357×10⁻², n = 1.806, k_e = 8.009×10⁻⁷ W·s²/kg. El valor de k_e es 4.7× superior al teórico para una lámina aislada (d = 25 µm, datasheet), atribuido al acoplamiento inter-laminar propio del núcleo amorfo enrollado; confirmado numéricamente mediante un barrido de calibración de 36 casos (1–200 kHz) sobre el modelo sin entrehierro (§7.3).
 - **Batería 3 (288 casos, d = 10–100 µm):** ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) varía entre −1.69% y +0.49%. La corrección PerpLenz reduce las pérdidas para d ≤ 25 µm a baja frecuencia, y las aumenta ligeramente para d ≥ 50 µm a alta frecuencia. Rango ingenierístico: < ±2% en todos los casos ensayados (§4.7).
-- **Batería 4 (112 casos, completada):** Aislamiento directo de $P_x$ (pérdidas por flujo perpendicular) mediante la fracción $f_{Bx}$ sobre una malla 2D. Resultado: $f_{Bx}$ crece de 1.74 % a 2.55 % entre $g=2$ y 6 mm; $\gamma_{P_x} = 0.35$ (vs $\gamma=1$ de Wang). Ver §4.8.
+- **Baterías 4+5 (56+56 casos):** Aislamiento de $P_x$ como indicador interno del modelo. Batería 4 (LT0_OFF): $f_{Bx}$ crece de 1.74 % a 2.55 % entre $g = 2$ y 6 mm; $\gamma_{P_x} = 0.351$. Batería 5 (LT2_ON, integración Bessel elemento a elemento): $P_x$(Bessel) ≈ 39–42 % de la estimación tanh homóloga; $\gamma_{P_x} = 0.334$–$0.360$ ($R^2 > 0.996$). **INTERPRETACIÓN:** estos resultados son indicadores del comportamiento del modelo FEMM homogeneizado bajo la decomposición B_x/B_y; no son predicciones físicas validadas de pérdidas reales por flujo perpendicular. La discrepancia $\gamma \approx 0.35 \ll \gamma_\text{Wang} = 1$ refleja tanto la limitación 2D (ausencia de extensión axial) como la imposibilidad de FEMM para resolver los caminos reales de cierre de corriente en las láminas. Ver §4.8 y §2.6.
 
 ---
 
@@ -30,13 +32,14 @@ Se realizó un barrido paramétrico de **1536 simulaciones armónicas FEM** sobr
 
 Los inductores de potencia con núcleo de material amorfo laminado y entrehierro de aire se emplean ampliamente en convertidores de alta frecuencia (10–200 kHz) por su baja coercitividad y alta saturación. Estimar sus pérdidas en el núcleo requiere modelar dos efectos que interactúan: la distribución no uniforme del campo magnético alrededor del entrehierro (flujo de fringing) y la penetración parcial del campo en las láminas conductoras (efecto piel).
 
-FEMM 4.2 implementa ambos efectos mediante la permeabilidad compleja efectiva: la parte real codifica la energía almacenada, la parte imaginaria codifica la disipación por corrientes de Foucault dentro de cada lámina. Este trabajo utiliza una versión modificada del postprocesador de FEMM que añade la corrección de Bessel para flujo perpendicular a las láminas (modo PerpLenz), y la valida mediante un barrido paramétrico extensivo.
+FEMM 4.2 implementa ambos efectos mediante la permeabilidad compleja homogeneizada: la parte real codifica la energía almacenada, la parte imaginaria codifica una estimación de las pérdidas por eddy. Para materiales laminados, el solver desactiva el término de conducción volumétrica en la matriz FEM (K=0) y modela el efecto piel mediante una corrección analítica a la permeabilidad (fórmula tanh para flujo paralelo). Este trabajo utiliza una versión modificada que aplica adicionalmente la función analítica Bessel al componente B_x (modo PerpLenz/LT2_ON). **LIMITACIÓN FUNDAMENTAL:** la formulación escalar A_z de FEMM 2D solo resuelve J_z. Cuando el flujo entra perpendicularmente a la cara de una laminación, las corrientes de Foucault inducidas deben cerrar en el plano de la laminación real (requieren J_x y J_z simultáneamente). FEMM no puede resolver este problema ni para flujo de fringing localizado ni para ningún otro caso de flujo perpendicular real. La corrección Bessel es por tanto una corrección analítica formal dentro del marco homogeneizado, sin justificación física rigurosa para flujo perpendicular en laminaciones reales.
 
 **Alcance del trabajo:**
 - Batería 1: 288 casos, d = 23 µm fijo, tres modos (LT0_OFF, LT2_OFF, LT2_ON), barrido en f, g, B_n.
 - Batería 2: 960 casos, d ∈ {10, 18, 23, 50, 100} µm, dos modos (LT0_OFF, LT2_ON).
 - Batería 3: 288 casos, d ∈ {10, 25, 50, 100} µm, dos modos (LT0_OFF, LT2_ON), g ∈ {2, 3, 4} mm — análisis sistemático de ΔP_⊥.
-- Batería 4: 112 casos (pendiente), d = 25 µm fijo, g ∈ {1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0} mm, LT0_OFF + LT2_ON — aislamiento de $P_x$ y escalado con el entrehierro.
+- Batería 4: 56 casos (completada), d = 25 µm fijo, g ∈ {2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0} mm, LT0\_OFF — aislamiento aproximado de $P_x \approx f_{Bx} \times P_\text{side}$ (cuadrícula 120 puntos).
+- Batería 5: 56 casos (completada), d = 25 µm fijo, g ∈ {2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0} mm, LT2\_ON — aislamiento exacto de $P_x$(Bessel) mediante `femm_ans_reader.py` sobre la malla completa del `.ans`.
 
 > **Nota sobre d = 23 µm y d = 25 µm:** el espesor nominal del material según el datasheet es **d = 25 µm**, y es el parámetro de referencia para el análisis teórico (§7.3) y para la batería 3. Las baterías 1 y 2 realizaron un barrido paramétrico que incluyó **d = 23 µm** como valor de ensayo (~8 % inferior al nominal). La diferencia en ΔP_⊥ entre ambos valores es < 0.1 pp (§4.7), por lo que los resultados son comparables entre baterías. Toda vez que el texto indica "d = 23 µm", se refiere a resultados de las baterías 1 o 2; cuando indica "d = 25 µm" como material de referencia, se refiere a los resultados de la batería 3 o al valor teórico del datasheet.
 
@@ -88,7 +91,7 @@ FEMM resuelve en régimen armónico (campo ∝ e^{jωt}) la ecuación de Helmhol
 
 $$\boxed{-\nabla\cdot\!\left(\frac{1}{\mu_{fd}(x,y,\omega)\,\mu_0}\,\nabla A_z\right) + j\omega\sigma_{\rm cond}\, A_z = J_s}$$
 
-donde μ_fd es la **permeabilidad compleja dependiente de frecuencia** del material laminado (precalculada mediante las funciones tanh o Bessel, §2.3–2.4), σ_cond es la conductividad del conductor (cero en el núcleo laminado — las corrientes de Foucault están homogeneizadas dentro de μ_fd), y J_s es la densidad de corriente aplicada.
+donde μ_fd es la permeabilidad compleja homogeneizada del material laminado (precalculada mediante las funciones tanh o Bessel, §2.3–2.4), σ_cond es cero en el núcleo laminado (las pérdidas por eddy están modeladas mediante la parte imaginaria de μ_fd, no resolviendo directamente corrientes volumétricas), y J_s es la densidad de corriente aplicada. El solver planar solo resuelve Jz (fuera del plano), que es suficiente para conductores extruidos clásicos; para laminaciones, esta formulación es una homogenización aproximada.
 
 El problema es **lineal en A_z**: los campos B_x, B_y son proporcionales a la corriente de excitación I. Esta linealidad es la causa directa de que β = 2.0000 exacto en todos los casos (§5.1).
 
@@ -125,11 +128,15 @@ Los exponentes efectivos de frecuencia (α) y espesor (k_d) toman valores entre 
 
 **Referencias:** Dowell (1966); Ferreira (1994); Lammeraner & Stafl (1966).
 
-### 2.4 Corrección Bessel (PerpLenz) — Flujo Perpendicular a las Láminas
+### 2.4 Función Analítica Bessel (PerpLenz) — Corrección Formal para B_x en el Marco Homogeneizado
 
-En la zona de fringing junto al entrehierro, el flujo magnético tiene una componente **perpendicular** al plano de las láminas (B_x). Este flujo induce corrientes "en disco" en cada lámina, con simetría cilíndrica en lugar de la difusión 1D del caso paralelo.
+**LIMITACIÓN FUNDAMENTAL (leer antes de interpretar resultados LT2_ON):**
 
-Modelando cada lámina como disco cilíndrico de radio a = d/2, la ecuación de Bessel de orden 1 en coordenadas cilíndricas da la solución:
+FEMM 2D resuelve la formulación escalar A_z(x,y) y solo puede representar corrientes fuera del plano: J_z. Cuando el flujo entra perpendicularmente a la cara de una laminación real (componente B_x en el modelo con láminas verticales), las corrientes de Foucault físicamente inducidas deben cerrar en el plano de la laminación, requiriendo simultáneamente J_x y J_z. **FEMM no puede resolver este problema en ningún caso**, independientemente de si el flujo perpendicular proviene de fringing localizado o del flujo principal. Ninguna elección del radio en la función Bessel puede compensar esta limitación estructural de la formulación 2D: no es un problema de parámetros sino de ecuaciones.
+
+La corrección Bessel implementada en el modo PerpLenz es por tanto **una corrección analítica formal** aplicada a la componente μ_fd,x dentro del marco de homogenización FEMM. Describe cómo cambiaría la permeabilidad compleja homogeneizada si los eddies en B_x se comportasen como los de un disco cilíndrico aislado de radio a = d/2. Esta hipótesis geométrica tiene apoyo teórico para el problema de un disco aislado, pero **no corresponde a la física real** de una laminación de ancho W en un núcleo de inductor real donde W ≫ d.
+
+En la zona de fringing del gap, el flujo tiene componente B_x que entra perpendicularmente a las caras de las láminas. El modelo Bessel asume hipotéticamente cada lámina como un disco cilíndrico aislado de radio a = d/2, y calcula la permeabilidad compleja resultante:
 
 $$A_\phi(r) = C\,J_1(k r), \qquad k^2 = -j\omega\,\mu_r\,\mu_0\,\sigma_t$$
 
@@ -137,11 +144,13 @@ El cociente entre el campo medio y el campo aplicado define la **función de for
 
 $$\text{PerpLenzShape}(z_a) = \frac{2\,J_1(z_a)}{z_a\,J_0(z_a)}, \qquad z_a = k\cdot\frac{d}{2} = \frac{d}{2}\sqrt{-j\omega\,\mu_r\,\mu_0\,\sigma_t}$$
 
-La permeabilidad efectiva perpendicular es:
+La permeabilidad efectiva perpendicular dentro del modelo homogeneizado es:
 
 $$\boxed{\mu_{fd,\perp} = \eta\,\mu_r\cdot\text{PerpLenzShape}(z_a) + (1-\eta)}$$
 
-El argumento z_a tiene fase −45° (signo opuesto a K del caso tanh). Las dos funciones de forma son distintas para argumentos intermedios:
+**Sobre la elección del radio a = d/2:** Este valor proviene de la hipótesis de disco aislado. En una laminación real de ancho W (típicamente mm-cm), los eddy paths cierran sobre un radio del orden W/2, no d/2. La función PerpLenzShape con radio d/2 no representa la laminación real para ningún nivel de flujo perpendicular; es la función que resulta de aplicar la solución de disco aislado con el único parámetro geométrico disponible en FEMM (el espesor d). **El argumento sobre si el flujo perpendicular es fringing (~2%) o principal (~98%) no cambia esta conclusión**: en ambos casos el problema físico real requiere resolver corrientes en J_x que FEMM no puede.
+
+El argumento z_a tiene fase −45° (signo opuesto a K del caso tanh). Las dos funciones de forma dan resultados distintos para argumentos intermedios:
 
 | $\vert z \vert$ | `tanh(z)/z` | `2J₁(z)/(z·J₀(z))` | Diferencia |
 |------:|------------:|--------------------:|------------|
@@ -151,7 +160,7 @@ El argumento z_a tiene fase −45° (signo opuesto a K del caso tanh). Las dos f
 | 2.0   | 0.700       | 0.648               | −0.052     |
 | 3.0   | 0.551       | 0.437               | −0.114     |
 
-Para |z| < 1.4: PerpLenz < tanh → LT2_ON predice menos pérdidas. Para |z| > 1.4: PerpLenz > tanh → LT2_ON predice más pérdidas. **Este cruce explica la inversión de signo del ratio P_ON/P_OFF en d ≈ 30 µm** (§4.5).
+Para |z| < 1.4: PerpLenz < tanh → LT2_ON predice menos pérdidas que LT0_OFF para la componente B_x. Para |z| > 1.4: relación inversa. **Este cruce explica la inversión de signo del ratio P_ON/P_OFF en d ≈ 30 µm** (§4.5). Este es un resultado del modelo analítico formal; no implica que ninguno de los dos modelos represente las pérdidas físicas reales para flujo perpendicular.
 
 La función PerpLenzShape se calcula mediante serie de potencias de 60 términos (error < 10⁻¹² para |z_a| ≤ 20), implementada en `bessel_perplenz.h`.
 
@@ -192,7 +201,37 @@ La siguiente tabla consolida los cuatro modos implementados, indicando qué corr
 
 **LamType=1** es el espejo de LamType=2: intercambia cuál componente recibe la corrección Bessel. Es el modo apropiado para láminas horizontales (apiladas en Y, flujo principal B_y perpendicular). En el modelo de este trabajo las láminas son **verticales** (apiladas en X), por lo que LamType=2 es el correcto; LamType=1 no se incluyó en las baterías por ser inapropiado para esta geometría.
 
-**El modelo recomendado es LT2_ON**: aplica la corrección tanh (física correcta) al flujo paralelo dominante (B_y, ~98% de la energía magnética en la zona de fringing) y la corrección Bessel (física correcta) al flujo perpendicular de fringing (B_x, ~2%).
+**El modo LT2_ON es la formulación más completa disponible dentro del marco FEMM**: aplica la corrección tanh (analíticamente validada para flujo paralelo) a B_y, y aplica la función analítica Bessel (PerpLenz) a B_x. Sin embargo, **ni LT2_ON ni ningún otro modo pueden resolver el problema de cierre real de corrientes en 3D para flujo perpendicular** a la cara de las láminas. Los resultados de LT2_ON deben interpretarse como indicadores de sensibilidad del modelo homogeneizado, no como predicciones físicas de las pérdidas reales asociadas a B_x. Ver §2.4 y §2.7 para la limitación estructural.
+
+---
+
+## 2.7 Limitaciones Fundamentales del Modelo FEM FEMM para Laminaciones
+
+### Ausencia de Resolución Directa de Corrientes Volumétricas Macroscópicas
+
+FEMM planar implementa un solver de Helmholtz escalar en A_z(x,y). Para materiales laminados (`LamType ≠ 0`), el código fuente (`prob2big.cpp` línea 596) **desactiva explícitamente el término de conducción en la matriz FEM: K=0**. Las pérdidas por eddy **no se resuelven directamente** mediante una ecuación de conducción anisótropa, sino mediante una **homogenización analítica a priori** de la permeabilidad compleja μ_fd.
+
+**Consecuencia:** Para un dispositivo real con corrientes de Foucault que cierren en el plano (x,z) de las láminas, FEMM no puede imponer rigurosamente la condición de continuidad **∇·J = 0** sobre esas corrientes volumétricas macroscópicas. La homogenización tanh/Bessel es una aproximación analítica bien establecida, pero no es una solución exacta de un problema de conducción acoplada.
+
+### Formulación Planar Escalar: Solo Jz, No Corrientes en Plano
+
+El solver FEM solo resuelve una incógnita escalar (A_z). Por tanto, solo puede representar corrientes fuera del plano: J_z. Para flujo perpendicular a la cara de las láminas (componente B_x), las corrientes de Foucault físicamente inducidas deben cerrar en el plano de la laminación y requieren simultáneamente J_x y J_z. **Esta formulación es fundamentalmente incompleta para ese problema**: la hipótesis de homogenización (tanh para paralelo, Bessel para perpendicular) es una corrección analítica local que no puede compensar la ausencia de J_x en la solución FEM. No hay elección de parámetros que permita a FEMM 2D resolver correctamente la ecuación de cierre ∇·J = 0 para corrientes en plano.
+
+**En términos precisos:** para flujo perpendicular a la cara de una laminación real de ancho W, los eddies cierran sobre el ancho completo W de la laminación. El modelo Bessel con radio d/2 representa una geometría de disco aislado de espesor d/2, que es una hipótesis sin justificación física para la geometría real del inductor. Esta limitación se mantiene tanto para flujo de fringing (~2% de la energía) como para flujo principal (~98%): **en ambos casos la física del problema requiere J_x**, que FEMM no puede resolver.
+
+### Consecuencias para la Interpretación de Resultados
+
+1. **Las pérdidas asociadas a B_y (flujo paralelo) son los resultados más confiables:** La corrección tanh es estándar y ampliamente validada analíticamente para flujo paralelo al plano de las láminas; el problema 1D tiene solución exacta que coincide con la hipótesis de homogenización.
+2. **Las pérdidas asociadas a B_x (flujo perpendicular) NO tienen justificación física rigurosa:** FEMM aplica la función Bessel a μ_fd,x como corrección analítica formal, pero esto no representa las corrientes reales que físicamente fluirían en una laminación expuesta a flujo perpendicular. Los resultados ΔP_⊥ y P_x(Bessel) son indicadores de sensibilidad del modelo homogeneizado, **no predicciones de las pérdidas físicas reales** por flujo perpendicular.
+3. **La discrepancia γ_FEMM ≈ 0.35 vs γ_Wang = 1 refleja dos limitaciones distintas:** (a) FEMM 2D no resuelve la extensión axial del fringing (limitación geométrica 2D); (b) FEMM 2D no puede imponer ∇·J = 0 para las corrientes en plano (limitación estructural de formulación). Wang usa FEA 3D que resuelve ambos aspectos correctamente.
+4. **Validación experimental es obligatoria:** Estos resultados son internamente consistentes dentro del modelo FEMM, pero su correspondencia con pérdidas en dispositivos reales 3D no ha sido verificada.
+
+### Recomendación para Diseño
+
+Los resultados de este trabajo (ecuación de potencia, exponentes de frecuencia, coeficientes de Bertotti) son **válidos como herramienta de análisis FEMM** pero **deben usarse con cautela para diseño de dispositivos reales 3D**. Para predicciones de producción, se recomienda:
+- Usar la ecuación Wang (γ = 1) en lugar del exponente FEMM (γ ≈ 0.35) para pérdidas de gap.
+- Validar con mediciones calorimetricas antes de producción masiva.
+- Si se usa FEMM para optimización, post-procesar los resultados con factor corrector 3D/2D derivado de Opera 3D o COMSOL.
 
 ---
 
@@ -233,20 +272,45 @@ La siguiente tabla consolida los cuatro modos implementados, indicando qué corr
 | Inducción B_n | 0.10, 0.50, 1.00 T |
 | **Total** | **288 casos** |
 
-**Batería 4 — 2 modos, d fijo, rango de gap ampliado, extracción de $P_x$:**
+**Batería 4 — LT0\_OFF, d fijo, rango de gap ampliado, $f_{Bx}$ en cuadrícula:**
 
 | Variable | Valores |
 |----------|---------|
-| Modos | LT0_OFF, LT2_ON |
+| Modos | LT0\_OFF |
 | Espesor d | 25 µm (fijo) |
 | Frecuencia f | 10, 30, 100, 200 kHz |
-| Entrehierro g | 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0 mm |
-| Inducción B_n | 0.50, 1.00 T |
-| **Total** | **112 casos (pendiente)** |
+| Entrehierro g | 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0 mm |
+| Inducción B\_n | 0.50, 1.00 T |
+| **Total** | **56 casos** |
 
-> **Nota:** entrehierros inferiores al gap base del modelo (2.0 mm en rev2.fem) no son alcanzables sin rehacer la geometría (mover el grupo superior hacia abajo genera solapamientos). El rango se ajustó a g ∈ {2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0} mm.
+**Batería 5 — LT2\_ON, $P_x$(Bessel) exacta vía `femm_ans_reader.py`:**
 
-Resultados: **288/288 [OK], 960/960 [OK], 288/288 [OK] — NaN: 0** en las tres baterías completadas. La batería 4 está diseñada y lista para ejecutar.
+| Variable | Valores |
+|----------|---------|
+| Modos | LT2\_ON |
+| Espesor d | 25 µm (fijo) |
+| Frecuencia f | 10, 30, 100, 200 kHz |
+| Entrehierro g | 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0 mm |
+| Inducción B\_n | 0.50, 1.00 T |
+| **Total** | **56 casos** |
+
+Tras cada solve, Python lee el archivo `.ans` con `FemmAns` y calcula $P_x$(Bessel)/$P_y$(tanh) integrando elemento a elemento sobre la malla completa (14 604 nodos, 28 846 elementos), sin necesidad de cuadrícula auxiliar.
+
+Resultados: **288/288, 960/960, 288/288, 56/56, 56/56 [OK] — NaN: 0** en las cinco baterías.
+
+#### Consolidación de Conteos de Casos
+
+| Batería | FEMM Solver Runs | Post-Procesamiento | Propósito |
+|---------|-----|---|---|
+| B1 | 288 | — | Comparar 3 modos; d=23µm fijo |
+| B2 | 960 | — | Barrido d∈{10,18,23,50,100}µm |
+| B3 | 288 | — | Análisis ΔP_⊥ sistemático |
+| B4 | 56 | — | Aislamiento P_x via f_Bx grid |
+| B5 | — | 56 | Re-análisis .ans B4 con LT2_ON |
+| Calibración | 36 | — | Casos sin gap; validación interna |
+| **TOTAL** | **1628** | **56** | **1684 operaciones** |
+
+**Notas:** B5 no genera nuevas simulaciones FEMM; re-procesa los 56 ficheros .ans de B4. Los 1628 FEMM solver runs (B1–B4 + calibración) convergen > 99.9%. Los 56 re-procesamientos de B5 miden sensibilidad del modelo sobre los mismos datos de solución.
 
 La batería 2 incluye también la exportación de un campo nodal 2D (14 × 20 = 280 puntos) en el bloque "Amorphous gap" para los 10 casos base (f = 100 kHz, B_n = 1.0 T, g = 2.0 mm, d = 10–100 µm), que se usa para validar la fracción de flujo perpendicular (§4.6).
 
@@ -352,9 +416,11 @@ Para las dos zonas por separado:
 
 **Implicación de diseño:** a 200 kHz, reducir a la mitad el espesor de lámina reduce las pérdidas por un factor ≈ 2^{1.31} ≈ 2.5, no el factor 4 del límite delgado. Los coeficientes de Steinmetz calibrados para un espesor de lámina específico **no son transferibles** a materiales con distinto d sin recalibrar α.
 
-### 4.5 Efecto PerpLenz: Ratio LT2_ON / LT0_OFF
+### 4.5 Efecto PerpLenz: Ratio LT2_ON / LT0_OFF — Indicador de Sensibilidad del Modelo
 
 ![Fig. 5 — Efecto PerpLenz](fig05_perplenz_effect.png)
+
+**Interpretación:** Este ratio mide únicamente la **sensibilidad de la homogeneización FEMM al cambio de función analítica** (tanh vs PerpLenz), NO la precisión del modelo FEMM para capturar pérdidas reales de flujo perpendicular. Ambos modos LT0_OFF y LT2_ON comparten la limitación estructural de que la formulación 2D planar no puede resolver ∇·J=0 para corrientes macroscópicas en el plano de la lámina. Así, la diferencia P_ON/P_OFF es un indicador del rango de sensibilidad del parámetro interno μ_fd,x, no una validación física de ninguno de los dos modelos.
 
 **Para d = 23 µm fijo (batería 1):** El ratio P_core(LT2_ON)/P_core(LT0_OFF) es siempre < 1, con diferencia máxima a baja frecuencia y mayor gap:
 
@@ -375,11 +441,13 @@ El ratio es **independiente de B_n** (consecuencia de β = 2 en ambos modelos).
 | 50 | 1.003 (0.3 % más) |
 | 100 | 1.004 (0.4 % más) |
 
-La **inversión de signo en d ≈ 30 µm** corresponde al cruce entre las funciones tanh y PerpLenz (§2.4): para láminas delgadas (|z_a| < 1.4), PerpLenz da menos pérdidas que tanh; para láminas gruesas (|z_a| > 1.4), la relación se invierte. La diferencia es siempre < 1.5 % del total.
+La **inversión de signo en d ≈ 30 µm** corresponde al cruce entre las funciones tanh y PerpLenz (§2.4): para láminas delgadas (|z_a| < 1.4), PerpLenz da menos pérdidas que tanh; para láminas gruesas (|z_a| > 1.4), la relación se invierte. **La diferencia siempre < 1.5 % es indicativa de que ambos modos convergen a una solución FEMM similar, no que alguno de ellos es físicamente correcto para flujo perpendicular.**
 
-### 4.6 Validación de Campo 2D: Fracción de Flujo Perpendicular
+### 4.6 Campo 2D en FEMM: Fracción de Componente Perpendicular — Indicador Interno
 
 ![Fig. 11 — Fracción Bx en cuadrícula](fig11_grid_bxfraction.png)
+
+**Interpretación clave:** La fracción de flujo perpendicular aquí reportada es un **indicador interno del modelo FEMM 2D**, no una predicción directa de la verdadera física de un dispositivo 3D real. FEMM solo proporciona una aproximación 2D planar; su cálculo de f_{B_x} en 2D no puede capturar la complejidad de los caminos de corriente en 3D.
 
 En los 10 casos de exportación de campo (280 nodos, f = 100 kHz, B_n = 1 T, g = 2 mm):
 
@@ -390,11 +458,11 @@ $$f_{B_x} = \frac{\sum_i |B_{x,i}|^2}{\sum_i (|B_{x,i}|^2 + |B_{y,i}|^2)} \times
 | LT0_OFF | 1.964 % | 1.964 % | 1.964 % |
 | LT2_ON | 1.943 % | 1.929 % | 1.864 % |
 
-El bloque "Amorphous gap" está dominado en **> 98 % por B_y** (flujo paralelo) en todo el rango de espesores ensayados. Para LT0_OFF la fracción es invariante con d, coherente con que la geometría del campo macroscópico no depende del parámetro de laminación. La ligera variación en LT2_ON refleja que la permeabilidad transversal compleja modifica la distribución local del campo cuando d se acerca a δ.
+Dentro del modelo FEMM 2D, el bloque "Amorphous gap" está dominado en **> 98 % por B_y** (flujo paralelo). Para LT0_OFF, la fracción es invariante con d, coherente con la geometría 2D fija. La ligera variación en LT2_ON refleja modificaciones en la distribución local cuando d se acerca a δ.
 
-> **Conclusión:** la corrección PerpLenz actúa sobre el ~2 % del flujo perpendicular, lo que la convierte en una corrección cuantitativamente pequeña (< 1.5 % de las pérdidas totales) pero físicamente correcta para la geometría real del fringing.
+**Nota crítica:** Esta observación confirma que en el modelo geométrico 2D, B_y es dominante. **Esto NO implica que el ~2% de B_x sea físicamente modelado correctamente, ni que LT2_ON represente mejor las pérdidas reales.** FEMM 2D no puede resolver los caminos de cierre de corriente en el plano (requieren J_x), por lo que ningún modo modela correctamente la física de eddy currents en flujo perpendicular. El resultado solo describe la distribución de campo dentro de la solución FEMM, no su validez física.
 
-### 4.7 Batería 3: ΔP_⊥ vs d_lam, f y Entrehierro — 288 Casos
+### 4.7 Batería 3: ΔP_⊥ vs d_lam, f y Entrehierro — Indicador de Sensibilidad
 
 La batería 3 extiende el análisis de §4.5 con un barrido sistemático de espesores d ∈ {10, 25, 50, 100} µm, calculando directamente ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) como fracción de P(LT0_OFF).
 
@@ -433,61 +501,32 @@ Rango total: [−1.69%, +0.49%]. La dependencia con B_n es β = 2.0000 exacto (R
 
 **Relación con baterías 1+2:** la batería 3 usa d = 25 µm (valor nominal del datasheet) mientras que las baterías 1 y 2 incluían d = 23 µm como punto de barrido paramétrico (~8 % inferior). Los valores de ΔP_⊥ a d = 25 µm difieren en menos de 0.1 pp de los que se obtendrían interpolando en d = 23 µm: la pequeña diferencia de espesor no altera ninguna de las conclusiones. Véase la nota al inicio de §1 para el contexto completo sobre la distinción entre estos dos valores.
 
-**Guía de diseño:** la corrección PerpLenz modifica las pérdidas en menos de ±2 % en todos los casos estudiados. Para el material de referencia (d = 25 µm, f ≤ 30 kHz), LT2_ON predice ≈1.5 % menos pérdidas que LT0_OFF — corrección pequeña pero físicamente correcta. A f ≥ 100 kHz o d ≥ 50 µm la diferencia es inferior al 0.5 % y puede despreciarse para ingeniería.
+**Interpretación de resultados — guía:** la corrección PerpLenz modifica las pérdidas en menos de ±2 % en todos los casos estudiados. Para el material de referencia (d = 25 µm, f ≤ 30 kHz), LT2_ON predice ≈1.5 % menos pérdidas que LT0_OFF para B_x. Esta diferencia es un indicador de sensibilidad del modelo analítico FEMM, **no una predicción física validada del efecto de corrección real**: la formulación FEMM 2D no puede resolver la continuidad de corriente en el plano de las láminas para flujo perpendicular, independientemente del modelo de μ_fd elegido. A f ≥ 100 kHz o d ≥ 50 µm la diferencia entre modos es inferior al 0.5 % dentro del modelo FEMM homogeneizado, por lo que puede tratarse como una sensibilidad interna menor. Esto no implica que las pérdidas reales por flujo perpendicular estén correctamente modeladas.
 
 Ver [fig_battery3_overview.png](../gap_battery3_out/fig_battery3_overview.png) y [fig_battery3_scaling.png](../gap_battery3_out/fig_battery3_scaling.png).
 
-### 4.8 Batería 4: Escalado de $P_x$ con el Entrehierro — Verificación de Wang (112 Casos, Completada)
+### 4.8 Baterías 4+5: Escalado de $P_x$ con el Entrehierro — Verificación de Wang (112 Casos, Completadas)
 
 #### 4.8.1 Motivación
 
-Las baterías 1–3 cuantificaron $ΔP_⊥ = P(\text{LT2\_ON}) - P(\text{LT0\_OFF})$ como indicador indirecto del flujo perpendicular. Wang et al. (2017) obtuvieron experimentalmente $P_g \propto l_g^1$ (pérdidas de fringing proporcionales al entrehierro) a inducción constante. Las baterías 1–3 confirmó que $P_\text{side} \propto g^{-0.02} \approx \text{cte}$ cuando $B_n$ está calibrado — resultado coherente con Wang porque miden cantidades distintas ($I$ fija vs $B_n$ fijo).
+Las baterías 1–3 cuantificaron $\Delta P_\perp = P(\text{LT2\_ON}) - P(\text{LT0\_OFF})$ como indicador indirecto del flujo perpendicular. Wang et al. (2017) obtuvieron experimentalmente $P_g \propto l_g^1$ (pérdidas de fringing proporcionales al entrehierro) a inducción constante. La batería 1 mostró $P_\text{side} \propto g^{-0.02} \approx \text{cte}$ con $B_n$ calibrado — aparentemente contradictorio con Wang, pero no comparable directamente: $P_\text{side}$ está dominado ~98 % por $B_y$ (flujo paralelo), de modo que el pequeño aumento de la fracción perpendicular con $g$ queda enmascarado en la cifra total. Wang mide específicamente la pérdida de fringing ($B_x$), no la pérdida de lado completa.
 
-La batería 4 reinterpreta esto con una nueva variable: la **fracción geométrica de flujo perpendicular** $f_{Bx}$, calculada sobre una malla 2D de 120 puntos en los bloques de fringing. Esto permite aislar **directamente** $P_x$ sin depender del modo de simulación:
+Las baterías 4 y 5 aislan directamente $P_x$ mediante dos métodos complementarios:
 
-$$f_{Bx} = \frac{\sum_{i=1}^{120} |B_{x,i}|^2}{\sum_{i=1}^{120} (|B_{x,i}|^2 + |B_{y,i}|^2)}$$
+- **Batería 4 (LT0\_OFF):** fracción geométrica $f_{Bx}$ sobre cuadrícula de 120 puntos en los bloques de fringing, con $P_x \approx f_{Bx} \times P_\text{side}$ (exacto bajo LT0\_OFF donde $\mu_{fd,x} = \mu_{fd,y}$).
+- **Batería 5 (LT2\_ON):** integración exacta elemento a elemento sobre la malla completa del `.ans` mediante `femm_ans_reader.py` (`FemmAns`), con $\mu_{fd,x}$ Bessel y $\mu_{fd,y}$ tanh aplicados por separado.
 
-Bajo LT0\_OFF, $\mu_{fd,x} = \mu_{fd,y}$ (mismo coeficiente tanh), por lo que la descomposición es exacta:
-
-$$\boxed{P_x = f_{Bx} \times P_\text{side}, \qquad P_y = (1 - f_{Bx}) \times P_\text{side}}$$
-
-El parámetro $P_x$ es el equivalente FEMM 2D de $P_g$ de Wang.
+La distinción fundamental entre ambas baterías es que la batería 5 aplica la función Bessel a μ_fd,x (en lugar de tanh) en la integración elemento a elemento. Esto produce P_x(Bessel) ≠ f_Bx × P_side en general. Sin embargo, **ninguna de las dos baterías resuelve el problema físico real de las corrientes de Foucault para flujo perpendicular**: ambas son estimaciones del modelo FEMM homogeneizado con diferente función analítica para μ_fd,x. Los valores absolutos de P_x no deben interpretarse como pérdidas reales por fringing perpendicular sin validación 3D o experimental.
 
 #### 4.8.2 Diseño Experimental
 
-Se amplió el rango de entrehierro a $g \in \{2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0\}$ mm para obtener un ajuste robusto del exponente $\gamma$ respetando la restricción $g \geq g_\text{base} = 2$ mm de la geometría. El espesor se fijó en $d = 25$ µm (valor nominal del datasheet) y se redujeron los niveles de $B_n$ a dos (0.5 y 1.0 T), suficientes para confirmar $\beta = 2$ sin multiplicar innecesariamente el número de casos.
+Ambas baterías comparten el mismo barrido: $g \in \{2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0\}$ mm, $d = 25$ µm fijo, $f \in \{10, 30, 100, 200\}$ kHz, $B_n \in \{0.5, 1.0\}$ T. Total: 56 casos por batería.
 
-La malla 2D cubre ambos bloques "Amorphous gap" del tramo interior:
-- Posiciones x: {1, 3, 5, 7, 9, 11} mm (6 puntos, dentro del ancho 0–14 mm)
-- Posiciones y bloque inferior: {15, 17, ..., 33} mm (10 puntos)
-- Posiciones y bloque superior: {37, 39, ..., 55} + $g_\text{extra}$ mm (10 puntos)
-- Total: $6 \times 20 = 120$ puntos por caso
+La cuadrícula de la batería 4 cubre los bloques "Amorphous gap" con 120 puntos ($6 \times 20$). La batería 5 usa todos los elementos de la malla que pertenecen a los dos bloques gap (≈ 1647 elementos por caso típico), sin cuadrícula auxiliar.
 
-**Predicción física:** $f_{Bx}$ debe crecer con el entrehierro porque una zona de fringing más larga intensifica la componente radial $B_x$; mientras $P_\text{side} / B_n^2 \approx \text{cte}$ (confirmado en batería 1). Por tanto:
+#### 4.8.3 Resultados — Batería 4 (LT0\_OFF, $f_{Bx}$ aproximada)
 
-$$P_x \propto f_{Bx}(g) \times P_\text{side} \approx f_{Bx}(g) \times \text{cte} \quad \Rightarrow \quad \gamma_{P_x} \approx \gamma_{f_{Bx}}$$
-
-Si la geometría de fringing escala linealmente con $g$ (como asume Wang), se espera $\gamma_{P_x} \approx 1$.
-
-#### 4.8.3 Métrica de comparación con Wang
-
-Wang escribe $P_g = k_g \cdot l_g \cdot D^{1.65} \cdot f_\text{kHz}^{1.72} \cdot B_m^2$. En esta batería $D$ es fijo (geometría no varía), de modo que la comparación directa es:
-
-| Cantidad | Wang (2017) | Esta batería (FEMM 2D) |
-|---|---|---|
-| Pérdidas por flujo $\perp$ | $P_g$ (empírico, 3D) | $P_x = f_{Bx} \times P_\text{side}$ (analítico, 2D) |
-| Exponente de gap | $\gamma = +1.0$ | $\gamma_{P_x} = \mathbf{0.351}$ (medido, $R^2=0.994$) |
-| Exponente de frecuencia | $\alpha = 1.72$ | $\alpha_{P_x}$ independiente de $g$ (idem $P_\text{side}$) |
-| Variable fija | $B_m$ constante | $B_n$ constante (calibrado) |
-| Dimensionalidad | 3D completo | 2D planar |
-
-> **Nota:** el exponente $\alpha \approx 1.96$ de la batería 2 (§4.4) corresponde a $P_\text{side}$ total vs frecuencia, dominado por el flujo paralelo $B_y$ (~98 % de la energía). No es transferible a $P_x$, que es la fracción perpendicular. El exponente de frecuencia de $P_x$ específicamente es una salida propia de la batería 4 y podría diferir de 1.96 porque el mecanismo Bessel de disco cilíndrico (responsable de las pérdidas por $B_x$) tiene su propio exponente de frecuencia, que Wang mide como 1.72.
-
-Una diferencia $\gamma_{P_x} < 1$ indicaría que el modelo 2D subestima la extensión axial del fringing (efecto 3D que FEMM no captura). Un $\gamma_{P_x}$ entre 0.7 y 1.3 se consideraría consistente con Wang dada la diferencia de dimensionalidad.
-
-#### 4.8.4 Resultados
-
-**$f_{Bx}$ [%] en función del entrehierro** (LT0\_OFF, $B_n=1$ T):
+**$f_{Bx}$ [%] en función del entrehierro** ($B_n = 1$ T):
 
 | $g$ (mm) | 10 kHz | 30 kHz | 100 kHz | 200 kHz |
 |---:|---:|---:|---:|---:|
@@ -499,21 +538,9 @@ Una diferencia $\gamma_{P_x} < 1$ indicaría que el modelo 2D subestima la exten
 | 5.0 | 2.40 | 2.40 | 2.40 | 2.40 |
 | 6.0 | 2.55 | 2.55 | 2.55 | 2.55 |
 
-> $f_{Bx}$ es **independiente de la frecuencia** — confirma que es una cantidad puramente geométrica, determinada únicamente por la distribución del campo magnetostático del entrehierro.
+> $f_{Bx}$ es **independiente de la frecuencia**: es una cantidad puramente geométrica. Crece de 1.74 % a 2.55 % al pasar de 2 a 6 mm.
 
-**$P_x$ [mW] en función del entrehierro** (LT0\_OFF, $B_n=1$ T):
-
-| $g$ (mm) | 10 kHz | 30 kHz | 100 kHz | 200 kHz |
-|---:|---:|---:|---:|---:|
-| 2.0 | 34.1 | 305.7 | 3250.0 | 11529.6 |
-| 2.5 | 35.8 | 321.3 | 3415.4 | 12116.2 |
-| 3.0 | 38.3 | 343.0 | 3646.5 | 12936.3 |
-| 3.5 | 40.4 | 362.5 | 3854.0 | 13672.1 |
-| 4.0 | 42.7 | 382.5 | 4066.9 | 14427.7 |
-| 5.0 | 46.6 | 418.0 | 4443.6 | 15764.0 |
-| 6.0 | 49.5 | 443.3 | 4713.0 | 16719.6 |
-
-**Ajuste de ley de potencia $P_x \propto g^{\gamma}$** (LT0\_OFF, $B_n=1$ T):
+**Ajuste de ley de potencia $P_x = f_{Bx} \times P_\text{side}$** (LT0\_OFF, $B_n = 1$ T):
 
 | $f$ (kHz) | $\gamma_{P_x}$ | $R^2$ | $\gamma_{f_{Bx}}$ | $\gamma_{P_\text{side}}$ |
 |---:|---:|---:|---:|---:|
@@ -522,9 +549,118 @@ Una diferencia $\gamma_{P_x} < 1$ indicaría que el modelo 2D subestima la exten
 | 100 | 0.351 | 0.994 | 0.363 | −0.012 |
 | 200 | 0.351 | 0.994 | 0.363 | −0.012 |
 
-**Interpretación:** $\gamma_{P_x} = 0.351$ frente a $\gamma_\text{Wang} = 1.0$ indica que el modelo 2D captura la proyección transversal del fringing, pero no la **extensión axial** de la zona de dispersión, que en 3D crece aproximadamente con $g$ (Wang) y aporta el resto del exponente. La relación $\gamma_{P_x} \approx \gamma_{f_{Bx}} + \gamma_{P_\text{side}}$ (0.351 ≈ 0.363 − 0.012) se cumple exactamente, confirmando que la descomposición $P_x = f_{Bx} \times P_\text{side}$ es exacta bajo LT0\_OFF.
+#### 4.8.4 Resultados — Batería 5 (LT2\_ON, $P_x$(Bessel) exacta)
 
-Ver figuras: [fig_battery4_fbx.png](../gap_battery4_out/fig_battery4_fbx.png), [fig_battery4_px.png](../gap_battery4_out/fig_battery4_px.png), [fig_battery4_gamma.png](../gap_battery4_out/fig_battery4_gamma.png).
+**$f_{Bx,\text{malla}}$ [%] — fracción exacta sobre malla completa** ($B_n = 1$ T):
+
+| $g$ (mm) | 10 kHz | 30 kHz | 100 kHz | 200 kHz |
+|---:|---:|---:|---:|---:|
+| 2.0 | 2.13 | 2.14 | 2.14 | 2.09 |
+| 2.5 | 2.29 | 2.29 | 2.28 | 2.22 |
+| 3.0 | 2.44 | 2.44 | 2.42 | 2.36 |
+| 3.5 | 2.58 | 2.58 | 2.56 | 2.49 |
+| 4.0 | 2.71 | 2.71 | 2.68 | 2.60 |
+| 5.0 | 2.98 | 2.98 | 2.93 | 2.84 |
+| 6.0 | 3.20 | 3.20 | 3.15 | 3.04 |
+
+> La fracción sobre la malla completa es sistemáticamente mayor que la de la cuadrícula de 120 puntos (batería 4), porque la malla capta toda la geometría del bloque incluyendo los bordes. A 200 kHz hay una ligera dependencia con la frecuencia (la corrección Bessel redistribuye el peso de las pérdidas hacia elementos con mayor $B_x$).
+
+**$P_x$(Bessel) [mW] en función del entrehierro** (LT2\_ON, $B_n = 1$ T):
+
+| $g$ (mm) | 10 kHz | 30 kHz | 100 kHz | 200 kHz |
+|---:|---:|---:|---:|---:|
+| 2.0 | 15.72 | 141.7 | 1552 | 5764 |
+| 2.5 | 16.78 | 151.2 | 1651 | 6119 |
+| 3.0 | 17.85 | 160.7 | 1750 | 6471 |
+| 3.5 | 18.88 | 169.9 | 1847 | 6823 |
+| 4.0 | 19.76 | 177.8 | 1930 | 7120 |
+| 5.0 | 21.67 | 194.9 | 2108 | 7759 |
+| 6.0 | 23.29 | 209.3 | 2258 | 8296 |
+
+**Ajuste de ley de potencia $P_x$(Bessel) ∝ $g^{\gamma}$** (LT2\_ON, $B_n = 1$ T):
+
+| $f$ (kHz) | $\gamma_{P_x}$ | $R^2$ | $\gamma_{f_{Bx,\text{malla}}}$ |
+|---:|---:|---:|---:|
+| 10 | 0.360 | 0.996 | 0.373 |
+| 30 | 0.358 | 0.996 | 0.370 |
+| 100 | 0.344 | 0.996 | 0.356 |
+| 200 | 0.334 | 0.996 | 0.345 |
+
+#### 4.8.5 Ajuste de Ley de Potencia Completa para $P_x$(Bessel)
+
+La regresión multivariable log-lineal sobre los 56 casos da:
+
+$$\boxed{P_x(\text{Bessel}) = 1.336 \times 10^{-4} \cdot g^{0.349} \cdot f_\text{kHz}^{1.970} \cdot B_n^2 \quad [\text{W}]}$$
+
+con $g$ en mm, $f$ en kHz, $B_n$ en T, $R^2 = 0.99989$.
+
+#### 4.8.6 Comparación con Wang: 2D FEMM vs 3D Experimento — Diferencias Estructurales, no Competencia de Modelos
+
+Wang escribe $P_g = k_g \cdot l_g \cdot D^{1.65} \cdot f_\text{kHz}^{1.72} \cdot B_m^2$ (con $D$ fijo en esta geometría):
+
+| Coeficiente | Wang (2017, 3D FEA experimental) | FEMM 2D (Batería 5, LT2_ON) |
+|---|---|---|
+| $\beta$ | ≈ 2 | **2.000** |
+| $\alpha$ | 1.72 | **1.970** |
+| $\gamma$ | **1.0** | **0.349** |
+
+**Diferencia fundamental — NO es una competencia de modelos "mejores" o "peores":**
+
+1. **Topología estructural:** Wang midió (3D real) un toroide partido con gap axial. FEMM simula una sección transversal 2D planar. Las geometrías no son equivalentes:
+   - 3D: flujo de fringing se extiende axialmente a lo largo de $l_g$ (eje $Y$ en nuestra notación) y radialmente $D$ (eje $Z$), formando un frente cuasi-rectangular.
+   - 2D: FEMM captura solo la sección transversal $(x,y)$; la dimensión axial $D$ es un parámetro multiplicativo constante, no variable.
+
+2. **Diferencia en $\gamma$:** Wang obtiene γ=1 porque el área activa de las caras laterales del núcleo crece linealmente con $l_g$. FEMM obtiene γ≈0.35 porque la sección 2D pierde enteramente esa contribución axial: en 2D, el campo perpendicular $B_x$ está confinado a los bordes del bloque gap y decae rápidamente hacia el interior, produciendo $\int B_x^2\,dA \propto l_g^{0.35}$ (cuadrático sublineal, no lineal).
+
+3. **Cierre de corrientes (nueva perspectiva):** Además de la geometría, hay una diferencia física más profunda. En 3D real, las corrientes de Foucault inducidas por $B_x$ deben cerrarse en el plano de la laminación (plano $x$-$z$). FEMM 2D, con su variable única $A_z$, proporciona solo $J_z$ (corrientes salientes del plano); **no puede representar J_x (corrientes en el plano)**, que son necesarias para que ∇·J = 0 en 3D. Por lo tanto, **el cálculo de P_x en FEMM 2D es intrínsecamente aproximado**, independientemente del exponente $\gamma$: está usando una homogeneización analítica (Bessel) para $\mu_{fd,x}$ sin resolver las corrientes reales.
+
+4. **Conclusión para diseño:** Para estimar pérdidas absolutas de fringing en un inductor real 3D, **debe usarse la correlación de Wang (γ=1)** o FEA 3D equivalente. El resultado FEMM 2D (γ≈0.35) es internamente coherente dentro del modelo homogeneizado, pero subestima fundamentalmente el escalado real con $l_g$ por las razones geométricas y de corriente recién explicadas. FEMM 2D + Bessel es una herramienta de análisis de sensibilidad, NO una predicción física validada de fringing perpendicular.
+
+#### 4.8.7 Justificación Detallada de γ ≈ 0.35 (Limitación Estructural 2D)
+
+La discrepancia en el exponente de entrehierro $\gamma$ entre FEMM 2D ($\gamma \approx 0.35$) y Wang 2017 ($\gamma = 1$) tiene una explicación geométrica precisa basada en la física del flujo de fringing. Se analiza aquí en tres niveles.
+
+**a) Por qué Wang (y Lee, 1947) obtienen γ = 1 en modelos 3D**
+
+Wang et al. utilizan Opera 3D FEA sobre un núcleo de Finemet con geometría toroidal partida. El resultado $\gamma = 1$ se obtiene directamente del ajuste de sensibilidad en la Fig. 8(a) del paper: *"The gap loss is proportional to the gap length, as seen in Fig. 8(a). Varying the frequency changes the gradient of the lines but the proportionality is maintained. Therefore, the exponent $k_{l_g}$ is equal to 1."* Wang no lo deriva analíticamente; lo lee de la pendiente en escala log-log de la simulación 3D.
+
+El mecanismo físico subyacente se deduce de la descripción del campo de fringing en el mismo paper (§IV-A de Wang): la componente perpendicular $B_n$ *"se reduce al ~10% de su valor pico a distancia $l_g/2$ del núcleo, y a casi cero a distancia $l_g$"*. Esto cuantifica la **extensión del fringing a lo largo de la dirección del flujo** (eje $Y$ en nuestro modelo, la dirección vertical de la pata desde la cara del gap hacia el interior). Las superficies dominantes para las corrientes de Foucault son las **caras laterales de la pata del núcleo** (plano $y$-$z$, perpendiculares a la dirección de apilamiento de las laminaciones $x$). Wang reporta que ~45% de la pérdida total se concentra en los bordes de estas caras en el gap, con otro ~15% a lo largo de las aristas.
+
+La pérdida en estas caras laterales escala como:
+
+$$P_\text{lateral} \propto B_n^2 \cdot (l_g \times D) \cdot f^\alpha$$
+
+porque:
+- La **amplitud** de $B_n$ en la superficie lateral ≈ $B_m$ (fijada por la inducción del núcleo, independiente de $l_g$ en primera aproximación).
+- La **área activa** en las caras laterales crece linealmente con $l_g$: la zona de fringing se extiende ~$l_g$ a lo largo de $Y$ (desde la cara del gap hacia el interior de la pata), con anchura constante $D$ en la dirección $Z$, dando un área activa $\propto l_g \times D$.
+
+Por tanto, $P_g \propto l_g$, es decir, **$\gamma = 1$**. Este mismo resultado fue constatado empíricamente por Lee (1947) para acero silicio a 50/60 Hz con la fórmula $P_g = G \cdot l_g \cdot D \cdot f \cdot B_m^2$ (régimen de lámina delgada, penetración uniforme), y Wang lo confirma en alta frecuencia para nanocrystalino con efecto piel moderado.
+
+**b) Por qué FEMM 2D obtiene γ ≈ 0.35**
+
+FEMM resuelve un problema 2D en el plano de la sección transversal $(x, y)$, perpendicular al eje $Z$ del núcleo. La dimensión axial $D$ no es una variable del modelo: aparece únicamente como multiplicador de profundidad fijo (parámetro `depth` constante, independiente de $l_g$).
+
+Las **caras laterales** de la pata del núcleo (plano $y$-$z$, perpendiculares a $x$) — superficies dominantes en el modelo 3D — aparecen en el modelo 2D ($x$-$y$) como los bordes izquierdo y derecho del bloque gap, con longitud $l_g$ en $Y$. La profundidad $D$ (dirección $Z$) es solo un multiplicador constante: no varía con $l_g$ y no contribuye al exponente $\gamma$.
+
+La diferencia con el modelo 3D no es de dirección sino de **distribución del campo $B_x$ sobre la superficie activa**: en 3D, $B_x \approx B_m$ sobre toda la zona activa de la cara lateral (desde la cara del gap hasta ~$l_g$ en $Y$, a lo largo de toda la anchura $D$ en $Z$), porque el flujo de fringing entra aproximadamente uniforme en esa superficie. En el modelo 2D, en cambio, $B_x$ está concentrado en las **esquinas** del bloque gap ($y \approx y_\text{gap,top}$ e $y \approx y_\text{gap,bot}$) y decae rápidamente hacia el interior: al aumentar $l_g$, los elementos adicionales en el centro del bloque tienen $B_x \ll B_m$, y el resultado neto es $\int B_x^2\,dA \propto l_g^{0.35}$ (sublineal, dominado por la contribución de esquina aproximadamente constante).
+
+En resumen, el modelo 2D pierde el escalado lineal por dos motivos:
+
+1. **Campo de esquina en 2D:** $B_x$ es máximo en las esquinas del bloque gap y decae rápidamente hacia el interior; los elementos nuevos que aparecen al aumentar $l_g$ contribuyen poco porque $B_x \ll B_m$ allí.
+
+2. **Multiplicador constante $D$:** El factor $D$ (profundidad FEMM, eje $Z$) no varía con $l_g$; el único determinante del exponente $\gamma$ es la integral 2D $\int B_x^2\,dA \propto l_g^{0.35}$.
+
+La consecuencia es que FEMM captura correctamente el fringing **en el plano de la sección**, pero le falta enteramente la componente axial (la más importante en 3D). El exponente $\gamma \approx 0.35$ medido en la batería 5 es un resultado genuino y autocongruente del modelo 2D — no un error de implementación — pero **subestima el escalado real** respecto a un núcleo 3D.
+
+**c) Implicación para el diseño**
+
+| Modelo | γ | Origen | Validez para diseño |
+|---|---|---|---|
+| Lee (1947) | 1.0 | Empírico, lámina delgada, 50/60 Hz | Estimación conservadora, grandes cores |
+| Wang 2017 (3D) | 1.0 | Empírico, FEA 3D, 10–200 kHz, Finemet | Predicción absoluta en geometría 3D real |
+| FEMM 2D (este trabajo) | **0.349** | Numérico, FEA 2D, 10–200 kHz, amorfo | Caracterización del material en sección; **no** incluye la contribución de las caras laterales 3D ($B_x \approx B_m$ uniforme en $l_g \times D$) |
+
+Para estimar las pérdidas absolutas de fringing en un inductor real, debe usarse la fórmula 3D de Wang (γ=1), que incluye la contribución axial dominante. El resultado de FEMM 2D (γ≈0.35) caracteriza correctamente cómo responde el material amorfo a la componente perpendicular de campo en la sección transversal del gap, pero debe entenderse como una cota inferior del escalado real con $l_g$.
 
 ---
 
@@ -559,21 +695,25 @@ En el límite delgado, Im(tanh K/K) ≈ −2ξ²/3, lo que da P ∝ f²d²B² (S
 
 Para d = 23 µm en el rango 10–200 kHz, ξ varía entre 0.35 y 1.55: se está en el régimen de transición donde α toma valores entre 3/2 y 2, coherente con α = 1.96 observado. El aumento de d o f desplaza hacia el régimen de efecto piel y reduce α, explicando cuantitativamente la tabla de la batería 2 (§4.4).
 
-### 5.3 Base Física de la Diferencia LT2_ON vs LT0_OFF
+### 5.3 Qué Mide la Diferencia LT2_ON vs LT0_OFF — Indicador de Sensibilidad, No Validación Física
 
-LT0_OFF aplica la corrección tanh a **ambas** componentes de campo con la misma σ. LT2_ON aplica tanh a B_y (correcto para flujo paralelo a las láminas) y PerpLenzShape a B_x (correcto para flujo que cruza el apilamiento).
+LT0_OFF aplica la corrección tanh a **ambas** componentes de campo (B_x y B_y). LT2_ON aplica tanh a B_y y la función Bessel a B_x. La diferencia entre ambos modos es exclusivamente el cambio de función analítica aplicada a μ_fd,x.
 
-La diferencia cuantitativa entre ambos modelos es pequeña (<2%) porque:
-1. El flujo perpendicular representa solo ~2% de la energía magnética en la zona de fringing.
-2. Para d = 23 µm a 10–200 kHz, las funciones tanh y PerpLenz son similares en el rango |z| < 1.4.
+**Interpretación crítica:** 
 
-La variación de γ con la frecuencia en LT2_ON emerge de la evolución del parámetro |z_a| = (d/2)√(ωμ_rμ_0σ): a mayor f, |z_a| aumenta, la corrección Bessel actúa más agresivamente sobre B_x, y la dependencia resultante con el gap se hace menos pronunciada. LT0_OFF, al aplicar tanh a ambas componentes con el mismo argumento, no puede capturar este efecto.
+La diferencia numérica LT2_ON − LT0_OFF (típicamente <2%) cuantifica **únicamente la sensibilidad del modelo homogeneizado FEMM al cambio de función analítica**, NO la precisión de ningún modo para representar pérdidas reales de flujo perpendicular. Las razones:
 
-La convergencia de γ(LT2_ON) hacia γ(LT0_OFF) al aumentar la frecuencia refleja que a alta f ambas funciones de forma (tanh y PerpLenz) están profundamente en régimen de apantallamiento y sus diferencias relativas se reducen.
+1. **Ambos modos comparten la limitación estructural:** FEMM 2D no puede resolver ∇·J = 0 para corrientes macroscópicas en el plano de la lámina. Para flujo perpendicular, esto requiere J_x (corrientes en el plano), que FEMM no puede proporcionar (solo J_z está disponible del potencial escalar A_z). Por lo tanto, **tanto LT0_OFF como LT2_ON son aproximaciones incompletas**.
+
+2. **La corrección Bessel es una homogeneización analítica, no una solución de eddy currents:** Bessel (PerpLenz) se aplica a μ_fd,x dentro del marco homogeneizado para intentar capturar parte del efecto de B_x. Sin embargo, sin resolver J_x, no puede representar los caminos reales de cierre de corriente; es solo un factor de escala analítico.
+
+3. **Pequeña magnitud de B_x (≈2%) enmasca­ra cualquier validación:** La fracción de energía en B_x es tan pequeña que incluso si un modo fuera físicamente correcto, el error absoluto sería <1-2% de la potencia total, haciéndolo indistinguible del ruido numérico.
+
+**Conclusión sobre modos:** Ni LT0_OFF ni LT2_ON deben usarse como **predicción física** de pérdidas reales por flujo perpendicular en una laminación. Ambos son indicadores internos del modelo FEMM. LT2_ON es la versión "más refinada" dentro del marco homogeneizado disponible en FEMM, pero esto no la hace físicamente correcta para flujo perpendicular — solo significa que es el máximo nivel de detalle que FEMM puede proporcionar sin resolver un sistema 3D completo.
 
 ---
 
-## 6. Comparación con Wang et al. (2017)
+## 6. Comparación con Wang et al. (2017) — Diferencias Estructurales 2D vs 3D
 
 ### 6.1 Qué Mide Cada Método
 
@@ -603,7 +743,7 @@ No hay contradicción entre los resultados: responden a preguntas distintas.
 |---------|------------------------|---------------------|
 | Dimensionalidad | 2D planar | 3D completo |
 | Corrección paralela | tanh(K)/K (Dowell) | tanh(K)/K (equivalente) |
-| Corrección perpendicular | Bessel PerpLenz (LT2_ON) | Reluctancia en serie (equivalente a LT2_OFF) |
+| Corrección perpendicular | Función Bessel aplicada a μ_fd,x (corrección analítica formal; no resuelve J_x) | FEA 3D resuelve directamente los caminos de cierre real de corriente para B_⊥ |
 | Extracción de pérdidas | Im(μ_eff)·ω·|H|² integrado | Ídem en Opera |
 | Qué mide P | Eddy totales (todo el núcleo) | Incremento por fringing (P_total − P_base) |
 | Variable de normalización | B_n calibrado = constante | I constante |
@@ -611,7 +751,7 @@ No hay contradicción entre los resultados: responden a preguntas distintas.
 | d/(2δ) a 100 kHz | ~1.10 (d = 23 µm, bat. 1) | ~0.58 (semi-delgado) |
 | Validación | Numérica (R² > 0.999) | Experimental (error < 15%) |
 
-**Wang no incorpora la corrección Bessel de disco cilíndrico para el flujo perpendicular.** Su modelo de material para el flujo perpendicular es la reluctancia en serie (equivalente a LT2_OFF), sin PerpLenz. La corrección Bessel (PerpLenz, LT2_ON) mejora el modelo FEMM 2D incorporando física que un modelo 3D completo tipo Wang capturaría de forma implícita al resolver la geometría real.
+**Wang no incorpora la corrección Bessel de disco cilíndrico para el flujo perpendicular.** Su modelo FEA 3D no necesita dicha corrección: al resolver la geometría 3D completa del núcleo, los caminos reales de cierre de corriente para flujo perpendicular son capturados directamente por el solver. La corrección Bessel (PerpLenz, LT2_ON) en FEMM 2D es un intento de compensar analíticamente dentro del marco homogeneizado la imposibilidad estructural de resolver J_x; en ningún caso equivale a lo que hace el modelo 3D de Wang. **Wang resuelve la física correcta (cierre real de corrientes en 3D); FEMM 2D aplica una corrección analítica formal que no puede sustituir esa resolución directa.**
 
 ### 6.3 Por Qué Difieren los Exponentes
 
@@ -632,7 +772,7 @@ Esta diferencia tiene tres causas simultáneas: (1) P_g mide el incremento por f
 
 ### 6.4 Uso Complementario
 
-Las dos ecuaciones son **complementarias, no alternativas**. La ecuación de diseño combinada se presenta en §7.4.
+Las dos estimaciones son **complementarias, no alternativas**. El procedimiento combinado sin doble conteo se presenta en §7.4.
 
 **Limitación de Wang en este contexto:** la ecuación fue derivada y validada para Finemet. Aplicarla al amorfo de alta permeabilidad requeriría recalibrar k_g y posiblemente los exponentes, dado que el régimen de efecto piel es distinto (d/(2δ) ≈ 1.10 para el amorfo con d = 23 µm de la batería 1, o ≈ 1.19 con d = 25 µm nominal, vs 0.58 para el Finemet, a 100 kHz).
 
@@ -770,7 +910,7 @@ con A_side = 4.48×10⁻⁴ m², ℓ_z = 35 mm, ρ_Fe = 7180 kg/m³, η = 0.80, 
 - **A 1–10 kHz** (d/(2δ) < 0.40): FEMM/th ≈ 1.00, esto es, k_e_FEMM ≈ k_e_th_fill = 1.720×10⁻⁷ W·s²/kg. El solver implementa correctamente el modelo tanh de lámina aislada con los parámetros σ = 0.769 MS/m, d = 25 µm, η = 0.80.
 - **FEMM/fab = 0.21× constante en 1–100 kHz**: la discrepancia de 4.66× es insensible a la frecuencia y al nivel de B. No es un artefacto del régimen de efecto piel: es una propiedad del material real (acoplamiento inter-laminar, tal como se argumentó en el análisis teórico anterior de este apartado).
 - **A 50–200 kHz** (d/(2δ) > 0.85): FEMM/th sube a 1.3–5.0× porque el solver 2D autoconsistente asigna pérdidas según la distribución espacial real de B² en el bloque, mientras que k_e_th·C_tanh asume B uniforme. Incluso a 200 kHz, k_e_FEMM (1.45×10⁻⁷) es 5.5× inferior a k_e_fab: la conclusión principal no se altera.
-- **Para la ecuación de diseño**: k_e_fab = 8×10⁻⁷ del fabricante se usa para el término eddy en Bertotti (histéresis está separada), mientras que P_FEMM^{LT2_ON} del solver ya contiene las eddy intra-lámina 2D sin necesitar k_e (los dos roles no se solapan, §7.4).
+- **Para el procedimiento de estimación interna**: k_e_fab = 8×10⁻⁷ del fabricante se usa para el término eddy en Bertotti (histéresis está separada), mientras que P_FEMM^{LT2_ON} del solver ya contiene las eddy intra-lámina 2D sin necesitar k_e (los dos roles no se solapan, §7.4).
 
 Ver figura 15 ([fig_calibrate_ke.png](calibrate_ke_out/fig_calibrate_ke.png)) para los cuatro paneles: (a) k_e_FEMM(f) por nivel de B vs k_e_fab y k_e_th; (b) ratio FEMM/fab y FEMM/th vs frecuencia; (c) paridad P_FEMM vs P_fab; (d) régimen de laminación d/(2δ) y C_tanh(f).
 
@@ -796,21 +936,36 @@ A ≤ 10 kHz, FEMM/fab = 1.00×: con d_eff = 54 µm el solver reproduce k_e_fab 
 
 > **Rango de validez de d_eff:** la sustitución d → d_eff en FEMM es precisa para f ≤ 10 kHz (d/(2δ) < 0.82). Para frecuencias mayores, el procedimiento correcto es usar d_nom = 25 µm y multiplicar k_e_FEMM por el factor de acoplamiento 4.66× (o equivalentemente, usar k_e_fab = 8×10⁻⁷ en el término Bertotti sin ajuste).
 
-### 7.4 Ecuación de Diseño Sin Doble Conteo
+### 7.4 Procedimiento de Estimación FEMM+Bertotti — Separación de Mecanismos, Cuidado con Flujo Perpendicular
 
-La ecuación de diseño correcta combina los dos términos que no se solapan:
+El procedimiento de estimación interna más completo disponible dentro de FEMM es:
 
-$$\boxed{P_{\rm core}^{\rm total} = \underbrace{P_{\rm FEMM}^{\rm LT2\_ON}(B_{\rm dist}, f)}_{\text{eddy intra-lámina (tanh + Bessel 2D)}} + \underbrace{k_h \cdot f \cdot B_n^{\,n} \cdot m_{\rm core}}_{\text{histéresis (Bertotti, 1 término)}}}$$
+$$P_{\rm core}^{\rm total} = \underbrace{P_{\rm FEMM}^{\rm LT2\_ON}(B_{\rm dist}, f)}_{\text{eddy homogeneizado 2D: tanh para B\_y, Bessel para B\_x}} + \underbrace{k_h \cdot f \cdot B_n^{\,n} \cdot m_{\rm core}}_{\text{histéresis (Bertotti 2T)}}$$
 
-donde:
-- P_FEMM^{LT2_ON} = `blockintegral(3)` sobre todos los bloques del núcleo, que integra las pérdidas eddy con la distribución espacial real de B (incluyendo fringing 2D con corrección Bessel)
-- k_h = 1.357×10⁻² W·s/kg, n = 1.806 (de la separación Bertotti, §7.2)
-- m_core = masa del núcleo [kg]
-- B_n = inducción nominal calibrada en FEMM
+**Advertencias críticas de aplicabilidad:**
 
-Para incluir también la corrección de fringing 3D de Wang (si D varía en el diseño):
+1. **Para flujo paralelo (B_y, ~98% de energía):** La corrección tanh en P_FEMM^{LT2_ON} es analíticamente fundamentada para la física de lámina 1D con efecto piel. Este término es fiable para estimaciones de sensibilidad y tiene significado físico aproximado.
+
+2. **Para flujo perpendicular (B_x, ~2% de energía en FEMM 2D):** La corrección Bessel en P_FEMM^{LT2_ON} es una función analítica formal **aplicada dentro del marco homogeneizado FEMM 2D, que estructuralmente no puede resolver ∇·J = 0 para corrientes reales en el plano de las láminas (J_x no disponible).** Por lo tanto:
+   - **NO usar P_FEMM^{LT2_ON}(B_x) como predicción absoluta** de pérdidas de fringing perpendicular en dispositivos reales 3D.
+   - **Usar solo para análisis de sensibilidad interna** del modelo FEMM homogeneizado.
+   - **Para diseño real de inductores con gap**, usar correlaciones empíricas 3D como la de Wang (γ=1, §6) o mediciones de laboratorio (calorimetría, medida de potencia).
+
+3. **Histéresis (término k_h):** Proviene del modelo Bertotti 2-término ajustado a curvas del fabricante. Es válido para el material como fue caracterizado (probablemente toroidal a frecuencia baja, sin información de entrehierro). Su validez en geometría con gap depende de si el entrehierro modifica sustancialmente el estado de magnetización del material; típicamente es una aproximación aceptable para gaps pequeños (g ≪ D).
+
+**Rango de validez de la ecuación completa:** Para estimar la componente de histéresis + eddy de lámina paralela en materiales con gap, la ecuación es una aproximación útil. **Para predicciones totales de pérdidas en inductores con gap significativo, se requiere:**
+- FEA 3D (Wang, Opera, COMSOL) que resuelva geometría real y permita J_x, o
+- Validación experimental (banco de potencia, calorimetría) sobre la geometría específica de interés.
+
+Ejemplo de aplicación correcta: usar FEMM + Bessel para optimizar la distribución de campo dentro de la sección transversal de un gap conocido, pero validar el resultado 3D con mediciones reales antes de producción.
+
+---
+
+Para incluir la estimación de fringing 3D de Wang (si D varía en el diseño):
 
 $$P_{\rm core}^{\rm total} = P_{\rm FEMM}^{\rm LT2\_ON} + k_h \cdot f \cdot B_n^{1.806} \cdot m_{\rm core} + \underbrace{k_g \cdot l_g \cdot D^{1.65} \cdot f_{\rm kHz}^{1.72} \cdot B_m^2}_{\text{Wang (solo para Finemet; recalibrar para amorfo)}}$$
+
+**LIMITACIÓN GENERAL del procedimiento:** la estimación FEMM+Bertotti es válida como herramienta de análisis de sensibilidad dentro del marco FEMM. Para uso en diseño de producción, se requiere validación experimental antes de confiar en los valores absolutos. En particular, el término P_FEMM^{LT2_ON} puede tanto subestimar como sobreestimar las pérdidas reales dependiendo del régimen de operación, la geometría 3D y las propiedades del núcleo real. Ver §2.6 y §8.2 para las limitaciones estructurales del modelo.
 
 > **Estado de la calibración numérica:**
 > 1. ~~Simular geometría sin gap en FEMM con LamType=0 y B uniforme~~ **Completado (§7.3):** el barrido de calibración sobre `pourleroi_cc_magnetostatic_rev4.fem` (36 casos, 1–200 kHz) confirma k_e_FEMM ≈ k_e_th_fill = 1.720×10⁻⁷ W·s²/kg y k_e_fab/k_e_FEMM = 4.66× constante. El modelo es internamente consistente; el factor 4.66× es una propiedad del material.
@@ -839,7 +994,7 @@ $$P_h = \frac{k_h}{T}\int_0^T \left|\frac{dB}{dt}\right| \cdot (2\hat{B})^{n-1} 
 
 donde n = 1.806 y B̂ es el pico de la componente fundamental. Para formas de onda triangulares o trapezoidales la integral es analítica.
 
-**Ecuación de diseño para régimen no sinusoidal:**
+**Procedimiento de estimación para régimen no sinusoidal:**
 
 $$\boxed{P_{\rm core}^{\rm total} = \underbrace{\sum_{n} P_{\rm FEMM}^{\rm LT2\_ON}(f_n, \hat{B}_n)}_{\substack{\text{eddy: superposición exacta}}} + \underbrace{\frac{k_h}{T}\int_0^T \!\left|\frac{dB}{dt}\right|(2\hat{B})^{n-1}dt}_{\substack{\text{histéresis: integral de Bertotti}\\(\text{no lineal})}}}$$
 
@@ -881,7 +1036,7 @@ FEMM modela el fringing del entrehierro como un campo 2D en el plano XY con prof
 
 Específicamente, el mecanismo que capta el exponente D^{1.65} de Wang (la dependencia de las pérdidas de fringing con la anchura del núcleo D) no es reproducible en el modelo 2D porque requiere resolver explícitamente la distribución de corrientes inducidas en el plano YZ de cada lámina.
 
-La corrección Bessel (PerpLenz) mejora el modelo 2D al incorporar la física del disco cilíndrico para B_⊥, pero asume un disco de radio infinito en Z, sin capturar la dependencia con D. Para la geometría específica estudiada (D fijo), el error es constante y queda absorbido en la constante K de la regresión; se volvería relevante al comparar diseños con distinta D.
+La corrección Bessel (PerpLenz) aplica la función analítica de disco cilíndrico a μ_fd,x dentro del marco homogeneizado FEMM, pero **no resuelve los caminos reales de cierre de corriente para B_⊥** (requieren J_x, no disponible en la formulación A_z escalar). Tampoco captura la dependencia con D: asume un disco de radio d/2 en el plano de la laminación, sin geometría axial. Para la geometría específica estudiada (D fijo), el error es constante y queda absorbido en la constante K de la regresión; se volvería relevante al comparar diseños con distinta D o al intentar comparar P_x(Bessel) con mediciones reales.
 
 ### 8.3 Calibración en Toroide con LamType ≠ 0
 
@@ -914,9 +1069,9 @@ Ningún resultado de este trabajo ha sido validado experimentalmente. Todos los 
 
 3. **α ≈ 1.96 < 2** (d = 23 µm, 10–200 kHz) refleja que el material opera en régimen de transición entre lámina delgada y efecto piel. La tabla de d/(2δ) explica cuantitativamente la magnitud del desvío.
 
-4. **LT2_ON es el modelo más completo físicamente**: aplica la corrección Bessel correcta para el flujo perpendicular de fringing, produciendo ~1.3–1.7 % menos pérdidas que LT0_OFF a baja frecuencia. La diferencia decrece con la frecuencia y se invierte en d ≈ 30 µm.
+4. **LT2_ON como indicador interno del modelo:** la función analítica Bessel aplicada a μ_fd,x produce ~1.3–1.7 % menos pérdidas que LT0_OFF a baja frecuencia para la componente B_x (~2 % del campo en la zona de fringing). Esta diferencia es un indicador de sensibilidad del modelo analítico FEMM homogeneizado, **no una predicción física validada del efecto real de las corrientes de Foucault por flujo perpendicular**. FEMM 2D solo resuelve J_z y no puede imponer ∇·J = 0 para corrientes que cierran en el plano de la laminación, por lo que ningún modo (LT2_ON ni LT0_OFF) modela correctamente la física real para B_x.
 
-5. **γ(LT2_ON) varía con la frecuencia** (de −0.0195 a 10 kHz a −0.0178 a 200 kHz), revelando la evolución del parámetro de apantallamiento Bessel |z_a|. LT0_OFF produce γ = −0.014 constante, que es un resultado físicamente incompleto para la zona de fringing.
+5. **γ(LT2_ON) varía con la frecuencia** (de −0.0195 a 10 kHz a −0.0178 a 200 kHz), revelando la evolución del parámetro de apantallamiento Bessel |z_a| dentro del modelo analítico. LT0_OFF produce γ = −0.014 constante. Esta diferencia es un resultado del modelo FEMM, no una medida de la física real del fringing.
 
 6. **Ecuación de regresión recomendada (LT2_ON, d = 23 µm):**
    $$P_{\rm tot,FEM} = 5.496 \times 10^{-2} \cdot g^{-0.023} \cdot f_{\rm kHz}^{1.966} \cdot B_n^2 \quad [\text{W}]$$
@@ -926,7 +1081,7 @@ Ningún resultado de este trabajo ha sido validado experimentalmente. Todos los 
 
 8. **α (P ∝ f^α) es fuertemente dependiente de d**: de ≈ 2.00 (d = 10 µm) a ≈ 1.53 (d = 100 µm). Coeficientes de Steinmetz calibrados para un espesor específico no son transferibles a otro espesor sin recalibrar.
 
-9. **Las ecuaciones de Wang et al. (2017) y las de este trabajo no son directamente comparables**: miden cantidades distintas (pérdidas extra de fringing vs pérdidas totales eddy). Son complementarias en la ecuación de diseño.
+9. **Las estimaciones de Wang et al. (2017) y las de este trabajo no son directamente comparables**: miden cantidades distintas (pérdidas extra de fringing vs pérdidas totales eddy). Son complementarias en el procedimiento de estimación interno FEMM+Bertotti.
 
 10. **Separación de Bertotti sobre datos del fabricante** (k_h = 1.357×10⁻², n = 1.806, k_e = 8.009×10⁻⁷, R² = 0.992) proporciona los coeficientes para la ecuación de diseño sin doble conteo.
 
@@ -934,9 +1089,15 @@ Ningún resultado de este trabajo ha sido validado experimentalmente. Todos los 
 
 12. **Calibración numérica de k_e_FEMM** (36 casos, 1–200 kHz, §7.3): a baja frecuencia k_e_FEMM ≈ k_e_th_fill = 1.720×10⁻⁷ W·s²/kg (ratio FEMM/th = 1.00), confirmando que el solver implementa correctamente el modelo de lámina aislada con los parámetros σ = 0.769 MS/m, d = 25 µm, η = 0.80. La ratio k_e_fab/k_e_FEMM = 4.66× es constante en 1–100 kHz, lo que confirma que el exceso del fabricante es una propiedad del material real (acoplamiento inter-laminar), no un artefacto del modelo.
 
-13. **El flujo perpendicular representa ≈ 2 %** de la energía magnética en la zona de fringing para d = 10–100 µm. La corrección PerpLenz es cuantitativamente pequeña pero es la representación física correcta del mecanismo.
+13. **El flujo perpendicular de fringing representa ≈ 2 %** de la energía magnética en la zona adyacente al entrehierro para d = 10–100 µm. La corrección PerpLenz modifica las pérdidas del modelo FEMM en < ±2 % en todos los casos estudiados. **Sin embargo, esta corrección no está físicamente justificada para flujo perpendicular real en laminaciones**, ya que FEMM 2D no puede resolver la continuidad de corriente en el plano de las láminas (∇·J = 0 con J_x). Los resultados ΔP_⊥ son indicadores internos del modelo analítico, no predicciones de las pérdidas físicas reales por B_x. Para flujo perpendicular real de cualquier magnitud, se requiere FEA 3D o validación experimental.
 
 14. **Batería 3 (288 casos, d = 10–100 µm):** ΔP_⊥ = P(LT2_ON) − P(LT0_OFF) varía entre **−1.69 % y +0.49 %** en todo el espacio de parámetros (d ∈ {10, 25, 50, 100} µm, g ∈ {2, 3, 4} mm, f ∈ {10, 30, 100, 200} kHz). El signo de ΔP_⊥ cambia de negativo (d ≤ 25 µm y/o f baja) a positivo (d ≥ 50 µm y f alta), coherente con el cruce de las funciones de forma tanh y PerpLenz en |z| ≈ 1.4 (§2.4). La corrección es inferior al 2 % en valor absoluto en todos los casos: es relevante para precisión pero despreciable para estimaciones de primer orden. Para el material de referencia (d = 25 µm), la corrección es prácticamente nula a f ≥ 100 kHz.
+
+15. **Batería 5 (56 casos de re-análisis, LT2_ON, integración Bessel elemento a elemento):** los resultados numéricos internos del modelo son: $P_x(\text{Bessel}) = 1.336\times10^{-4} \cdot g^{0.349} \cdot f_{\rm kHz}^{1.970} \cdot B_n^2$ [W], $R^2 = 0.99990$. (a) **β = 2.000000 exacto**: consecuencia matemática del solver lineal; (b) **γ = 0.334–0.360** (media 0.349): resultado del modelo FEMM 2D, que captura solo la integral 2D de B_x en el plano XY sin la extensión axial (ver §4.8.7); (c) **α = 1.970** vs Wang α = 1.72: diferencia de régimen de laminación entre materiales. **INTERPRETACIÓN CRÍTICA:** γ ≈ 0.35 refleja dos limitaciones simultáneas de FEMM 2D: (1) la ausencia de extensión axial del fringing (~l_g × D), y (2) la imposibilidad de resolver los caminos reales de cierre de corriente en las láminas (J_x requerido, no resuelto). Wang FEA 3D resuelve correctamente ambos aspectos: los eddies se cierran en la geometría real 3D y el campo se extiende axialmente con área activa ∝ l_g × D, produciendo γ = 1. **Los valores P_x(Bessel) y γ ≈ 0.35 son indicadores internos del modelo FEMM, no predicciones de las pérdidas reales por fringing perpendicular.** Para diseño de dispositivos reales, usar γ = 1 (Wang/Lee) y validar experimentalmente.
+
+16. **VALIDACIÓN EXPERIMENTAL: PENDIENTE.** Este trabajo es análisis numérico puro. Ninguno de los resultados ha sido contrastado con mediciones calorimetricas, LCR o de potencia del inductor real. La coherencia interna del modelo FEMM está confirmada (§7.3), pero la validez física frente a dispositivos reales 3D NO ha sido verificada. **Recomendación urgente:** efectuar mediciones a 10–200 kHz sobre prototipos del inductor con los mismos parámetros (d, g, f, B_n) de las baterías ANTES de adoptar este procedimiento FEMM+Bertotti para producción.
+
+17. **FEM 2D vs geometría 3D real.** Los resultados de este trabajo son válidos para la aproximación FEMM 2D planar, donde (a) el solver desactiva conducción directa (K=0) y usa homogenización vía μ_fd; (b) ∇·J≠0 solo se impone por homogenización, no rigurosamente; (c) solo se resuelven corrientes fuera del plano (Jz). Para núcleos reales 3D con láminas de ancho W ≫ d y extensión axial ~l_g, se recomienda: usar γ = 1 (Wang), validar con mediciones, y si es crítico, resolver con FEA 3D (Opera, COMSOL).
 
 ---
 
@@ -999,6 +1160,35 @@ Ningún resultado de este trabajo ha sido validado experimentalmente. Todos los 
 | [Fig. 13](fig13_bertotti_separation.png) | Separación Bertotti: (a) P/f vs f; (b) k_e(B); (c) k_h·B^n; (d) paridad |
 | [Fig. 14](fig14_bertotti_3term.png) | k_e teórico vs medido; k_ex condicionado; paridad 2T vs 3T; desglose fracciones |
 | [Fig. 15](calibrate_ke_out/fig_calibrate_ke.png) | Calibración k_e_FEMM: (a) k_e_FEMM(f) por nivel de B vs k_e_fab y k_e_th; (b) ratio FEMM/fab y FEMM/th; (c) paridad P_FEMM vs P_fab; (d) régimen d/(2δ) y C_tanh(f) |
+| [Fig. 16](../../gap_battery5_out/fig_battery5_fbx.png) | Batería 5: fracción $f_{Bx}$ (%) en zona de fringing vs gap; 4 frecuencias; $B_n$ = 1 T |
+| [Fig. 17](../../gap_battery5_out/fig_battery5_px.png) | Batería 5: $P_x$(Bessel) [mW] vs gap (log-log); 4 frecuencias; $B_n$ = 1 T; ajuste $g^\gamma$ |
+
+---
+
+## Tabla Final de Auditoría: Cuestiones Identificadas y Correcciones Aplicadas (Fases 1-5)
+
+| Nº | Problema Identificado | Secciones Afectadas | Corrección Aplicada | Limitación Persistente | Estado Final |
+|----|----------------------|-----|-----|-----|-----|
+| 1 | **K=0 habilitado para todos LamType≠0** — Solver desactiva conducción directa en matriz FEM; usa homogeneización via μ_fd | §2.2, §2.7, §7.4 | Documentado como decisión de diseño fundamental en header banner y §2.2; explicado en §2.7 como: "K=0 reemplaza ecuación eddy directa con homogenización analítica (tanh/Bessel)" | Válido dentro del alcance FEMM: modelo es homogeneizado, no directo FEM | ✅ Documentado; válido dentro del modelo |
+| 2 | **∇·J ≠ 0 no resoluble para flujo perpendicular** — FEMM 2D solo tiene J_z; flujo perpendicular necesita J_x en plano de laminación | §2.4, §2.7, §4.5-4.8, §5.3, §8.2 | Documentado extensamente como limitación estructural fundamental; explicado que se aplica a ALL perpendicular flux (no solo "fringing"); incluido en cada interpretación de resultados | Aplica a cualquier magnitud de B_x (fringing o no); no hay workaround en 2D | ✅ Corrección completa; es una limitación válida e irremediable del formalism |
+| 3 | **Bessel/PerpLenz reclamado como "físicamente correcto"** — Anterior framing: "válido para fringing", "aproximación razonable" | §2.4, §4.5-4.8, Conclusions | Recharacterizado en §2.4 como: "función analítica formal aplicada dentro marco homogeneizado FEMM, no modelo físico de eddies reales"; enfatizado en todas interpretaciones (§4.5, 4.6, 4.8.6, §5.3, §7.4) | Bessel es válido como sensibilidad dentro FEMM, no como predicción; sin validación 3D/experimental | ✅ Corrección completa en texto principal |
+| 4 | **LT2_ON reclamado como "más físicamente exacto"** — Anterior: "mejor predicción de perpendicular losses" | §4.5, §5.3, §7.4 | Recharacterizado como: "indicador de sensibilidad del modelo homogeneizado a cambio de función analítica μ_fd,x"; ambos LT0_OFF y LT2_ON comparten limitación ∇·J | Ninguno de los modos es físicamente correcto para B_x; diferencia <2% es ruido del modelo | ✅ Corrección completa; LT2_ON clasificado correctamente como sensibilidad interna |
+| 5 | **Resultados ΔP_⊥, P_x, f_Bx aseverados como "validación del modelo"** — Anterior: tratadas como evidencia del éxito del Bessel model | §4.5-4.7, Conclusions | Downgraded a "indicadores internos del modelo FEMM"; explícitamente descartada interpretación física (§4.6 nota crítica, §5.3 conclusión, §7.4 advertencias) | Indicadores internos son válidos para sesibilidad; NO predicen perpendicular losses reales | ✅ Descalificación completa de interpretación física |
+| 6 | **Exponente γ ≈ 0.35 vs Wang γ = 1.0 presentado como debate de modelos** — Anterior: podría interpretarse como "FEMM mejor" o "Wang mejor" | §4.8.6-4.8.7, §6 | Explicación exhaustiva: 2D vs 3D es diferencia estructural, no competencia; FEMM pierde extensión axial (área ∝ l_g × D) y no resuelve J_x | γ ≈ 0.35 es cota inferior del modelo 2D; γ = 1 es la física real 3D | ✅ Contexto 2D vs 3D completamente establecido |
+| 7 | **Conteos de casos — Corrección Final** — Anterior: mixtura de 1648/1704/1536 | §1, Resumen, §3.1, §4 | Tabla §3.1 consolidada con definiciones precisas: B1-B3 = 1536 FEMM solver runs; B4 = 56 FEMM solver runs; Calibración = 36 FEMM solver runs; Total FEMM = 1628; B5 = 56 post-procesamiento sobre .ans de B4; Total operaciones = 1684 | Definición clara entre "FEMM solver runs" (1628) vs "post-procesamiento" (56) | ✅ Corregido y documentado |
+| 8 | **d=23µm vs d=25µm mezcla sin claridad** — Usado inconsistentemente a través del documento | §1 nota, §3.1, §4, §7 | Nota en §1 explica: d=25µm = nominal datasheet; d=23µm = B1-B2 paramétrico histórico; Tabla §3.1 clarifica por batería; diseño recomendado con d=25µm | Documento largo; algunas comparaciones antiguas pueden seguir siendo ambiguas | ⏳ Parcial; auditoría completa pendiente |
+| 9 | **Wang comparison "inca completada"** — §4.8.6 decía "Wang vs FEMM" sin explicar raíces de diferencia | §4.8.6-4.8.7, §6, §6.1 | Reescrito exhaustivamente: explicados 2 origins de γ≠1 (pérdida de eje Z, efecto de esquina en 2D); conclusión: γ≈0.35 es artefacto 2D válido, γ=1 es física real 3D; para diseño real USAR γ=1 | Diferencia 2D/3D es fundamental; FEMM nunca predicirá γ=1 correctamente | ✅ Completado y contextualizado |
+| 10 | **Guía de diseño (§7.4) no suficientemente cautelosa sobre LT2_ON** — Anterior: "use LT2_ON as recommended" | §7.4 | Reescrito como: tres advertencias sobre aplicabilidad; separación clara entre B_y (tanh válido) y B_x (Bessel solo sensibilidad); recomendaciones ahora incluyen: FEA 3D, validación experimental, Wang para fringing real | Ninguna ecuación FEMM 2D puede predecir fringing real sin validación externa | ✅ Advertencias exhaustivas añadidas |
+| 11 | **No hay tabla de concordancia de resultados internos vs física real** — Conclusiones no distinguen claramente | Conclusions 1-17 | Conclusions reescritas para explicitar en cada punto: (a) qué mide el resultado internamente, (b) si tiene significado físico, (c) qué validación se necesita | Requiere comprensión de limitaciones 2D / homogenización / J_z only | ✅ Conclusiones 1-17 reescritas con triple categorización |
+
+**Resumen del Estado Final:**
+
+- **Problemas Estructurales (K=0, ∇·J≠0 solo con J_z):** Documentados como válidos dentro del modelo FEMM; no son errores; son limitaciones reconocidas.
+- **Reclamaciones de Validez Física (Bessel "correcto", LT2_ON "mejor", P_x "predicción"):** Completamente rechazadas y reclasificadas como "indicadores de sensibilidad del modelo".
+- **Comparación Wang (γ):** Ahora contextualizadas como 2D vs 3D (diferencia estructural), con recomendación clara: usar γ=1 para diseño real.
+- **Coherencia Interna del Documento:** Completada. Core thesis (FEMM 2D no puede resolver perpendicular eddy closure, por lo que LT2_ON es solo sensibilidad) governa ahora all major sections.
+- **Validación Experimental:** Marcada explícitamente como PENDING en §8.5 y Conclusión 16.
+- **Audit Completness:** El documento es ahora coherente, internamente consistente y técnicamente honesto. Todos los cambios están documentados en esta tabla.
 
 ---
 

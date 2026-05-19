@@ -55,14 +55,6 @@ class CBlockLabel
 		CComplex ProximityMu; 
 		BOOL bIsWound;
 
-		// Perpendicular Lenz feedback — geometric data filled by solver.
-		// Wperp = extent of this label's bounding box PERPENDICULAR to the
-		// lamination stacking direction (X for LamType==2, Y for LamType==1).
-		// MuPerp = pre-computed complex μ⊥(ω) for the perpendicular slot,
-		// using the Bessel disc model with disc radius a = Wperp/2.
-		double   Wperp;
-		CComplex MuPerp;
-
 	private:
 
 };
@@ -90,24 +82,19 @@ class CMaterialProp
 		double Jr,Ji;			// applied current density, MA/m^2
 		double Cduct;		    // conductivity of the material, MS/m
 
-		// Anisotropic conductivity for homogenized laminated cores
-		// (Wang 2015 PhD, §4.2; Wang 2017 IEEE Trans. Power Electron.)
-		// sigma_t: tangential conductivity along laminations [MS/m] = F * Cduct
-		// sigma_n: normal conductivity through laminations [S/m]  = (Lam_d/Lam_fill_width)^2 * Cduct/F
-		// When bAnisoConductivity==TRUE and LamType==0 and Lam_d>0,
-		// the FEM uses Cduct_t for in-plane eddy (gap loss model)
-		// and Cduct_n (converted to MS/m) for the tanh skin-depth formula.
+		// Homogenized laminated-core conductivity data.
+		// sigma_t is tangential to the lamination plane and is the optional
+		// FEMM Az/Jz equivalent channel: sigma_z_eff = sigma_t = F*sigma_m.
+		// sigma_n is normal to the stack and is stored only for documentation
+		// and future tensor support; it is not used for macro gap-loss eddies.
 		double Cduct_t;		    // tangential conductivity [MS/m]
-		double Cduct_n;		    // normal conductivity [S/m] (stored in S/m, ~order 1)
-		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
+		double Cduct_n;		    // normal through-stack conductivity [S/m]
+		BOOL   bAnisoConductivity; // TRUE = sigma_t/sigma_n data are present
+		BOOL   bLamHybridSigmaZ; // TRUE = use Cduct_t as sigma_z_eff in Az solve
 
-		// Perpendicular Lenz feedback — Bessel disc model (Wang/Reinert)
-		// Replaces the series-reluctance μ⊥ with a complex Bessel formula:
-		//   μ⊥(ω) = (1-F)·μ₀ + F·μ_fe · 2J₁(γa)/(γa·J₀(γa)),  γ²=-jωμσ_t
-		// Active for LamType==1 and LamType==2 when bPerpLenz==TRUE.
-		// The disc radius a = Wperp/2 is derived per-LABEL from the geometry
-		// at solve time (CBlockLabel::Wperp), NOT stored in the material.
-		BOOL   bPerpLenz;      // TRUE = use Bessel μ⊥(ω) for perpendicular flux
+		// Deprecated compatibility flag. Older modified files/scripts may set
+		// PerpLenz, but the Bessel perpendicular-flux model is no longer used.
+		BOOL   bPerpLenz;
 
 	double Lam_d;			// lamination thickness, mm
 	double Theta_hn;			// hysteresis angle, degrees
@@ -131,8 +118,8 @@ class CMaterialProp
 		CComplex LaminatedBH(double omega, int i);
 		void IncrementalPermeability(double B, double w, CComplex &mu1, CComplex &mu2);
 		void IncrementalPermeability(double B, double &mu1, double &mu2);
-		// Compute Cduct_t and Cduct_n from Cduct, LamFill, Lam_d using Wang 2015 formulae.
-		// Wcore_mm: strip width of the core in mm (used in sigma_n formula).
+		// Compute Cduct_t and Cduct_n from Cduct, LamFill, Lam_d using Wang formulae.
+		// Wcore_mm: strip width of the core in mm (used only in sigma_n).
 		// Sets bAnisoConductivity=TRUE on success.
 		void ComputeAnisoConductivity(double Wcore_mm);
 

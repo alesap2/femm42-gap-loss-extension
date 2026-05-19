@@ -158,14 +158,14 @@ class CMaterialProp
 		double Jr,Ji;			// applied current density, MA/m^2
 		double Cduct;		    // conductivity of the material, MS/m
 		double Lam_d;			// lamination thickness, mm
-		// Anisotropic conductivity for homogenized laminated cores
-		// (Wang 2015 PhD, §4.2; Wang 2017 IEEE Trans. Power Electron.)
-		double Cduct_t;          // tangential conductivity [MS/m] = F * Cduct
-		double Cduct_n;          // normal conductivity [S/m]
-		BOOL   bAnisoConductivity; // TRUE = use tensor; FALSE = legacy scalar Cduct
-		// Perpendicular Lenz feedback — Bessel disc model (disc radius derived
-		// from per-label geometry by the solver; no material-side width parameter).
-		BOOL   bPerpLenz;        // TRUE = use Bessel μ⊥(ω) model
+		// Homogenized laminated-core conductivity data.
+		// Cduct_t is sigma_t and can be used as the optional Az/Jz channel
+		// for LamType 1/2. Cduct_n is stored for future tensor support only.
+		double Cduct_t;          // tangential conductivity [MS/m] = sigma_z_eff
+		double Cduct_n;          // normal through-stack conductivity [S/m]
+		BOOL   bAnisoConductivity; // TRUE = sigma_t/sigma_n data are present
+		BOOL   bLamHybridSigmaZ; // TRUE = use Cduct_t as sigma_z_eff in Az solve
+		BOOL   bPerpLenz;        // deprecated compatibility flag; ignored
 
 		double Theta_hn;			// hysteresis angle, degrees
 		double Theta_hx;			// hysteresis angle, degrees

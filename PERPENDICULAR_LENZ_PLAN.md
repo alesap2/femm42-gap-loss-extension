@@ -1,4 +1,17 @@
-# Plan de acción — Lenz perpendicular retroalimentado en B (FEMM 4.2 / `fkn`)
+# Deprecated - PerpLenz/Bessel Plan
+
+> Current status, 2026-05-18: this plan is retained only as historical context.
+> The Bessel/PerpLenz permeability correction is no longer considered a
+> physically valid model for real perpendicular-fringing lamination gap losses
+> in FEMM's 2D scalar `A_z` formulation.
+>
+> The active replacement is the explicitly enabled hybrid laminated
+> `sigma_z_eff` model: classical parallel-flux lamination loss remains in
+> complex permeability, and the macro channel uses FEMM's `J_z` conductor degree
+> of freedom with `sigma_z_eff = sigma_t = F*sigma_m`. See
+> `HYBRID_LAMINATED_SIGMA_Z.md`.
+
+# Historical Plan - Lenz perpendicular retroalimentado en B (FEMM 4.2 / `fkn`)
 
 > **Propósito.** Documento de diseño y lista de tareas para extender el solver
 > harmonic `fkn` con el efecto Lenz **perpendicular** al plano de laminación

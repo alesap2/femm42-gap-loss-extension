@@ -26,6 +26,7 @@ CFemmeDocCore::CFemmeDocCore()
 	LengthUnits = NULL;
 	ProblemType = NULL;
 	Coords = NULL;
+	Depth = 1.0;   // default until parsed from file
 	BandWidth = NULL;
 	NumNodes = NULL;
 	NumEls = NULL;
@@ -450,6 +451,7 @@ BOOL CFemmeDocCore::OnOpenDocument()
 	Relax=1.;
 	ProblemType=0;
 	Coords=0;
+	Depth=1.0;
 	NumPointProps=0;
 	NumLineProps=0;
 	NumBlockProps=0;
@@ -564,6 +566,15 @@ BOOL CFemmeDocCore::OnOpenDocument()
 			v=StripKey(s);
 			sscanf(v,"%s",q);
 			if( _strnicmp(q,"\"dump\"",6)==0) bDump=TRUE;
+			q[0]=NULL;
+		}
+
+		// Problem depth (planar out-of-plane length, stored raw in problem units)
+		if( _strnicmp(q,"[depth]",7)==0){
+			v=StripKey(s);
+			double raw_depth=1.0;
+			sscanf(v,"%lf",&raw_depth);
+			Depth = raw_depth;   // raw problem units; converted to meters in Harmonic2D
 			q[0]=NULL;
 		}
 
@@ -747,6 +758,7 @@ BOOL CFemmeDocCore::OnOpenDocument()
 			MProp.Cduct_t=0.;		// tangential conductivity [MS/m]
 			MProp.Cduct_n=0.;		// normal conductivity [S/m]
 			MProp.bAnisoConductivity=FALSE;
+			MProp.bLamHybridSigmaZ=FALSE;
 			MProp.bPerpLenz   = FALSE;
 			MProp.Lam_d=0.;			// lamination thickness, mm
 			MProp.Theta_hn=0.;			// hysteresis angle, degrees
@@ -819,13 +831,19 @@ BOOL CFemmeDocCore::OnOpenDocument()
 		   q[0]=NULL;
 		}
 
-		// Perpendicular Lenz feedback tags (new — backward compatible).
-		// Note: disc radius is derived from per-label geometry by the solver;
-		// no Wcore stored in the material.
+		if( _strnicmp(q,"<LamHybridSigmaZ>",17)==0){
+		   int en=0;
+		   v=StripKey(s);
+		   sscanf(v,"%i",&en);
+		   MProp.bLamHybridSigmaZ=(en!=0);
+		   q[0]=NULL;
+		}
+		// Deprecated PerpLenz tag from the modified branch. Parse for file
+		// compatibility, but do not enable the removed Bessel model.
 		if( _strnicmp(q,"<PerpLenz>",10)==0){
 		   v=StripKey(s);
 		   int pl=0; sscanf(v,"%i",&pl);
-		   MProp.bPerpLenz=(pl!=0);
+		   MProp.bPerpLenz=FALSE;
 		   q[0]=NULL;
 		}
 

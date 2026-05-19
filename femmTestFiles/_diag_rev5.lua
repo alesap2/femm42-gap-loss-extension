@@ -1,0 +1,5 @@
+open("D:\\FEMM Source\\femmTestFiles\\_diag_rev5.fem")
+mi_probdef(100000, "millimeters", "planar", 1e-8, 35, 30)
+mi_modifycircprop("coil", 1, 0.001)
+mi_analyze(1)
+quit()

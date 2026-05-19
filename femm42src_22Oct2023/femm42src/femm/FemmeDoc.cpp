@@ -1955,6 +1955,7 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			MProp.Cduct_t=0.;
 			MProp.Cduct_n=0.;
 			MProp.bAnisoConductivity=FALSE;
+			MProp.bLamHybridSigmaZ=FALSE;
 			MProp.bPerpLenz   = FALSE;
 			q[0]=NULL;
 		}
@@ -2079,13 +2080,19 @@ BOOL CFemmeDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		   q[0]=NULL;
 		}
 
-		// Perpendicular Lenz feedback tags (new — backward compatible).
-		// Disc radius is derived from per-label geometry by the solver;
-		// no Wcore stored in the material.
+		if( _strnicmp(q,"<LamHybridSigmaZ>",17)==0){
+		   int en=0;
+		   v=StripKey(s);
+		   sscanf(v,"%i",&en);
+		   MProp.bLamHybridSigmaZ=(en!=0);
+		   q[0]=NULL;
+		}
+		// Deprecated PerpLenz tag from the modified branch. Parse for file
+		// compatibility, but do not enable the removed Bessel model.
 		if( _strnicmp(q,"<PerpLenz>",10)==0){
 		   v=StripKey(s);
 		   int pl=0; sscanf(v,"%i",&pl);
-		   MProp.bPerpLenz=(pl!=0);
+		   MProp.bPerpLenz=FALSE;
 		   q[0]=NULL;
 		}
 
@@ -2483,15 +2490,13 @@ BOOL CFemmeDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		fprintf(fp,"    <LamFill> = %.17g\n",blockproplist[i].LamFill);
 		fprintf(fp,"    <NStrands> = %i\n",blockproplist[i].NStrands);
 		fprintf(fp,"    <WireD> = %.17g\n",blockproplist[i].WireD);
-		// Anisotropic conductivity (gap loss extension — Wang 2015)
+		// Optional laminated sigma_z_eff conductivity data.
 		if(blockproplist[i].bAnisoConductivity){
 			fprintf(fp,"    <sigma_t> = %.17g\n",blockproplist[i].Cduct_t);
 			fprintf(fp,"    <sigma_n> = %.17g\n",blockproplist[i].Cduct_n);
 		}
-		// Perpendicular Lenz feedback (written only when enabled). Disc radius
-		// is derived from geometry by the solver; no Wcore stored here.
-		if(blockproplist[i].bPerpLenz){
-			fprintf(fp,"    <PerpLenz> = 1\n");
+		if(blockproplist[i].bLamHybridSigmaZ){
+			fprintf(fp,"    <LamHybridSigmaZ> = 1\n");
 		}
 		fprintf(fp,"    <BHPoints> = %i\n",blockproplist[i].BHpoints);
 		for(j=0;j<blockproplist[i].BHpoints;j++)
