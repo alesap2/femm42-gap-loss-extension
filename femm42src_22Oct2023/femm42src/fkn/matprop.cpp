@@ -37,8 +37,8 @@ void CMaterialProp::ComputeAnisoConductivity(double Wcore_mm)
 	// eq. 4-3: sigma_t = F * sigma_m
 	// eq. 4-4: sigma_n = (t_l / W_core)^2 * sigma_m / F
 	// where F=LamFill, t_l=Lam_d [mm], W_core=Wcore_mm [mm], sigma_m=Cduct [MS/m]
-	// FEMM uses sigma_t as the optional equivalent Az/Jz conductivity channel.
-	// sigma_n is stored for documentation/future tensor support, not for that channel.
+	// The current hybrid macro model uses LamFill*Cduct directly as a B_perp
+	// imaginary-reluctivity source. sigma_n is metadata for future tensor support.
 	if (Cduct <= 0. || LamFill <= 0. || Lam_d <= 0. || Wcore_mm <= 0.) return;
 
 	double F = LamFill;

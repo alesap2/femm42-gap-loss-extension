@@ -134,7 +134,7 @@ CMaterialProp::CMaterialProp()
 void CMaterialProp::ComputeAnisoConductivity(double Wcore_mm)
 {
 	// Wang 2015 PhD eqs 4-3/4-4:
-	// sigma_t = F * sigma_m          [MS/m]  (optional Az/Jz channel)
+	// sigma_t = F * sigma_m          [MS/m]  (tangential metadata)
 	// sigma_n = (d/W)^2 * sigma_m/F  [S/m]   (normal through-stack metadata)
 	if (Cduct<=0. || LamFill<=0. || Lam_d<=0. || Wcore_mm<=0.) return;
 	double F=LamFill, sigma_m=Cduct, ratio=Lam_d/Wcore_mm;

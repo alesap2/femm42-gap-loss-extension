@@ -1557,8 +1557,8 @@ int CFemmeDoc::lua_setmataniso(lua_State *L)
 	// mi_setmataniso(name, Cduct_t, Cduct_n)
 	//   Stores laminated homogenized conductivity data.
 	//     Cduct_t  - tangential lamination-plane conductivity [MS/m];
-	//                 can be used as sigma_z_eff for LamType 1/2 only after
-	//                 mi_setmatlamhybrid(name, 1) is called.
+	//                 stored as metadata for future tensor support.  The
+	//                 current hybrid model computes sigma_t as LamFill*Cduct.
 	//     Cduct_n  - normal through-stack conductivity [S/m], stored only
 	//                 for documentation/future tensor support.
 	//   When both are 0, ComputeAnisoConductivity estimates them from
@@ -1608,9 +1608,9 @@ int CFemmeDoc::lua_setmataniso(lua_State *L)
 int CFemmeDoc::lua_setmatlamhybrid(lua_State *L)
 {
 	// mi_setmatlamhybrid(name [, enable])
-	//   Explicitly enables/disables the 2D equivalent laminated sigma_z_eff
-	//   channel. This is intentionally separate from mi_setmataniso so older
-	//   files that contain sigma_t/sigma_n do not become solid conductors.
+	//   Enables/disables the 2D equivalent laminated macro B_perp loss model.
+	//   The model is an anisotropic imaginary reluctivity term, not a global
+	//   sigma*A_z conductor channel.
 	CatchNullDocument();
 	CFemmeDoc * thisDoc = (CFemmeDoc *)pFemmeDoc;
 	int n = lua_gettop(L);

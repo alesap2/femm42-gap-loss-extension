@@ -53,13 +53,15 @@ double sqr(double x)
 
 static double EffectiveAzConductivity(const CMaterialProp &m)
 {
-	// Laminated materials: the nu_perp'' complex-reluctivity model handles all
-	// macro gap-loss eddy currents.  The Az/Jz conductive channel is disabled
-	// for all laminated materials (Lam_d > 0) to avoid double-counting.
-	// Only solid conductors (Lam_d == 0) retain their bulk conductivity.
-	if (m.Lam_d > 0.)
-		return 0.;
-	return m.Cduct;
+	// Solid conductors keep FEMM's original AC conductivity path.
+	if (m.Lam_d <= 0.)
+		return m.Cduct;
+
+	// Laminated magnetic materials must not use the global j*w*sigma*A_z
+	// conductor channel for macro gap/fringing loss.  Their classical parallel
+	// lamina loss is handled by complex permeability; the optional macro
+	// perpendicular term is represented as imaginary reluctivity in GetMu().
+	return 0.;
 }
 
 CFemmviewDoc::CFemmviewDoc()
@@ -1424,7 +1426,8 @@ BOOL CFemmviewDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		else if (blockproplist[k].LamType==1 || blockproplist[k].LamType==2) {
 			// Mirror LamType 1/2 permeability logic from the solver. The
 			// perpendicular component is static series reluctance; macro eddy
-			// loss, when enabled, is reported through the conductive Jz channel.
+			// loss, when enabled, is added per element/label as imaginary
+			// reluctivity in GetMu().
 			blockproplist[k].mu_fdx = blockproplist[k].mu_x *
 			                          exp(-I*blockproplist[k].Theta_hx*PI/180.);
 			blockproplist[k].mu_fdy = blockproplist[k].mu_y *
@@ -2176,8 +2179,8 @@ BOOL CFemmviewDoc::GetPointValues(double x, double y, int k, CPointVals &u)
 		}	
 
 		// Effective z-conductivity for eddy-current display, consistent with solver.
-		// Laminated materials: sigma_z_eff = sigma_t only when hybrid is enabled.
-		// LamType 0 or hybrid-OFF LamType 1/2: u.c = 0 (no conductive J_z channel).
+		// Laminated materials always use u.c=0 here: the hybrid macro
+		// perpendicular term is a B_perp stiffness/reluctivity term, not J_z.
 		// Solid conductors: u.c from block o (original FEMM behavior preserved).
 		if (blockproplist[meshelem[k].blk].Lam_d!=0) {
 			u.c=EffectiveAzConductivity(blockproplist[meshelem[k].blk]);
@@ -2185,10 +2188,8 @@ BOOL CFemmviewDoc::GetPointValues(double x, double y, int k, CPointVals &u)
 			u.c=1./Re(1./(blocklist[meshelem[k].lbl].o));
 		else u.c=0;
 
-		// J_z = -j * omega * sigma_z_eff * A_z  (standard FEMM conductor formulation).
-		// For hybrid-ON laminates: sigma_z_eff = sigma_t = F*sigma_m (Wang macro channel).
-		// Length scale is set by macroscopic A_z geometry, not d_lam/2.
-		// For hybrid-OFF laminates and LamType 0: u.c = 0, so u.Je = 0.
+		// J_z = -j * omega * sigma * A_z is only for real solid conductors.
+		// Hybrid-ON laminates still have u.c=0, so u.Je=0.
 		if (blocklist[meshelem[k].lbl].FillFactor<0 ||
 		    (blockproplist[meshelem[k].blk].Lam_d!=0 && u.c!=0))
 			u.Je=-I*Frequency*2.*PI*u.c*u.A;
@@ -3035,9 +3036,8 @@ CComplex CFemmviewDoc::GetJA(int k,CComplex *J,CComplex *A)
 	// c: conductivity for eddy-current display  (J_z = -j*omega*c*A_z).
 	//
 	// Effective z-conductivity for eddy-current display, consistent with the solver.
-	// Laminated materials: EffectiveAzConductivity returns sigma_z_eff = sigma_t only
-	// when the hybrid sigma_z channel is explicitly enabled (bLamHybridSigmaZ).
-	// LamType 0 or hybrid-OFF LamType 1/2: c = 0 (no conductive J_z channel).
+	// Laminated materials return c=0 even when the hybrid macro model is on;
+	// that model is represented by imaginary reluctivity, not a J_z conductor.
 	// Solid conductors (Lam_d == 0): c = Cduct (original FEMM behavior preserved).
 	// c_circ (circuit voltage source J term) uses the same value for self-consistency.
 	if (blockproplist[blk].Lam_d > 0)
@@ -3050,11 +3050,9 @@ CComplex CFemmviewDoc::GetJA(int k,CComplex *J,CComplex *A)
 	// their losses are handled via the integral post-processing path.
 	if (blocklist[lbl].FillFactor>0) { c = 0; c_circ = 0; }
 
-	// contribution from eddy currents:
-	// J_z = -j * omega * sigma_z_eff * A_z  (standard FEMM conductor formulation).
-	// For hybrid-ON laminates: sigma_z_eff = sigma_t = F * sigma_m (Wang macro channel).
-	// The length scale is set by the macroscopic A_z field geometry, not by d_lam/2.
-	// For hybrid-OFF laminates and LamType=0: sigma_z_eff = 0, so J_z = 0.
+	// contribution from conductor eddy currents:
+	// J_z = -j * omega * sigma * A_z is the standard solid-conductor path.
+	// Laminated macro gap/fringing loss is not represented here.
 	if(Frequency!=0)
 	{
 		for(i=0;i<3;i++)
@@ -3512,8 +3510,8 @@ CComplex CFemmviewDoc::BlockIntegral(int inttype)
 
 			case 31:
 				// Deprecated modified-branch thin-lamination perpendicular loss
-				// indicator. The hybrid model reports its equivalent conductive
-				// Az/Jz loss through case 4 so this path intentionally returns 0.
+				// indicator. The current hybrid model is part of blockintegral(3)
+				// via anisotropic imaginary reluctivity, so this returns 0.
 				break;
 
 			default:
@@ -4783,6 +4781,64 @@ double CFemmviewDoc::AECF(int k)
 	return (r*r*extRi)/(extRo*extRo*extRo); // permeability gets divided by this factor;
 }
 
+double CFemmviewDoc::GetLamHybridNuPerpCoeff(int i)
+{
+	if(Frequency==0) return 0.;
+	if((i<0) || (i>=meshelem.GetSize())) return 0.;
+	int lbl=meshelem[i].lbl;
+	if((lbl<0) || (lbl>=blocklist.GetSize())) return 0.;
+	int blk=meshelem[i].blk;
+	if((blk<0) || (blk>=blockproplist.GetSize())) return 0.;
+
+	CMaterialProp &m = blockproplist[blk];
+	if(m.Lam_d <= 0.) return 0.;
+	if(!m.bLamHybridSigmaZ) return 0.;
+	if(m.LamType!=1 && m.LamType!=2) return 0.;
+
+	// Wang-style tangential in-plane conductivity.  This model intentionally
+	// does not use sigma_n and does not use d_lam/2 as the macro length scale.
+	double sigma_t = m.LamFill*m.Cduct; // MS/m
+	if(sigma_t <= 0.) return 0.;
+
+	double xmin=1.e30, xmax=-1.e30, ymin=1.e30, ymax=-1.e30;
+	BOOL found=FALSE;
+	for(int ei=0; ei<meshelem.GetSize(); ei++){
+		if(meshelem[ei].lbl != lbl) continue;
+		found=TRUE;
+		for(int kk=0; kk<3; kk++){
+			int n=meshelem[ei].p[kk];
+			double x=meshnode[n].x;
+			double y=meshnode[n].y;
+			if(x<xmin) xmin=x;
+			if(x>xmax) xmax=x;
+			if(y<ymin) ymin=y;
+			if(y>ymax) ymax=y;
+		}
+	}
+	if(!found) return 0.;
+
+	double A_m;
+	if(ProblemType==0) A_m=Depth; // already converted to meters on load
+	else{
+		double r_mean = 0.5*(xmin+xmax)*LengthConv[LengthUnits];
+		A_m = 2.*PI*r_mean;
+	}
+	if(A_m <= 0.) return 0.;
+
+	double B_m = (m.LamType==1)
+		? (xmax-xmin)*LengthConv[LengthUnits]
+		: (ymax-ymin)*LengthConv[LengthUnits];
+	if(B_m <= 0.) return 0.;
+
+	double A2=A_m*A_m, B2=B_m*B_m;
+	double Leff2=A2*B2/(12.*(A2+B2));
+	double w=2.*PI*Frequency;
+
+	// FEMM stores sigma_t in MS/m and uses relative permeability.  The factor
+	// 0.4*pi converts mu0*sigma_t[MS/m] to the relative reluctivity coefficient.
+	return 0.4*PI*sigma_t*w*Leff2;
+}
+
 // versions of GetMu that sort out whether or not the AECF should be applied,
 // as well as the corrections required for wound regions.
 void CFemmviewDoc::GetMu(CComplex b1, CComplex b2,CComplex &mu1, CComplex &mu2, int i)
@@ -4793,6 +4849,16 @@ void CFemmviewDoc::GetMu(CComplex b1, CComplex b2,CComplex &mu1, CComplex &mu2, 
 		mu2=mu1;
 	}
 	else blockproplist[meshelem[i].blk].GetMu(b1,b2,mu1,mu2);
+
+	double nuperp=GetLamHybridNuPerpCoeff(i);
+	if(nuperp>0.)
+	{
+		int lt=blockproplist[meshelem[i].blk].LamType;
+		if(lt==1)
+			mu2=1./(1./mu2 + I*nuperp); // B_y component
+		else if(lt==2)
+			mu1=1./(1./mu1 + I*nuperp); // B_x component
+	}
 
 	double aecf=AECF(i); mu1/=aecf; mu2/=aecf;
 }

@@ -159,12 +159,13 @@ class CMaterialProp
 		double Cduct;		    // conductivity of the material, MS/m
 		double Lam_d;			// lamination thickness, mm
 		// Homogenized laminated-core conductivity data.
-		// Cduct_t is sigma_t and can be used as the optional Az/Jz channel
-		// for LamType 1/2. Cduct_n is stored for future tensor support only.
-		double Cduct_t;          // tangential conductivity [MS/m] = sigma_z_eff
+		// Cduct_t is sigma_t metadata. The current hybrid macro model uses
+		// LamFill*Cduct as a B_perp imaginary-reluctivity source, not Az/Jz.
+		// Cduct_n is stored for future tensor support only.
+		double Cduct_t;          // tangential conductivity [MS/m]
 		double Cduct_n;          // normal through-stack conductivity [S/m]
 		BOOL   bAnisoConductivity; // TRUE = sigma_t/sigma_n data are present
-		BOOL   bLamHybridSigmaZ; // TRUE = use Cduct_t as sigma_z_eff in Az solve
+		BOOL   bLamHybridSigmaZ; // TRUE = add B_perp imaginary reluctivity term
 		BOOL   bPerpLenz;        // deprecated compatibility flag; ignored
 
 		double Theta_hn;			// hysteresis angle, degrees

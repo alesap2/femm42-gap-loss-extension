@@ -19,13 +19,15 @@ double Power(double x, int y);
 
 static double EffectiveAzConductivity(const CMaterialProp &m)
 {
-	// Laminated materials: the nu_perp'' complex-reluctivity model handles all
-	// macro gap-loss eddy currents.  The Az/Jz conductive channel is disabled
-	// for all laminated materials (Lam_d > 0) to avoid double-counting.
-	// Only solid conductors (Lam_d == 0) retain their bulk conductivity.
-	if (m.Lam_d > 0.)
-		return 0.;
-	return m.Cduct;
+	// Solid conductors keep FEMM's original AC conductivity path.
+	if (m.Lam_d <= 0.)
+		return m.Cduct;
+
+	// Laminated magnetic materials must not use the global j*w*sigma*A_z
+	// conductor channel for macro gap/fringing loss.  Their classical parallel
+	// lamina loss is handled by complex permeability, and the optional macro
+	// perpendicular term is added below as an anisotropic imaginary reluctivity.
+	return 0.;
 }
 
 void CFemmeDocCore::GetPrev2DB(int k, double &B1p, double &B2p)
@@ -91,39 +93,33 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 
 
 	// LamType==1 (lams parallel to X) and LamType==2 (lams parallel to Y) are
-	// now supported in AC problems. The component parallel to the lamination
-	// plane uses the tanh skin-depth correction; the perpendicular component
-	// uses static series reluctance unless the separate hybrid sigma_z channel
-	// is explicitly enabled.
+	// supported in AC problems. The component parallel to the lamination plane
+	// uses the tanh skin-depth correction; the perpendicular component uses
+	// static series reluctance plus, when enabled, a macroscopic imaginary
+	// reluctivity term driven by B_perp.
 
 	// Go through and evaluate permeability for regions subject to prox effects
 	for(i=0;i<NumBlockLabels;i++) GetFillFactor(i);
 
-	// -----------------------------------------------------------------------
-	// Pre-compute per-block-label imaginary reluctivity coefficient
-	// nu_perp_coeff[lbl] for the macro gap-loss complex-reluctivity model.
+	// Per-label coefficient for the hybrid macro perpendicular-fringing loss.
+	// FEMM's element matrix uses relative reluctivity 1/mu_r.  The physical
+	// absolute coefficient nu_abs'' = sigma_t*omega*Leff^2 is converted to
+	// relative form by mu0: nu_rel'' = mu0*sigma_t*omega*Leff^2.
 	//
-	// For LamType=1 (lams stacked in Y, B_perp = B_y):
-	//   Im(ν_y) += nu_perp_coeff  →  added via I * nu_perp_coeff * Mx stiffness.
-	// For LamType=2 (lams stacked in X, B_perp = B_x):
-	//   Im(ν_x) += nu_perp_coeff  →  added via I * nu_perp_coeff * My stiffness.
-	//
-	// ν_perp'' = μ₀ · σ_t · ω · L_eff²  (relative-ν units, 0.4π·σ_t[MS/m]·ω·L²[m²])
-	// L_eff²   = A²·B² / (12·(A²+B²))
-	//   A = problem depth [m];  B = block bounding width in the B_perp direction [m]
-	// -----------------------------------------------------------------------
+	// sigma_t = LamFill*Cduct, where Cduct is FEMM's metallic lamina
+	// conductivity in MS/m.  sigma_n and d_lam/2 are intentionally not used.
 	std::vector<double> nu_perp_coeff(NumBlockLabels, 0.0);
 	{
 		static const double toCm[]={2.54,0.1,1.,100.,0.00254,1.e-04};
-		double A_m = Depth * toCm[LengthUnits] * LengthConv;  // problem units → m
+		double A_m = Depth * toCm[LengthUnits] * LengthConv; // planar depth [m]
 
 		if(A_m > 0. && w > 0.)
 		{
-			// Bounding box per block label (cm, matching meshnode.x/y units)
-			std::vector<double> bxmin(NumBlockLabels,  1e30);
-			std::vector<double> bxmax(NumBlockLabels, -1e30);
-			std::vector<double> bymin(NumBlockLabels,  1e30);
-			std::vector<double> bymax(NumBlockLabels, -1e30);
+			std::vector<double> bxmin(NumBlockLabels,  1.e30);
+			std::vector<double> bxmax(NumBlockLabels, -1.e30);
+			std::vector<double> bymin(NumBlockLabels,  1.e30);
+			std::vector<double> bymax(NumBlockLabels, -1.e30);
+
 			for(int ei=0; ei<NumEls; ei++){
 				int lbl = meshele[ei].lbl;
 				if(lbl < 0) continue;
@@ -136,28 +132,27 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 					if(yy > bymax[lbl]) bymax[lbl]=yy;
 				}
 			}
+
 			for(int lbl=0; lbl<NumBlockLabels; lbl++){
 				int blk = labellist[lbl].BlockType;
 				const CMaterialProp &m = blockproplist[blk];
 				if(m.Lam_d <= 0.) continue;
 				if(!m.bLamHybridSigmaZ) continue;
 				if(m.LamType!=1 && m.LamType!=2) continue;
-				double sigma_t = (m.Cduct_t>0.) ? m.Cduct_t : m.LamFill * m.Cduct;
+				double sigma_t = m.LamFill*m.Cduct;
 				if(sigma_t <= 0.) continue;
-				// B_m: block dimension perpendicular to the lamination stacking
+
 				double B_m = (m.LamType==1)
-					? (bxmax[lbl]-bxmin[lbl]) * LengthConv   // LamType=1: x-width (B_perp=B_y)
-					: (bymax[lbl]-bymin[lbl]) * LengthConv;  // LamType=2: y-width (B_perp=B_x)
+					? (bxmax[lbl]-bxmin[lbl]) * LengthConv
+					: (bymax[lbl]-bymin[lbl]) * LengthConv;
 				if(B_m <= 0.) continue;
+
 				double A2=A_m*A_m, B2=B_m*B_m;
-				double Leff2 = A2*B2 / (12.*(A2+B2));
-				nu_perp_coeff[lbl] = 0.4*PI * sigma_t * w * Leff2;
+				double Leff2 = A2*B2/(12.*(A2+B2));
+				nu_perp_coeff[lbl] = 0.4*PI*sigma_t*w*Leff2;
 			}
 		}
 	}
-	// -----------------------------------------------------------------------
-
-
 
 	V_old=(CComplex *) calloc(NumNodes+NumCircProps,sizeof(CComplex));
 
@@ -267,9 +262,8 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			// Laminations stacked in X (lam plane = YZ).
 			// mu1/Mu[k][0] acts on B_x; mu2/Mu[k][1] acts on B_y.
 			// B_x is perpendicular to the laminations; B_y is parallel.
-			// The perpendicular component uses static series reluctance. Macro
-			// gap-loss eddies, when enabled, enter through the Az/Jz conductivity
-			// term instead of a Bessel permeability correction.
+			// The perpendicular component uses static series reluctance; the
+			// optional macro term is added later as Im(1/mu1) on B_x.
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
 			if(blockproplist[k].Lam_d!=0){
@@ -296,9 +290,8 @@ BOOL CFemmeDocCore::Harmonic2D(CBigComplexLinProb &L)
 			// Laminations stacked in Y (lam plane = XZ).
 			// mu1/Mu[k][0] acts on B_x; mu2/Mu[k][1] acts on B_y.
 			// B_y is perpendicular to the laminations; B_x is parallel.
-			// The perpendicular component uses static series reluctance. Macro
-			// gap-loss eddies, when enabled, enter through the Az/Jz conductivity
-			// term instead of a Bessel permeability correction.
+			// The perpendicular component uses static series reluctance; the
+			// optional macro term is added later as Im(1/mu2) on B_y.
 			Mu[k][0]=blockproplist[k].mu_x*exp(-I*blockproplist[k].Theta_hx*DEG);
 			Mu[k][1]=blockproplist[k].mu_y*exp(-I*blockproplist[k].Theta_hy*DEG);
 			if(blockproplist[k].Lam_d!=0){
@@ -574,10 +567,9 @@ do{
 				if (j!=k) Mxy[k][j] += K*(p[j]*q[k] + p[k]*q[j]);
 			}
 
-		// contribution from eddy currents;
-		// For laminated LamType 1/2, EffectiveAzConductivity returns the
-		// optional hybrid sigma_z_eff = sigma_t = Cduct_t. It returns zero for
-		// LamType 0 to avoid double-counting the classical tanh lamination loss.
+		// contribution from solid-conductor eddy currents. Laminated materials
+		// return zero here; the hybrid laminated gap/fringing term is a B_perp
+		// stiffness contribution, not a global sigma*A_z mass term.
 		K=-I*a*w*EffectiveAzConductivity(blockproplist[meshele[i].blk])*c/12.;
 		
 		// if this element is part of a wound coil, 
@@ -791,21 +783,18 @@ do{
 // #endif
 			}
 
-		// Macro gap-loss: add imaginary reluctivity ν_perp'' for hybrid laminates.
-		// LamType=1 (B_perp=B_y): Im(ν_y) via Mx (∂A/∂x · ∂A/∂x terms).
-		// LamType=2 (B_perp=B_x): Im(ν_x) via My (∂A/∂y · ∂A/∂y terms).
-		// ν_perp'' = 0.4π·σ_t[MS/m]·ω·L_eff²[m²]  (relative-ν units, positive→loss)
+		// Hybrid laminated macro perpendicular loss/reaction.
+		// LamType=1: B_perp=By=-dA/dx, so add Im(1/mu2) through Mx.
+		// LamType=2: B_perp=Bx= dA/dy, so add Im(1/mu1) through My.
 		{
 			int lbl_i = meshele[i].lbl;
 			if(lbl_i >= 0 && nu_perp_coeff[lbl_i] > 0.)
 			{
-				CComplex jnu = I * nu_perp_coeff[lbl_i];
-				int blk_i = meshele[i].blk;
-				int lt = blockproplist[blk_i].LamType;
+				CComplex jnu = I*nu_perp_coeff[lbl_i];
+				int lt = blockproplist[meshele[i].blk].LamType;
 				for(j=0;j<3;j++)
 					for(k=0;k<3;k++)
-						Me[j][k] += (lt==1) ? jnu * Mx[j][k]
-						                    : jnu * My[j][k];
+						Me[j][k] += (lt==1) ? jnu*Mx[j][k] : jnu*My[j][k];
 			}
 		}
 

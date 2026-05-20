@@ -135,6 +135,7 @@ public:
 	CComplex GetParallelLinkageAlt(int numcirc);
 	void GetMu(CComplex b1, CComplex b2,CComplex &mu1, CComplex &mu2, int i);
 	void GetMu(double b1, double b2, double &mu1, double &mu2, int i);
+	double GetLamHybridNuPerpCoeff(int i);
 	void GetMagnetization(int n, CComplex &M1, CComplex &M2);
 	void GetH(double b1, double b2, double &h1, double &h2, int k);
 	void GetH(CComplex b1, CComplex b2, CComplex &h1, CComplex &h2, int k);

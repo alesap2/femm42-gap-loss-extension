@@ -18,13 +18,15 @@
 
 static double EffectiveAzConductivity(const CMaterialProp &m)
 {
-	// Laminated materials: the nu_perp'' complex-reluctivity model handles all
-	// macro gap-loss eddy currents.  The Az/Jz conductive channel is disabled
-	// for all laminated materials (Lam_d > 0) to avoid double-counting.
-	// Only solid conductors (Lam_d == 0) retain their bulk conductivity.
-	if (m.Lam_d > 0.)
-		return 0.;
-	return m.Cduct;
+	// Solid conductors keep FEMM's original AC conductivity path.
+	if (m.Lam_d <= 0.)
+		return m.Cduct;
+
+	// Laminated magnetic materials must not use the global j*w*sigma*A_z
+	// conductor channel for macro gap/fringing loss.  Their classical parallel
+	// lamina loss is handled by complex permeability, and the optional macro
+	// perpendicular term is added below as an anisotropic imaginary reluctivity.
+	return 0.;
 }
 
 void CFemmeDocCore::GetPrevAxiB(int k, double &B1p, double &B2p)
@@ -121,27 +123,25 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 	// LamType==1 (parallel to X) and LamType==2 (parallel to Y) are now
 	// supported for AC problems. The parallel component uses tanh skin-depth
 	// permeability; the perpendicular component uses static series reluctance.
-	
+	// The optional hybrid model is assembled as a B_perp-driven imaginary
+	// reluctivity correction, not as a global sigma*A_z conductor term.
+
 	// Go through and evaluate permeability for regions subject to prox effects
 	for(i=0;i<NumBlockLabels;i++) GetFillFactor(i);
 
-	// -----------------------------------------------------------------------
-	// Pre-compute per-block-label imaginary reluctivity coefficient
-	// nu_perp_coeff[lbl] for the macro gap-loss complex-reluctivity model.
-	// For axisymmetric: A = 2π × r_mean of block (circumferential depth).
-	// For planar:       A = problem depth from [Depth] tag.
-	// ν_perp'' = 0.4π·σ_t[MS/m]·ω·L_eff²[m²]  (relative-ν units)
-	// L_eff² = A²·B²/(12·(A²+B²)),  B = block bounding width in B_perp direction
-	// -----------------------------------------------------------------------
+	// Per-label coefficient for the hybrid macro perpendicular-fringing loss.
+	// Stored in relative reluctivity units: nu_rel''=mu0*sigma_t*omega*Leff^2.
+	// For axisymmetric problems the out-of-plane length is taken as the local
+	// circumference.  Planar use is the validated target for this model.
 	std::vector<double> nu_perp_coeff(NumBlockLabels, 0.0);
 	{
 		if(w > 0.)
 		{
-			// Bounding box per block label (cm)
-			std::vector<double> bxmin(NumBlockLabels,  1e30);
-			std::vector<double> bxmax(NumBlockLabels, -1e30);
-			std::vector<double> bymin(NumBlockLabels,  1e30);
-			std::vector<double> bymax(NumBlockLabels, -1e30);
+			std::vector<double> bxmin(NumBlockLabels,  1.e30);
+			std::vector<double> bxmax(NumBlockLabels, -1.e30);
+			std::vector<double> bymin(NumBlockLabels,  1.e30);
+			std::vector<double> bymax(NumBlockLabels, -1.e30);
+
 			for(int ei=0; ei<NumEls; ei++){
 				int lbl = meshele[ei].lbl;
 				if(lbl < 0) continue;
@@ -154,30 +154,31 @@ BOOL CFemmeDocCore::HarmonicAxisymmetric(CBigComplexLinProb &L)
 					if(yy > bymax[lbl]) bymax[lbl]=yy;
 				}
 			}
-			// For axisymmetric: A = 2π × r_mean (circumferential depth)
+
 			for(int lbl=0; lbl<NumBlockLabels; lbl++){
 				int blk = labellist[lbl].BlockType;
 				const CMaterialProp &m = blockproplist[blk];
 				if(m.Lam_d <= 0.) continue;
 				if(!m.bLamHybridSigmaZ) continue;
 				if(m.LamType!=1 && m.LamType!=2) continue;
-				double sigma_t = (m.Cduct_t>0.) ? m.Cduct_t : m.LamFill * m.Cduct;
+				double sigma_t = m.LamFill*m.Cduct;
 				if(sigma_t <= 0.) continue;
-				// A_m: circumferential depth = 2π × r_mean of block [m]
+
 				double r_mean = 0.5*(bxmin[lbl]+bxmax[lbl]) * LengthConv;
-				double A_m = 2.*PI * r_mean;
+				double A_m = 2.*PI*r_mean;
 				if(A_m <= 0.) continue;
+
 				double B_m = (m.LamType==1)
 					? (bxmax[lbl]-bxmin[lbl]) * LengthConv
 					: (bymax[lbl]-bymin[lbl]) * LengthConv;
 				if(B_m <= 0.) continue;
+
 				double A2=A_m*A_m, B2=B_m*B_m;
-				double Leff2 = A2*B2 / (12.*(A2+B2));
-				nu_perp_coeff[lbl] = 0.4*PI * sigma_t * w * Leff2;
+				double Leff2 = A2*B2/(12.*(A2+B2));
+				nu_perp_coeff[lbl] = 0.4*PI*sigma_t*w*Leff2;
 			}
 		}
 	}
-	// -----------------------------------------------------------------------
 
 	V_old=(CComplex *) calloc(NumNodes+NumCircProps,sizeof(CComplex));
 
@@ -493,7 +494,8 @@ do{
 
 		// contribution from eddy currents;
 		// induced current interpolated as constant (avg. of nodal values)
-		// over the entire element;
+		// over the entire element. Laminated materials return zero here; the
+		// hybrid laminated gap/fringing term is a B_perp stiffness contribution.
 		K = -I*R*a*w*EffectiveAzConductivity(blockproplist[meshele[i].blk])*c/6.;
 		
 		// if this element is part of a wound coil, 
@@ -710,24 +712,24 @@ do{
 					be[j]+=Mn[j][k]*L.V[n[k]];
 				}
 //#endif			
-				
+
 			}
 
-		// Macro gap-loss: imaginary reluctivity ν_perp'' for hybrid laminates.
+		// Hybrid laminated macro perpendicular loss/reaction.
+		// LamType=1: B_perp=Bz/By-like axial component from dA/dr, add via Mx.
+		// LamType=2: B_perp=Br-like radial component from dA/dz, add via My.
 		{
 			int lbl_i = meshele[i].lbl;
 			if(lbl_i >= 0 && nu_perp_coeff[lbl_i] > 0.)
 			{
-				CComplex jnu = I * nu_perp_coeff[lbl_i];
-				int blk_i = meshele[i].blk;
-				int lt = blockproplist[blk_i].LamType;
+				CComplex jnu = I*nu_perp_coeff[lbl_i];
+				int lt = blockproplist[meshele[i].blk].LamType;
 				for(j=0;j<3;j++)
 					for(k=0;k<3;k++)
-						Me[j][k] += (lt==1) ? jnu * Mx[j][k]
-						                    : jnu * My[j][k];
+						Me[j][k] += (lt==1) ? jnu*Mx[j][k] : jnu*My[j][k];
 			}
 		}
-		
+
 		for (j=0;j<3;j++){
 			for (k=j;k<3;k++)
 			{

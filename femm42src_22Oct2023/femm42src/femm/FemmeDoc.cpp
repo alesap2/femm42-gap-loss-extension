@@ -2490,7 +2490,7 @@ BOOL CFemmeDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		fprintf(fp,"    <LamFill> = %.17g\n",blockproplist[i].LamFill);
 		fprintf(fp,"    <NStrands> = %i\n",blockproplist[i].NStrands);
 		fprintf(fp,"    <WireD> = %.17g\n",blockproplist[i].WireD);
-		// Optional laminated sigma_z_eff conductivity data.
+		// Optional laminated homogenized conductivity metadata.
 		if(blockproplist[i].bAnisoConductivity){
 			fprintf(fp,"    <sigma_t> = %.17g\n",blockproplist[i].Cduct_t);
 			fprintf(fp,"    <sigma_n> = %.17g\n",blockproplist[i].Cduct_n);
